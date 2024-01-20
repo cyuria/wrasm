@@ -1,6 +1,6 @@
 
 cc:=clang
-emu:=qemu-system-riscv64
+emu:=qemu-riscv64
 
 h:=h
 src:=src
