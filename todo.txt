@@ -1,5 +1,6 @@
 
 - Add parsing for placeholder values
+- Use code size macro definitions
 - Add directives support
 - Add/Fix preprocessor support
 
