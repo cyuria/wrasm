@@ -1,9 +1,6 @@
 #pragma once
 #include <stdint.h>
 
-#ifndef RISCV_OPCODES
-#define RISCV_OPCODES
-
 #define OP_LOAD 0x03
 #define OP_STORE 0x23
 #define OP_BRANCH 0x63
@@ -18,47 +15,75 @@
 #define OP_LUI 0x37
 #define OP_AUIPC 0x17
 
-#endif
+#define RV64I_SIZE 2
+#define RV64M_SIZE 2
+#define RV64A_SIZE 2
+#define RV64F_SIZE 2
+#define RV64D_SIZE 2
+#define RV64C_SIZE 1
+#define RV64Z_SIZE 2
 
-struct iarg {
-  enum { reg, val } type;
+enum argtype_t {
+  R_TYPE,
+  ISB_TYPE,
+  UJ_TYPE,
+  NOARGS_TYPE,
+};
+
+struct args_t {
+  enum argtype_t type;
   union {
-    int reg;
-    uint32_t val;
+    struct {
+      uint8_t rd;
+      uint8_t rs1;
+      uint8_t rs2;
+    } r;
+    struct {
+      uint8_t r1;
+      uint8_t r2;
+      uint16_t imm;
+    } isb;
+    struct {
+      uint8_t rd;
+      uint32_t imm;
+    } uj;
   };
 };
 
-struct instruction_t
-{
-  const char* name;
-  enum {
-    R_TYPE,
-    I_TYPE,
-    S_TYPE,
-    B_TYPE,
-    U_TYPE,
-    J_TYPE,
-    FENCE_TYPE,
-    FLAT_TYPE,
-  } type;
-  const uint8_t opcode;
-  const uint8_t funct1;
-  const uint16_t funct2;
+struct bytecode_t {
+  int size;
+  uint16_t data[];
 };
+
+struct instruction_t {
+  const char *name;
+  enum argtype_t argtype;
+  struct bytecode_t *(*handler)(struct instruction_t, struct args_t, int);
+  uint8_t opcode;
+  uint8_t funct1;
+  uint16_t funct2;
+};
+
+extern struct bytecode_t error_bytecode;
 
 /* instruction sets */
 extern const struct instruction_t rv64i[];
 extern const struct instruction_t rv64m[];
 extern const struct instruction_t rv64a[];
+extern const struct instruction_t rv64f[];
+extern const struct instruction_t rv64d[];
 extern const struct instruction_t rv64c[];
 extern const struct instruction_t rv64z[]; /* zifencei and zicsr extensions */
 
-/* basic instruction type generation */
-uint32_t gen_rtype(struct instruction_t inst, int rd, int rs1, int rs2);
-uint32_t gen_itype(struct instruction_t inst, int rd, int rs1, uint32_t imm);
-uint32_t gen_stype(struct instruction_t inst, int rs1, int rs2, uint32_t imm);
-uint32_t gen_btype(struct instruction_t inst, int rs1, int rs2, uint32_t imm);
-uint32_t gen_utype(struct instruction_t inst, int rd, uint32_t imm);
-uint32_t gen_jtype(struct instruction_t inst, int rd, uint32_t imm);
-uint32_t gen_fencetype(struct instruction_t inst, uint8_t flags);
+struct bytecode_t *gen_empty_bytecode(void);
 
+/* basic integer instruction type bytecode generation */
+struct bytecode_t *gen_rtype(struct instruction_t, struct args_t, int);
+struct bytecode_t *gen_itype(struct instruction_t, struct args_t, int);
+struct bytecode_t *gen_itype2(struct instruction_t, struct args_t, int);
+struct bytecode_t *gen_stype(struct instruction_t, struct args_t, int);
+struct bytecode_t *gen_btype(struct instruction_t, struct args_t, int);
+struct bytecode_t *gen_utype(struct instruction_t, struct args_t, int);
+struct bytecode_t *gen_jtype(struct instruction_t, struct args_t, int);
+struct bytecode_t *gen_fence(struct instruction_t, struct args_t, int);
+struct bytecode_t *gen_nop(struct instruction_t, struct args_t, int);
