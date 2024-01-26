@@ -67,6 +67,7 @@ struct instruction_t {
 extern struct bytecode_t error_bytecode;
 
 /* instruction sets */
+extern const struct instruction_t rv64s[]; /* Shortcuts */
 extern const struct instruction_t rv64i[];
 extern const struct instruction_t rv64m[];
 extern const struct instruction_t rv64a[];
@@ -85,5 +86,6 @@ struct bytecode_t *gen_stype(struct instruction_t, struct args_t, int);
 struct bytecode_t *gen_btype(struct instruction_t, struct args_t, int);
 struct bytecode_t *gen_utype(struct instruction_t, struct args_t, int);
 struct bytecode_t *gen_jtype(struct instruction_t, struct args_t, int);
+struct bytecode_t *gen_syscall(struct instruction_t, struct args_t, int);
 struct bytecode_t *gen_fence(struct instruction_t, struct args_t, int);
 struct bytecode_t *gen_nop(struct instruction_t, struct args_t, int);

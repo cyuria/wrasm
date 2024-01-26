@@ -3,7 +3,7 @@
 #include "instructions.h"
 
 struct placeholder_t {
-  struct instruction_t inst;
+  struct instruction_t instruction;
   struct args_t args;
   int position;
 };

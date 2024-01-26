@@ -1,6 +1,8 @@
 
-- Add parsing for placeholder values
-- Use code size macro definitions
+- Make default output elf instead of bin
 - Add directives support
+- Add shortcut instructions
 - Add/Fix preprocessor support
+- Use LibGW32c for windows compatibility and builds
+- Add output format options
 

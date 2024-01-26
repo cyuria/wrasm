@@ -63,48 +63,8 @@ size_t getl(char **lineptr, size_t *n, FILE *stream) {
 static int linenumber;
 static FILE *outputfile;
 
-void parse_file(FILE *ifp, FILE *ofp) {
-  char *line = NULL;
-  size_t linesize = 0;
-  size_t nread;
-
-  linenumber = 0;
-  outputfile = ofp;
-
-  while ((nread = getl(&line, &linesize, ifp)) != -1) {
-    linenumber++;
-    logger(DEBUG, NO_ERROR, linenumber, "Parsing line \"%s\"", line);
-    int res = parse_line(line);
-    if (res)
-      return;
-  }
-
-  free(line);
-  linenumber = 0;
-  outputfile = NULL;
-}
-
-int parse_line(const char *line) {
-  switch (*line) {
-  case '#':
-  case '%':
-    return parse_preprocessor(line);
-  case '.':
-  case '[':
-    return parse_directive(line);
-  case ' ':
-  case '\t':
-    return parse_asm(line);
-  case ';':
-    /* comment */
-    return 0;
-  case '/':
-    if (*(line + 1) == '/')
-      return 0;
-  default:
-    logger(INFO, NO_ERROR, linenumber, "Attempting to create label (%s)", line);
-    return parse_label(line);
-  }
+static inline int is_whitespace(char c) {
+  return c == ' ' || c == '\t' || c == '\n';
 }
 
 static inline int valid_labelchar(const char c) {
@@ -120,7 +80,54 @@ static inline int valid_labelchar(const char c) {
   return 0;
 }
 
+void parse_file(FILE *ifp, FILE *ofp) {
+  char *line = NULL;
+  size_t linesize = 0;
+  size_t nread;
+
+  linenumber = 0;
+  outputfile = ofp;
+
+  while ((nread = getl(&line, &linesize, ifp)) != -1) {
+    linenumber++;
+    logger(DEBUG, NO_ERROR, linenumber, "Parsing line \"%s\"", line);
+    const int res = parse_line(line);
+    if (res)
+      return;
+  }
+
+  for (int i = 0; i < placeholders_size; i++) {
+    const int res = parse_placeholder(placeholders[i]);
+    if (res)
+      return;
+  }
+
+  free(line);
+  linenumber = 0;
+  outputfile = NULL;
+}
+
+int parse_line(const char *line) {
+  while (is_whitespace(*line))
+    if (!*(line++))
+      return 0;
+
+  if (*line == '#' || *line == '%')
+    return parse_preprocessor(line);
+  if (*line == '.' || *line == '[')
+    return parse_directive(line);
+  if (*line == ';')
+    return 0;
+  if (*line == '/' && *(line + 1) == '/')
+    return 0;
+  if (strchr(line, ':'))
+    return parse_label(line);
+
+  return parse_asm(line);
+}
+
 int parse_label(const char *line) {
+
   if (!valid_labelchar(*line))
     return 0;
 
@@ -128,12 +135,16 @@ int parse_label(const char *line) {
   /* check for invalid label definition */
   if (end == NULL)
     return 0;
+
+  logger(INFO, NO_ERROR, linenumber, "Attempting to create label (%s)", line);
+
   char *label = malloc(end - line + 1);
   memcpy(label, line, end - line);
   label[end - line] = '\0';
 
   if (get_label_by_name(label) >= 0) {
-    logger(ERROR, ERROR_INSTRUCTION_OTHER, linenumber, "Label already defined (%s)", label);
+    logger(ERROR, ERROR_INSTRUCTION_OTHER, linenumber,
+           "Label already defined (%s)", label);
     return 1;
   }
 
@@ -150,33 +161,29 @@ int parse_label(const char *line) {
     return 1;
   }
 
-  parse_asm(end + 1);
+  do {
+    end++;
+  } while (is_whitespace(*end) && *end);
+  logger(DEBUG, NO_ERROR, linenumber, "Moving on to line (%s)", end);
+  parse_line(end);
 
   return 0;
 }
 
-static inline int is_whitespace(char c) {
-  return c == ' ' || c == '\t' || c == '\n';
-}
-
 int parse_preprocessor(const char *line) {
   /* TODO: implement preprocessor stuff */
-  logger(ERROR, ERROR_NOT_IMPLEMENTED, linenumber,
+  logger(WARN, ERROR_NOT_IMPLEMENTED, linenumber,
          "Preprocessor not implemented");
-  return 1;
+  return 0;
 }
 int parse_directive(const char *line) {
   /* TODO: implement directive stuff */
-  logger(ERROR, ERROR_NOT_IMPLEMENTED, linenumber,
+  logger(WARN, ERROR_NOT_IMPLEMENTED, linenumber,
          "Assembler directives not implemented");
-  return 1;
+  return 0;
 }
 
 int parse_asm(const char *line) {
-  /* remove inital whitespace */
-  while (is_whitespace(*line))
-    line++;
-
   logger(DEBUG, NO_ERROR, linenumber, "Parsing assembly %s", line);
 
   // if line is empty
@@ -202,7 +209,7 @@ int parse_asm(const char *line) {
   const struct instruction_t *instruction = rv64i;
   while (strcmp(instid, instruction->name)) {
     instruction++;
-    if (unlikely(!*instruction->name)) {
+    if (unlikely(!instruction->name)) {
       logger(ERROR, ERROR_INVALID_INSTRUCTION, linenumber,
              "Unknown assembly instruction - %s\n", instid);
       free(instid);
@@ -236,7 +243,7 @@ int parse_asm(const char *line) {
   /* check for error */
   if (unlikely(args[1] == NULL)) {
     logger(ERROR, ERROR_INVALID_INSTRUCTION, linenumber,
-           "Invalid instruction arguments");
+           "Invalid instruction arguments (expected 0 or 1 argument/s)");
     free(argstr);
 
     return 1;
@@ -252,16 +259,15 @@ int parse_asm(const char *line) {
     logger(DEBUG, NO_ERROR, linenumber, "Found U/J type argument format");
     if (unlikely(r0 < 0)) {
       logger(ERROR, ERROR_INVALID_INSTRUCTION, linenumber,
-             "Invalid instruction arguments");
+             "Invalid instruction arguments (expected register in first argument)");
       return 1;
     }
 
     int arg1 = get_label_by_name(args[1]);
     if (arg1 != -1) {
       free(argstr);
-      struct instruction_t inst = *instruction;
-      inst.handler = &placeholder_handler;
-      return add_bytecode(inst, (struct args_t){UJ_TYPE, .uj = {r0, arg1}});
+      return write_placeholder(*instruction,
+                               (struct args_t){UJ_TYPE, .uj = {r0, arg1}});
     }
 
     if (unlikely(get_immediate(args[1], &arg1))) {
@@ -305,14 +311,42 @@ int parse_asm(const char *line) {
   }
 }
 
-struct bytecode_t *placeholder_handler(struct instruction_t instruction,
-                                       struct args_t args, int position) {
-  logger(DEBUG, NO_ERROR, linenumber, "Adding placeholder instruction (%s)", instruction.name);
+int parse_placeholder(struct placeholder_t ph) {
+  logger(DEBUG, NO_ERROR, 0, "Parsing placeholder (%s)", ph.instruction.name);
+  if (unlikely(outputfile == NULL)) {
+    logger(WARN, ERROR_INTERNAL, 0,
+           "Attempt to add placeholder bytecode without file");
+    return 0;
+  }
+  if (fseek(outputfile, ph.position, SEEK_SET)) {
+    logger(ERROR, ERROR_INTERNAL, 0,
+           "Unable to set file cursor position while replacing placeholder");
+    return 1;
+  }
+  ph.args.uj.imm = get_label_position(ph.args.uj.imm);
+  if (ph.args.uj.imm < 0) {
+    logger(ERROR, ERROR_INTERNAL, 0, "Label not found");
+    return 1;
+  }
+  return add_bytecode(ph.instruction, ph.args);
+}
+
+int write_placeholder(struct instruction_t instruction, struct args_t args) {
+  const int position = ftell(outputfile);
+  if (unlikely(position == -1L)) {
+    logger(CRITICAL, ERROR_SYSTEM, linenumber,
+           "Unable to determine file position");
+    return 1;
+  }
+  logger(DEBUG, NO_ERROR, linenumber,
+         "Adding placeholder instruction (%s 0x%.08x)", instruction.name,
+         position);
   add_placeholder((struct placeholder_t){instruction, args, position});
-  struct bytecode_t *ph = malloc(sizeof(*ph) + 2 * sizeof(*ph->data));
-  ph->size = 2;
-  *(uint32_t *)&(ph->data) = 0;
-  return ph;
+  struct bytecode_t *code =
+      malloc(sizeof(*code) + RV64I_SIZE * sizeof(*code->data));
+  code->size = RV64I_SIZE;
+  *(uint32_t *)&(code->data) = 0;
+  return write_bytecode(code);
 }
 int add_bytecode(struct instruction_t instruction, struct args_t args) {
   if (unlikely(outputfile == NULL)) {
@@ -330,14 +364,27 @@ int add_bytecode(struct instruction_t instruction, struct args_t args) {
 
   if (unlikely(args.type != instruction.argtype)) {
     logger(ERROR, ERROR_INVALID_INSTRUCTION, linenumber,
-           "Invalid instruction arguments");
+           "Invalid instruction arguments (Expected different argument types)");
     return 1;
   }
+
+  logger(DEBUG, NO_ERROR, linenumber,
+         "Generating code for instruction at offset 0x%.08x", fpos);
 
   struct bytecode_t *code = instruction.handler(instruction, args, fpos);
 
   if (unlikely(code == NULL)) {
     logger(ERROR, ERROR_INTERNAL, linenumber, "Failed to generate bytecode");
+    return 1;
+  }
+
+  return write_bytecode(code);
+}
+
+int write_bytecode(struct bytecode_t *code) {
+
+  if (unlikely(code == NULL)) {
+    logger(ERROR, ERROR_INTERNAL, linenumber, "Received invalid bytecode");
     return 1;
   }
 
@@ -347,6 +394,7 @@ int add_bytecode(struct instruction_t instruction, struct args_t args) {
   logger(DEBUG, NO_ERROR, linenumber, "%zu bytes written to output", nwritten);
 
   const int writeerr = nwritten != code->size;
+
   free(code);
 
   if (unlikely(writeerr)) {

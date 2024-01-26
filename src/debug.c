@@ -38,8 +38,9 @@ void logger(enum loglvl_t level, int id, int line, const char *format, ...) {
   struct tm *timeinfo = localtime(&rawtime);
   char time[sizeof(TIMEFMT)];
   strftime(time, sizeof(TIMEFMT), "%Y/%m/%d %X", timeinfo);
-  fprintf(out, "%s - \033[38;2;220;220;220;1m0x%.02x\033[0m/%s%s\033[0m ", time,
-          id, level_colours[level], level_names[level]);
+  const char *errcol = id ? "\033[38;2;255;0;0;1m" : "\033[38;2;220;220;220;1m";
+  fprintf(out, "%s - %s0x%.02x\033[0m/%s%s\033[0m ", time, errcol, id,
+          level_colours[level], level_names[level]);
   if (line)
     fprintf(out, "- %sL%d\033[0m ", level_colours[level], line);
 

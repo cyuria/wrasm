@@ -6,23 +6,23 @@ compare: printwrasm printgas clean
 compile: workingwrasm workinggas
 
 wrasm:
-	../bin/wrasm -a working.S -b workingwrasm
+	../bin/wrasm -a w2.S -b workingwrasm -v
 
 gas:
-	riscv64-unknown-elf-as -march rv64i working.S
+	riscv64-unknown-elf-as -march rv64i w2.S
 	riscv64-unknown-elf-objcopy -O binary a.out workinggas
 
 printwrasm: wrasm
 	@echo
 	@echo
-	hexdump workingwrasm
+	xxd -e -g 4 workingwrasm
 	@echo
 	@echo
 
 printgas: gas
 	@echo
 	@echo
-	hexdump workinggas
+	xxd -e -g 4 workinggas
 	@echo
 	@echo
 

@@ -4,6 +4,7 @@
 /* TODO: add directives and preprocessor */
 //#include "directives.h"
 #include "instructions.h"
+#include "placeholders.h"
 //#include "preprocessor.h"
 
 /* general instruction generation */
@@ -16,7 +17,8 @@ int parse_preprocessor(const char *);
 int parse_directive(const char *);
 int parse_asm(const char *);
 
-struct bytecode_t *placeholder_handler(struct instruction_t instruction,
-                                       struct args_t args, int position);
+int parse_placeholder(struct placeholder_t);
+int write_placeholder(struct instruction_t, struct args_t);
 int add_bytecode(struct instruction_t, struct args_t);
 
+int write_bytecode(struct bytecode_t *);
