@@ -2,5 +2,7 @@
 build/*
 bin/*
 
-.tags
+# Allow local user config files without clogging the repo or gitignore
+.*
+!.git*
 
