@@ -65,7 +65,7 @@ $(dirs):
 	mkdir -p $@
 
 $(lib)/$(argp-standalone):
-	(cd argp-standalone && cmake . -Bbuild -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_COMPILER=clang && cmake --build build)
+	(cd argp-standalone && cmake . -Bbuild -DCMAKE_BUILD_TYPE=RelWithDebInfo && cmake --build build)
 	cp $$(find $(argp-standalone-dir) -type f -name $(argp-standalone)) $(lib)/
 
 clean:
