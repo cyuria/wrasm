@@ -78,5 +78,5 @@ brew install argp-standalone
 
 Because the build system is Unix make based, `make` needs to be installed. The
 GNU toolchain, which contains make, should be available from
-[](https://developer.apple.com/)
+<https://developer.apple.com/>
 
