@@ -77,8 +77,14 @@ If you are on a Linux system without the `"argp.h"` header (provided with
 glibc or any `argp-standalone` package that may be available on your system),
 the `noargp` variable must be set. This can be done by calling `make noargp=y`.
 
-If you do use a system `argp-standalone` package or equivalent, compile with
-the `libargppath` variable set to the path containing `libargp.a` and the
+Compiling with `noargp` requires the `argp-standalone` submodule. This can be
+cloned with the following command if it has not already been cloned.
+```sh
+git submodule update --init 
+```
+
+If you use a system `argp-standalone` package or equivalent, compile with the
+`libargppath` variable set to the path containing `libargp.a` and the
 `libargpinclude` variable set to the path containing `argp.h` if it is not
 already available to the compiler. If `libargppath` is already a standard
 search location (such as `/usr/lib`), you can set `uselibargp` e.g. one of the
