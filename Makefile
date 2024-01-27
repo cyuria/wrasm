@@ -14,20 +14,23 @@ bin := bin
 dirs := $(h) $(lib) $(src) $(build) $(bin)
 
 ifeq ($(OS),Windows_NT)
+	libprefix :=
 	libext := .lib
 	opext := .exe
 endif
 ifeq ($(OS),Linux)
+	libprefix := lib
 	libext := .a
 	opext :=
 endif
 ifeq ($(OS),Darwin)
+	libprefix := lib
 	libext := .a
 	opext :=
 endif
 
 argp-standalone-dir := argp-standalone/build/src
-argp-standalone := libargp-standalone$(libext)
+argp-standalone := $(libprefix)argp-standalone$(libext)
 
 debug := y
 cflags := -std=c17 -Wall
