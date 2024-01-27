@@ -1,5 +1,5 @@
 
-#include <argp-standalone/argp.h>
+#include <argp.h>
 
 extern const char *argp_program_version;
 extern const char usagestr[];

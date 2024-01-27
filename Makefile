@@ -5,7 +5,7 @@ endif
 
 cc := clang
 
-h := h argp-standalone/include
+h := h
 src := src
 lib := lib
 build := build
@@ -13,36 +13,40 @@ bin := bin
 
 dirs := $(h) $(lib) $(src) $(build) $(bin)
 
-debug := y
 cflags := -std=c17 -Wall
-lflags := -L$(lib) -largp-standalone
+lflags :=
 
-ifeq ($(strip $(debug)),y)
+opext :=
+
+ifndef release
 	cflags += -g
 else
 	cflags += -O3
 endif
 
 ifeq ($(OS),Windows_NT)
-	libprefix :=
-	libext := .lib
+	noargp :=
+	lflags := -L$(lib) -largp-standalone -Wl,-nodefaultlib:libcmt -D_DLL -lucrt
+	libargp := argp-standalone.lib
 	opext := .exe
-	lflags += -Wl,-nodefaultlib:libcmt -D_DLL -lucrt
 endif
-ifeq ($(OS),Linux)
-	libprefix := lib
-	libext := .a
-	opext :=
+ifdef noargp
+	h += argp-standalone/include/argp-standalone
 endif
 ifeq ($(OS),Darwin)
-	lflags += -L/usr/local/opt/argp-standalone/lib
+	lflags := -L/usr/local/opt/argp-standalone/lib -largp
+	h += /usr/local/opt/argp-standalone/include
 	libprefix := lib
 	libext := .a
-	opext :=
 endif
 
 argp-standalone-dir := argp-standalone/build/src
-argp-standalone := $(libprefix)argp-standalone$(libext)
+ifeq ($(OS),Darwin)
+	argp-standalone := libargp-standalone.a
+endif
+ifeq ($(OS),Windows_NT)
+	argp-standalone := argp-standalone.lib
+endif
 
 output := $(bin)/wrasm$(opext)
 headers := $(wildcard $(h)/*.h)

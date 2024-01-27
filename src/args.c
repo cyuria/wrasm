@@ -1,7 +1,7 @@
 #include "args.h"
 #include "debug.h"
 
-#include <argp-standalone/argp.h>
+#include <argp.h>
 #include <stdio.h>
 
 const char *argp_program_version = "wrasm 0.0.1 alpha";
