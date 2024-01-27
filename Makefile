@@ -37,7 +37,7 @@ endif
 
 ifdef noargp
 	libargpinclude := argp-standalone/include/argp-standalone
-	ldflags += -L$(lib) -largp-standalone
+	lflags += -L$(lib) -largp-standalone
 	ifeq ($(OS),Windows_NT)
 		libargp := argp-standalone.lib
 	else
