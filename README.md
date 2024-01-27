@@ -18,34 +18,6 @@ for your system and run `make` from the root directory.
 This should result in the creation of a `wrasm` or `wrasm.exe` file in the bin
 directory.
 
-### Compiling without glibc or `argp.h` on Linux
-
-If you are on a Linux system without the `"argp.h"` header (provided with
-glibc or any `argp-standalone` package that may be available on your system),
-the `noargp` variable must be set. This can be done by calling `make noargp=y`.
-
-If you do use a system `argp-standalone` package or equivalent, compile with
-the `libargppath` variable set to the path containing `libargp.a` and the
-`libargpinclude` variable set to the path containing `argp.h` if it is not
-already available to the compiler. If `libargppath` is already a standard
-search location (such as `/usr/lib`), you can set `uselibargp` e.g. one of the
-following
-```sh
-make uselibargp=y
-make libargppath=/usr/local/lib
-make libargppath=/path/to/argp-standalone/libe \
-  libargpinclude=/path/to/argp-standalone/include
-```
-
-### A Note on Windows and macOS without glibc/`argp.h`
-
-On Windows, `noargp` is automatically set.
-
-On macOS, `libargppath` is automatically set to
-`/usr/local/opt/argp-standalone/lib` and `libargpinclude` is set similarly.
-Both are overridable from the command line, see [Compiling without glibc or
-`argp.h` on Linux](#compiling-without-glibc-or-argph-on-linux).
-
 ### Requirements
 
 The build system uses Unix make and clang by default to compile. These are
@@ -62,8 +34,8 @@ make cc=/path/to/cc
 Linux requires the `clang` executable on the path, as well as any Unix
 compatible `make`. If you do not have the `"argp.h"` header, you may need to
 either install an available `argp-standalone` system package or compile with
-`noargp`, see [compiling without glibc or
-`argp.h`](#compiling-without-glibc-or-argph)
+`noargp`, see [compiling without glibc or `argp.h` on
+Linux](#compiling-without-glibc-or-argph-on-linux)
 
 #### Windows Requirements
 
@@ -98,4 +70,32 @@ brew install argp-standalone
 Because the build system is Unix make based, `make` needs to be installed. The
 GNU toolchain, which contains make, should be available from
 <https://developer.apple.com/>
+
+### Compiling without glibc or `argp.h` on Linux
+
+If you are on a Linux system without the `"argp.h"` header (provided with
+glibc or any `argp-standalone` package that may be available on your system),
+the `noargp` variable must be set. This can be done by calling `make noargp=y`.
+
+If you do use a system `argp-standalone` package or equivalent, compile with
+the `libargppath` variable set to the path containing `libargp.a` and the
+`libargpinclude` variable set to the path containing `argp.h` if it is not
+already available to the compiler. If `libargppath` is already a standard
+search location (such as `/usr/lib`), you can set `uselibargp` e.g. one of the
+following
+```sh
+make uselibargp=y
+make libargppath=/usr/local/lib
+make libargppath=/path/to/argp-standalone/libe \
+  libargpinclude=/path/to/argp-standalone/include
+```
+
+### A Note on Windows and macOS without glibc or `argp.h`
+
+On Windows, `noargp` is automatically set.
+
+On macOS, `libargppath` is automatically set to
+`/usr/local/opt/argp-standalone/lib` and `libargpinclude` is set similarly.
+Both are overridable from the command line, see [Compiling without glibc or
+`argp.h` on Linux](#compiling-without-glibc-or-argph-on-linux).
 
