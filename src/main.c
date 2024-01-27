@@ -17,7 +17,15 @@ int main(int argc, char* argv[])
   }
 
   FILE* ifp = fopen(args.input, "r");
+  if (ifp == NULL) {
+    logger(ERROR, error_system, 0, "Unable to open input file");
+    return EXIT_FAILURE;
+  }
   FILE* ofp = fopen(args.output, "wb");
+  if (ofp == NULL) {
+    logger(ERROR, error_system, 0, "Unable to open output file");
+    return EXIT_FAILURE;
+  }
 
   logger(DEBUG, no_error, 0, "Files opened");
 

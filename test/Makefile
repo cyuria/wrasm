@@ -9,7 +9,7 @@ compare: printwrasm printgas
 compile: wrasm gas
 
 wrasm:
-	../bin/wrasm -i w2.S -o workingwrasm
+	../bin/wrasm w2.S -o workingwrasm
 
 gas:
 	riscv64-unknown-elf-as -march rv64i w2.S

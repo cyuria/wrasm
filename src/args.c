@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 const char *argp_program_version = "wrasm 0.0.1 alpha";
-const char usagestr[] = "FILE1 FILE2 ...";
+const char usagestr[] = "INPUT";
 const char docstr[] =
     "The wrasm assembler\n"
     "\n"
@@ -14,8 +14,7 @@ const char docstr[] =
 
 const struct argp_option options[] = {
   { "verbose", 'v', 0, 0, "Produce verbose output", },
-  { "input", 'i', "ARG1", 0, "The first argument", },
-  { "output", 'o', "ARG2", 0, "The second argument", },
+  { "output", 'o', "OUTPUT", 0, "The output file. Leave blank to automatically generate based off of input", },
   { 0 }
 };
 
@@ -25,27 +24,23 @@ error_t parseArgs(int key, char *arg, struct argp_state *state) {
   struct cmdargs_t *args = state->input;
 
   switch (key) {
-    case 'v':
-      args->verbose = 1;
-      set_min_loglevel(DEBUG);
-      return 0;
-    case 'i':
-      if (args->input)
-        return 1;
-      args->input = arg;
-      return 0;
-    case 'o':
-      args->output = arg;
-      return 0;
-    case ARGP_KEY_ARG:
-      if (state->arg_num > sizeof(args->args) / sizeof(*args->args))
-        argp_usage(state);
-      printf("ARGP_KEY_ARG given: %s\n", arg);
-      args->args[state->arg_num] = arg;
-      return 0;
+  case 'v':
+    args->verbose = 1;
+    set_min_loglevel(DEBUG);
+    return 0;
+  case 'o':
+    args->output = arg;
+    return 0;
+  case ARGP_KEY_ARG:
+    if (state->arg_num > 1) {
+      logger(ERROR, error_other, 0, "Multiple input files specified");
+      argp_usage(state);
+    }
+    args->input = arg;
+    return 0;
+  default:
+    return ARGP_ERR_UNKNOWN;
   }
-
-  return ARGP_ERR_UNKNOWN;
 }
 
 struct cmdargs_t new_arguments(void) {
