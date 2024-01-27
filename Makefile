@@ -1,6 +1,7 @@
 
 cc:=clang
-emu:=qemu-riscv64
+
+rm:=rm
 
 h:=h argp-standalone/include
 src:=src
@@ -13,8 +14,7 @@ argp-standalone=argp-standalone/build/src/libargp-standalone.a
 
 debug:=y
 cflags:=-std=c17 -Wall
-lflags:=
-#-L$(argp-standalone)
+lflags:=-l$(argp-standalone)
 
 ifeq ($(strip $(debug)),y)
 	cflags+= -g
@@ -47,5 +47,5 @@ $(argp-standalone):
 	(cd argp-standalone && cmake . -Bbuild && cmake --build build)
 
 clean:
-	rm -rf $(build) $(bin)
+	$(rm) -rf $(build) $(bin)
 
