@@ -71,11 +71,7 @@ all: $(dirs) $(output)
 test: $(output)
 	@echo "tests have not yet been implemented"
 
-$(output): $(objects) $(lib)/$(argp-standalone)
-ifeq ($(OS),Windows_NT)
-	-@echo "libargp-standalone $(lib)/$(argp-standalone)"
-	ls lib
-endif
+$(output): $(objects) $(lib)/$(libargp)
 	$(cc) $(filter %.o,$^) $(lflags) -o $@
 
 $(build)/%.o: $(src)/%.c $(headers)
