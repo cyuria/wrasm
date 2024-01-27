@@ -98,7 +98,11 @@ make libargppath=/path/to/argp-standalone/libe \
 
 ### A Note on Windows and macOS without glibc or `argp.h`
 
-On Windows, `noargp` is automatically set.
+On Windows, `noargp` is automatically set. The `argp-standalone` submodule does
+need to be cloned. This can be done with
+```sh
+git submodule update --init
+```
 
 On macOS, `libargppath` is automatically set to
 `/usr/local/opt/argp-standalone/lib` and `libargpinclude` is set similarly.
