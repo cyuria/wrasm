@@ -7,3 +7,5 @@
 - [x] Use standalone argp for windows compatibility and builds
 - [ ] Add output format options
 
+- [?] MacOS support (unable to build argp-standalone)
+

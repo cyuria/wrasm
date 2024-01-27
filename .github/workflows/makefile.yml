@@ -19,6 +19,10 @@ jobs:
       with:
         submodules: recursive
 
+    - name: Install Argp-Standalone (MAC)
+      if: runner.os == 'macOS'
+      run: brew install argp-standalone
+
     - name: Compile
       run: make
 

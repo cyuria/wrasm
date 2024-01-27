@@ -35,6 +35,7 @@ ifeq ($(OS),Linux)
 	opext :=
 endif
 ifeq ($(OS),Darwin)
+	lflags += -L/usr/local/opt/argp-standalone/lib
 	libprefix := lib
 	libext := .a
 	opext :=
@@ -65,8 +66,10 @@ $(dirs):
 	mkdir -p $@
 
 $(lib)/$(argp-standalone):
+ifneq ($(OS),Darwin)
 	(cd argp-standalone && cmake . -Bbuild -DCMAKE_BUILD_TYPE=RelWithDebInfo && cmake --build build)
 	cp $$(find $(argp-standalone-dir) -type f -name $(argp-standalone)) $(lib)/
+endif
 
 clean:
 	rm -rf $(build) $(bin)
