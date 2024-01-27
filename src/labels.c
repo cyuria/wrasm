@@ -16,7 +16,7 @@ const char *get_label_name(int id) {
 }
 int get_label_position(int id) {
   if (id >= labelcount || id < 0) {
-    logger(INFO, ERROR_INTERNAL, 0, "Unregistered label position fetched as 0");
+    logger(INFO, error_internal, 0, "Unregistered label position fetched as 0");
     return -1;
   }
   return labels[id].position;
@@ -33,21 +33,21 @@ int create_label(const char *name, int position) {
     return -1;
   strcpy(n, name);
 
-  logger(DEBUG, NO_ERROR, 0, "Creating label named \"%s\"", name);
+  logger(DEBUG, no_error, 0, "Creating label named \"%s\"", name);
 
   labels[labelcount] = (struct label_t){n, position};
   labelcount++;
   return labelcount - 1;
 }
 int get_label_by_name(const char *name) {
-  logger(DEBUG, NO_ERROR, 0, "Searching for label with name \"%s\"", name);
+  logger(DEBUG, no_error, 0, "Searching for label with name \"%s\"", name);
   for (int i = 0; i < labelcount; i++) {
     if (!strcmp(labels[i].name, name)) {
-      logger(DEBUG, NO_ERROR, 0, "Label found (0x%x)", i);
+      logger(DEBUG, no_error, 0, "Label found (0x%x)", i);
       return i;
     }
   }
-  logger(DEBUG, NO_ERROR, 0, "Label not found");
+  logger(DEBUG, no_error, 0, "Label not found");
   return -1;
 }
 

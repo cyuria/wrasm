@@ -87,7 +87,7 @@ const struct instruction_t rv64i[] = {
 };
 
 struct bytecode_t *gen_empty_bytecode(void) {
-  logger(DEBUG, NO_ERROR, 0, "Generating empty instruction");
+  logger(DEBUG, no_error, 0, "Generating empty instruction");
   struct bytecode_t *res = malloc(sizeof(*res));
   if (!res)
     return NULL; /* if malloc fails */
@@ -97,7 +97,7 @@ struct bytecode_t *gen_empty_bytecode(void) {
 
 struct bytecode_t *gen_rtype(struct instruction_t inst, struct args_t args,
                              int position) {
-  logger(DEBUG, NO_ERROR, 0, "Generating R type instruction (%s)", inst.name);
+  logger(DEBUG, no_error, 0, "Generating R type instruction (%s)", inst.name);
 
   struct bytecode_t *res = malloc(sizeof(*res) + RV64I_SIZE * sizeof(*res->data));
   if (!res)
@@ -112,7 +112,7 @@ struct bytecode_t *gen_rtype(struct instruction_t inst, struct args_t args,
 
 struct bytecode_t *gen_itype(struct instruction_t inst, struct args_t args,
                              int position) {
-  logger(DEBUG, NO_ERROR, 0, "Generating I type instruction (%s, %d)",
+  logger(DEBUG, no_error, 0, "Generating I type instruction (%s, %d)",
          inst.name, args.isb.imm);
 
   struct bytecode_t *res =
@@ -129,7 +129,7 @@ struct bytecode_t *gen_itype(struct instruction_t inst, struct args_t args,
 
 struct bytecode_t *gen_itype2(struct instruction_t inst, struct args_t args,
                               int position) {
-  logger(DEBUG, NO_ERROR, 0, "Generating I type 2 instruction (%s)", inst.name);
+  logger(DEBUG, no_error, 0, "Generating I type 2 instruction (%s)", inst.name);
   struct bytecode_t *res = gen_itype(inst, args, position);
   *(uint32_t *)&(res->data) |= 0x40000000; /* set type 2 bit */
   return res;
@@ -137,7 +137,7 @@ struct bytecode_t *gen_itype2(struct instruction_t inst, struct args_t args,
 
 struct bytecode_t *gen_stype(struct instruction_t inst, struct args_t args,
                              int position) {
-  logger(DEBUG, NO_ERROR, 0, "Generating S type instruction (%s)", inst.name);
+  logger(DEBUG, no_error, 0, "Generating S type instruction (%s)", inst.name);
 
   struct bytecode_t *res =
       malloc(sizeof(*res) + RV64I_SIZE * sizeof(*res->data));
@@ -154,7 +154,7 @@ struct bytecode_t *gen_stype(struct instruction_t inst, struct args_t args,
 
 struct bytecode_t *gen_btype(struct instruction_t inst, struct args_t args,
                              int position) {
-  logger(DEBUG, NO_ERROR, 0, "Generating B type instruction (%s)", inst.name);
+  logger(DEBUG, no_error, 0, "Generating B type instruction (%s)", inst.name);
 
   const uint32_t dup = args.isb.imm >> 1;
   args.isb.imm &= 0x7FE;
@@ -166,7 +166,7 @@ struct bytecode_t *gen_btype(struct instruction_t inst, struct args_t args,
 
 struct bytecode_t *gen_utype(struct instruction_t inst, struct args_t args,
                              int position) {
-  logger(DEBUG, NO_ERROR, 0, "Generating U type instruction (%s)", inst.name);
+  logger(DEBUG, no_error, 0, "Generating U type instruction (%s)", inst.name);
 
   struct bytecode_t *res =
       malloc(sizeof(*res) + RV64I_SIZE * sizeof(*res->data));
@@ -181,13 +181,13 @@ struct bytecode_t *gen_utype(struct instruction_t inst, struct args_t args,
 
 struct bytecode_t *gen_jtype(struct instruction_t inst, struct args_t args,
                              int position) {
-  logger(DEBUG, NO_ERROR, 0, "Generating J type instruction (%s)", inst.name);
+  logger(DEBUG, no_error, 0, "Generating J type instruction (%s)", inst.name);
 
   int offset = args.uj.imm;
   if (unlikely(offset < 0))
     return NULL;
   offset -= position;
-  logger(DEBUG, NO_ERROR, 0, "Offset of J type instruction is 0x%x", offset);
+  logger(DEBUG, no_error, 0, "Offset of J type instruction is 0x%x", offset);
 
   const uint32_t a = (offset & 0x0007FE) << 20;
   const uint32_t b = (offset & 0x000800) << 9;
@@ -214,7 +214,7 @@ struct bytecode_t *gen_syscall(struct instruction_t inst, struct args_t args,
 struct bytecode_t *gen_fence(struct instruction_t inst, struct args_t args,
                              int position) {
   /* TODO: fix fence implementation w/ flags and stuff */
-  logger(DEBUG, NO_ERROR, 0, "Generating FENCE instruction (%s)", inst.name);
+  logger(DEBUG, no_error, 0, "Generating FENCE instruction (%s)", inst.name);
 
   struct bytecode_t *res =
       malloc(sizeof(*res) + RV64I_SIZE * sizeof(*res->data));
@@ -230,6 +230,6 @@ struct bytecode_t *gen_fence(struct instruction_t inst, struct args_t args,
 struct bytecode_t *gen_nop(struct instruction_t inst, struct args_t args,
                            int position) {
   /* TODO: check encoding correct (req. reg impl) */
-  logger(DEBUG, NO_ERROR, 0, "Generating NOP instruction (%s)", inst.name);
+  logger(DEBUG, no_error, 0, "Generating NOP instruction (%s)", inst.name);
   return gen_itype(inst, (struct args_t){ISB_TYPE, {{0, 0, 0}}}, position);
 }

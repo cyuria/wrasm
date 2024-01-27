@@ -9,9 +9,12 @@ bin:=bin
 
 dirs:=$(h) $(src) $(build) $(bin)
 
+argp-standalone=argp-standalone/build/src/libargp-standalone.a
+
 debug:=y
 cflags:=-std=c17 -Wall
-lflags:=-Larg-standalone/src/argp-standalone.a
+lflags:=
+#-L$(argp-standalone)
 
 ifeq ($(strip $(debug)),y)
 	cflags+= -g
@@ -26,13 +29,13 @@ objects:=$(sources:$(src)/%.c=$(build)/%.o)
 
 .PHONY: all test clean
 
-all: $(dirs) argp-standalone/src/libargp-standalone.a $(output)
+all: $(dirs) $(output)
 
 test: all
 	@echo "tests have not yet been implemented"
 
-$(output): $(objects)
-	$(cc) $^ $(lflags) -o $@
+$(output): $(objects) $(argp-standalone)
+	$(cc) $(filter %.o,$^) $(lflags) -o $@
 
 $(build)/%.o: $(src)/%.c $(headers)
 	$(cc) -c $< $(addprefix -I,$(h)) -o $@ $(cflags)
@@ -40,8 +43,8 @@ $(build)/%.o: $(src)/%.c $(headers)
 $(dirs):
 	mkdir -p $@
 
-argp-standalone/src/libargp-standalone.a:
-	(cd argp-standalone && cmake . && cmake --build .)
+$(argp-standalone):
+	(cd argp-standalone && cmake . -Bbuild && cmake --build build)
 
 clean:
 	rm -rf $(build) $(bin)

@@ -7,16 +7,16 @@ extern const char docstr[];
 
 extern const struct argp_option options[];
 
-struct arguments_t {
+struct cmdargs_t {
   int verbose;
   char *args[2];
-  char *argone;
-  char *argtwo;
+  char *input;
+  char *output;
 };
 
 extern const struct argp argp_config;
 
 error_t parseArgs(int, char *, struct argp_state *);
 
-struct arguments_t new_arguments(void);
+struct cmdargs_t new_arguments(void);
 

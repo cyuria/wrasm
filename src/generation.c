@@ -90,7 +90,7 @@ void parse_file(FILE *ifp, FILE *ofp) {
 
   while ((nread = getl(&line, &linesize, ifp)) != -1) {
     linenumber++;
-    logger(DEBUG, NO_ERROR, linenumber, "Parsing line \"%s\"", line);
+    logger(DEBUG, no_error, linenumber, "Parsing line \"%s\"", line);
     const int res = parse_line(line);
     if (res)
       return;
@@ -136,14 +136,14 @@ int parse_label(const char *line) {
   if (end == NULL)
     return 0;
 
-  logger(INFO, NO_ERROR, linenumber, "Attempting to create label (%s)", line);
+  logger(INFO, no_error, linenumber, "Attempting to create label (%s)", line);
 
   char *label = malloc(end - line + 1);
   memcpy(label, line, end - line);
   label[end - line] = '\0';
 
   if (get_label_by_name(label) >= 0) {
-    logger(ERROR, ERROR_INSTRUCTION_OTHER, linenumber,
+    logger(ERROR, error_instruction_other, linenumber,
            "Label already defined (%s)", label);
     return 1;
   }
@@ -151,20 +151,20 @@ int parse_label(const char *line) {
   // TODO: create label
   const int fpos = ftell(outputfile);
   if (unlikely(fpos == -1L)) {
-    logger(CRITICAL, ERROR_SYSTEM, linenumber,
+    logger(CRITICAL, error_system, linenumber,
            "Unable to determine file position");
     return 1;
   }
 
   if (create_label(label, fpos) < 0) {
-    logger(CRITICAL, ERROR_INTERNAL, linenumber, "Unable to create label");
+    logger(CRITICAL, error_internal, linenumber, "Unable to create label");
     return 1;
   }
 
   do {
     end++;
   } while (is_whitespace(*end) && *end);
-  logger(DEBUG, NO_ERROR, linenumber, "Moving on to line (%s)", end);
+  logger(DEBUG, no_error, linenumber, "Moving on to line (%s)", end);
   parse_line(end);
 
   return 0;
@@ -172,19 +172,19 @@ int parse_label(const char *line) {
 
 int parse_preprocessor(const char *line) {
   /* TODO: implement preprocessor stuff */
-  logger(WARN, ERROR_NOT_IMPLEMENTED, linenumber,
+  logger(WARN, error_not_implemented, linenumber,
          "Preprocessor not implemented");
   return 0;
 }
 int parse_directive(const char *line) {
   /* TODO: implement directive stuff */
-  logger(WARN, ERROR_NOT_IMPLEMENTED, linenumber,
+  logger(WARN, error_not_implemented, linenumber,
          "Assembler directives not implemented");
   return 0;
 }
 
 int parse_asm(const char *line) {
-  logger(DEBUG, NO_ERROR, linenumber, "Parsing assembly %s", line);
+  logger(DEBUG, no_error, linenumber, "Parsing assembly %s", line);
 
   // if line is empty
   if (!*line)
@@ -198,19 +198,19 @@ int parse_asm(const char *line) {
   const size_t instidsize = end - line + 1;
   char *const instid = malloc(instidsize);
   if (unlikely(instid == NULL)) {
-    logger(CRITICAL, ERROR_INTERNAL, linenumber, "Unable to allocate memory");
+    logger(CRITICAL, error_internal, linenumber, "Unable to allocate memory");
     return 1;
   }
   memcpy(instid, line, instidsize - 1);
   instid[instidsize - 1] = '\0';
 
-  logger(DEBUG, NO_ERROR, linenumber, "Assembly instruction name (%s)", instid);
+  logger(DEBUG, no_error, linenumber, "Assembly instruction name (%s)", instid);
 
   const struct instruction_t *instruction = rv64i;
   while (strcmp(instid, instruction->name)) {
     instruction++;
     if (unlikely(!instruction->name)) {
-      logger(ERROR, ERROR_INVALID_INSTRUCTION, linenumber,
+      logger(ERROR, error_invalid_instruction, linenumber,
              "Unknown assembly instruction - %s\n", instid);
       free(instid);
       return 1;
@@ -242,7 +242,7 @@ int parse_asm(const char *line) {
 
   /* check for error */
   if (unlikely(args[1] == NULL)) {
-    logger(ERROR, ERROR_INVALID_INSTRUCTION, linenumber,
+    logger(ERROR, error_invalid_instruction, linenumber,
            "Invalid instruction arguments (expected 0 or 1 argument/s)");
     free(argstr);
 
@@ -256,9 +256,9 @@ int parse_asm(const char *line) {
 
   /* U and J type arg formats */
   if (args[2] == NULL) {
-    logger(DEBUG, NO_ERROR, linenumber, "Found U/J type argument format");
+    logger(DEBUG, no_error, linenumber, "Found U/J type argument format");
     if (unlikely(r0 < 0)) {
-      logger(ERROR, ERROR_INVALID_INSTRUCTION, linenumber,
+      logger(ERROR, error_invalid_instruction, linenumber,
              "Invalid instruction arguments (expected register in first argument)");
       return 1;
     }
@@ -271,7 +271,7 @@ int parse_asm(const char *line) {
     }
 
     if (unlikely(get_immediate(args[1], &arg1))) {
-      logger(INFO, NO_ERROR, linenumber, "Invalid label or immediate (%s)",
+      logger(INFO, no_error, linenumber, "Invalid label or immediate (%s)",
              args[1]);
       free(argstr);
       return 1;
@@ -312,20 +312,20 @@ int parse_asm(const char *line) {
 }
 
 int parse_placeholder(struct placeholder_t ph) {
-  logger(DEBUG, NO_ERROR, 0, "Parsing placeholder (%s)", ph.instruction.name);
+  logger(DEBUG, no_error, 0, "Parsing placeholder (%s)", ph.instruction.name);
   if (unlikely(outputfile == NULL)) {
-    logger(WARN, ERROR_INTERNAL, 0,
+    logger(WARN, error_internal, 0,
            "Attempt to add placeholder bytecode without file");
     return 0;
   }
   if (fseek(outputfile, ph.position, SEEK_SET)) {
-    logger(ERROR, ERROR_INTERNAL, 0,
+    logger(ERROR, error_internal, 0,
            "Unable to set file cursor position while replacing placeholder");
     return 1;
   }
   ph.args.uj.imm = get_label_position(ph.args.uj.imm);
   if (ph.args.uj.imm < 0) {
-    logger(ERROR, ERROR_INTERNAL, 0, "Label not found");
+    logger(ERROR, error_internal, 0, "Label not found");
     return 1;
   }
   return add_bytecode(ph.instruction, ph.args);
@@ -334,11 +334,11 @@ int parse_placeholder(struct placeholder_t ph) {
 int write_placeholder(struct instruction_t instruction, struct args_t args) {
   const int position = ftell(outputfile);
   if (unlikely(position == -1L)) {
-    logger(CRITICAL, ERROR_SYSTEM, linenumber,
+    logger(CRITICAL, error_system, linenumber,
            "Unable to determine file position");
     return 1;
   }
-  logger(DEBUG, NO_ERROR, linenumber,
+  logger(DEBUG, no_error, linenumber,
          "Adding placeholder instruction (%s 0x%.08x)", instruction.name,
          position);
   add_placeholder((struct placeholder_t){instruction, args, position});
@@ -350,31 +350,31 @@ int write_placeholder(struct instruction_t instruction, struct args_t args) {
 }
 int add_bytecode(struct instruction_t instruction, struct args_t args) {
   if (unlikely(outputfile == NULL)) {
-    logger(WARN, ERROR_INTERNAL, linenumber,
+    logger(WARN, error_internal, linenumber,
            "Attempt to add bytecode without file");
     return 0;
   }
 
   const int fpos = ftell(outputfile);
   if (unlikely(fpos == -1L)) {
-    logger(CRITICAL, ERROR_SYSTEM, linenumber,
+    logger(CRITICAL, error_system, linenumber,
            "Unable to determine file position");
     return 1;
   }
 
   if (unlikely(args.type != instruction.argtype)) {
-    logger(ERROR, ERROR_INVALID_INSTRUCTION, linenumber,
+    logger(ERROR, error_invalid_instruction, linenumber,
            "Invalid instruction arguments (Expected different argument types)");
     return 1;
   }
 
-  logger(DEBUG, NO_ERROR, linenumber,
+  logger(DEBUG, no_error, linenumber,
          "Generating code for instruction at offset 0x%.08x", fpos);
 
   struct bytecode_t *code = instruction.handler(instruction, args, fpos);
 
   if (unlikely(code == NULL)) {
-    logger(ERROR, ERROR_INTERNAL, linenumber, "Failed to generate bytecode");
+    logger(ERROR, error_internal, linenumber, "Failed to generate bytecode");
     return 1;
   }
 
@@ -384,21 +384,21 @@ int add_bytecode(struct instruction_t instruction, struct args_t args) {
 int write_bytecode(struct bytecode_t *code) {
 
   if (unlikely(code == NULL)) {
-    logger(ERROR, ERROR_INTERNAL, linenumber, "Received invalid bytecode");
+    logger(ERROR, error_internal, linenumber, "Received invalid bytecode");
     return 1;
   }
 
   size_t nwritten =
       fwrite(code->data, sizeof(*code->data), code->size, outputfile);
 
-  logger(DEBUG, NO_ERROR, linenumber, "%zu bytes written to output", nwritten);
+  logger(DEBUG, no_error, linenumber, "%zu bytes written to output", nwritten);
 
   const int writeerr = nwritten != code->size;
 
   free(code);
 
   if (unlikely(writeerr)) {
-    logger(CRITICAL, ERROR_SYSTEM, linenumber, "Error writing bytes to output");
+    logger(CRITICAL, error_system, linenumber, "Error writing bytes to output");
     return 1;
   }
 

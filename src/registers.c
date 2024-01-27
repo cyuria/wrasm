@@ -18,7 +18,7 @@ const char *reg_abi_map[BASE_REG_COUNT] = {
 const char *float_reg_abi_map[FLOAT_REG_COUNT] = {};
 
 int get_register_id(const char *reg) {
-  logger(DEBUG, NO_ERROR, 0, "Searching for register (%s)", reg);
+  logger(DEBUG, no_error, 0, "Searching for register (%s)", reg);
 
   if (*reg == 'x')
     return atoi(reg + 1);

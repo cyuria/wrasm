@@ -1,15 +1,15 @@
 
 .PHONY: compare compile wrasm gas printwrasm printgas clean
 
-all: compare
+all: compare clean
 
 compare: printwrasm printgas
-	diff -u gas.hex wrasm.hex
+	-diff -u gas.hex wrasm.hex
 
 compile: wrasm gas
 
 wrasm:
-	../bin/wrasm -a w2.S -b workingwrasm
+	../bin/wrasm -i w2.S -o workingwrasm
 
 gas:
 	riscv64-unknown-elf-as -march rv64i w2.S
@@ -22,5 +22,5 @@ printgas: gas
 	unbuffer xxd -e -g 4 workinggas | tee gas.hex
 
 clean:
-	@rm a.out workingwrasm workinggas wrasm.hex gas.hex
+	rm a.out workingwrasm workinggas wrasm.hex gas.hex
 

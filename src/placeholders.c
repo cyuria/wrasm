@@ -14,7 +14,7 @@ int add_placeholder(struct placeholder_t placeholder) {
       realloc(placeholders, sz * sizeof(*placeholders));
 
   if (unlikely(newplaceholderarr == NULL)) {
-    logger(ERROR, ERROR_INTERNAL, 0,
+    logger(ERROR, error_internal, 0,
            "Unable to allocate memory for label instruction");
     return 1;
   }

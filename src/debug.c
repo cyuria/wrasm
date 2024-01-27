@@ -3,19 +3,18 @@
 
 #include <stdarg.h>
 #include <stdio.h>
-#include <time.h>
 
 #define TIMEFMT "YYYY/MM/DD HH:MM:SS"
 
 const char *level_names[] = {
-    "DEBUG", "INFO", "WARN", "ERROR", "CRITICAL", "NONE",
+    "debug", "info", "warning", "error", "critical", "none",
 };
 const char *level_colours[] = {
     "",
-    "\033[38;2;255;255;0;1m",
-    "\033[38;2;255;127;0;1m",
-    "\033[38;2;210;48;0;1m",
-    "\033[38;2;160;0;0;1m",
+    "\033[0;36;1m",
+    "\033[0;35;1m",
+    "\033[0;31;1m",
+    "\033[1;31;1m",
     "\033[1m",
 };
 
@@ -23,7 +22,7 @@ static enum loglvl_t minloglevel = INFO;
 
 void set_min_loglevel(enum loglvl_t level) {
   minloglevel = level;
-  logger(INFO, NO_ERROR, 0, "Log level set to %s%s\033[0m", level_colours[minloglevel],
+  logger(INFO, no_error, 0, "Log level set to %s%s\033[0m", level_colours[minloglevel],
          level_names[minloglevel]);
 }
 
@@ -33,13 +32,7 @@ void logger(enum loglvl_t level, int id, int line, const char *format, ...) {
 
   FILE *out = stderr;
 
-  time_t rawtime;
-  time(&rawtime);
-  struct tm *timeinfo = localtime(&rawtime);
-  char time[sizeof(TIMEFMT)];
-  strftime(time, sizeof(TIMEFMT), "%Y/%m/%d %X", timeinfo);
-  const char *errcol = id ? "\033[38;2;255;0;0;1m" : "\033[38;2;220;220;220;1m";
-  fprintf(out, "%s - %s0x%.02x\033[0m/%s%s\033[0m ", time, errcol, id,
+  fprintf(out, " %s0x%.02x\033[0m / %s%s\033[0m ", level_colours[level], id,
           level_colours[level], level_names[level]);
   if (line)
     fprintf(out, "- %sL%d\033[0m ", level_colours[level], line);
