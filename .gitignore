@@ -1,6 +1,7 @@
 
-# Compiled files
+# Compiled stuff
 build/*
+lib/*argp-standalone*
 bin/*
 
 # Allow local user config files without clogging the repo or gitignore
