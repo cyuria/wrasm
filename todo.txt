@@ -3,6 +3,7 @@
 - Add directives support
 - Add shortcut instructions
 - Add/Fix preprocessor support
+- Compile for riscv64 target
 - Use LibGW32c for windows compatibility and builds
 - Add output format options
 

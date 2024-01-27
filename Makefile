@@ -2,7 +2,7 @@
 cc:=clang
 emu:=qemu-riscv64
 
-h:=h
+h:=h argp-standalone/include
 src:=src
 build:=build
 bin:=bin
@@ -11,7 +11,7 @@ dirs:=$(h) $(src) $(build) $(bin)
 
 debug:=y
 cflags:=-std=c17 -Wall
-lflags:=
+lflags:=-Larg-standalone/src/argp-standalone.a
 
 ifeq ($(strip $(debug)),y)
 	cflags+= -g
@@ -26,7 +26,7 @@ objects:=$(sources:$(src)/%.c=$(build)/%.o)
 
 .PHONY: all test clean
 
-all: $(dirs) $(output)
+all: $(dirs) argp-standalone/src/libargp-standalone.a $(output)
 
 test: all
 	@echo "tests have not yet been implemented"
@@ -39,6 +39,9 @@ $(build)/%.o: $(src)/%.c $(headers)
 
 $(dirs):
 	mkdir -p $@
+
+argp-standalone/src/libargp-standalone.a:
+	(cd argp-standalone && cmake . && cmake --build .)
 
 clean:
 	rm -rf $(build) $(bin)

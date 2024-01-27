@@ -1,5 +1,5 @@
 #include "args.h"
-#include <argp.h>
+#include <argp-standalone/argp.h>
 
 const char *argp_program_version = "wrasm 0.0.1 alpha";
 const char usagestr[] = "FILE1 FILE2 ...";

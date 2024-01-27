@@ -1,4 +1,4 @@
-greeting:
+greeting: .ascii "hello"
 _start:
   addi a7, x0, 64
   addi a0, x0, 1
