@@ -22,6 +22,15 @@ jobs:
     - name: Install Argp-Standalone (MAC)
       if: runner.os == 'macOS'
       run: brew install argp-standalone
+    - name: ldir
+      if: runner.os == 'macOS'
+      run: |
+          ls /usr/lib
+          ls /usr/lib/*
+          ls /usr/local/opt/argp-standalone
+          ls /usr/local/opt/argp-standalone/*
+          find /usr -name libargp-standalone.a
+
 
     - name: Compile
       run: make
