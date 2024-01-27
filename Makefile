@@ -68,10 +68,14 @@ objects := $(sources:$(src)/%.c=$(build)/%.o)
 
 all: $(dirs) $(output)
 
-test: all
+test: $(output)
 	@echo "tests have not yet been implemented"
 
 $(output): $(objects) $(lib)/$(argp-standalone)
+ifeq ($(OS),Windows_NT)
+	-@echo "libargp-standalone $(lib)/$(argp-standalone)"
+	ls lib
+endif
 	$(cc) $(filter %.o,$^) $(lflags) -o $@
 
 $(build)/%.o: $(src)/%.c $(headers)
