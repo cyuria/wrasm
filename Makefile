@@ -25,28 +25,40 @@ else
 endif
 
 ifeq ($(OS),Windows_NT)
-	noargp :=
-	lflags := -L$(lib) -largp-standalone -Wl,-nodefaultlib:libcmt -D_DLL -lucrt
-	libargp := argp-standalone.lib
+	noargp := y
+	lflags += -Wl,-nodefaultlib:libcmt -D_DLL -lucrt
 	opext := .exe
 endif
-ifdef noargp
-	h += argp-standalone/include/argp-standalone
-endif
 ifeq ($(OS),Darwin)
-	lflags := -L/usr/local/opt/argp-standalone/lib -largp
-	h += /usr/local/opt/argp-standalone/include
-	libprefix := lib
-	libext := .a
+	libargppath := /usr/local/opt/argp-standalone/lib
+	libargpinclude := /usr/local/opt/argp-standalone/include
+	sysargp := y
+endif
+
+ifdef noargp
+	libargpinclude := argp-standalone/include/argp-standalone
+	ldflags += -L$(lib) -largp-standalone
+	ifeq ($(OS),Windows_NT)
+		libargp := argp-standalone.lib
+	else
+		libargp := libargp-standalone.a
+	endif
+endif
+
+ifdef libargppath
+	lflags += -L$(libargppath)
+	uselibargp := y
+endif
+
+ifdef uselibargp
+	lflags += -largp
+endif
+
+ifdef libargpinclude
+	h += $(libargpinclude)
 endif
 
 argp-standalone-dir := argp-standalone/build/src
-ifeq ($(OS),Darwin)
-	argp-standalone := libargp-standalone.a
-endif
-ifeq ($(OS),Windows_NT)
-	argp-standalone := argp-standalone.lib
-endif
 
 output := $(bin)/wrasm$(opext)
 headers := $(wildcard $(h)/*.h)
@@ -70,7 +82,7 @@ $(dirs):
 	mkdir -p $@
 
 $(lib)/$(argp-standalone):
-ifneq ($(OS),Darwin)
+ifdef noargp
 	(cd argp-standalone && cmake . -Bbuild -DCMAKE_BUILD_TYPE=RelWithDebInfo && cmake --build build)
 	cp $$(find $(argp-standalone-dir) -type f -name $(argp-standalone)) $(lib)/
 endif

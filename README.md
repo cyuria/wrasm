@@ -18,19 +18,38 @@ for your system and run `make` from the root directory.
 This should result in the creation of a `wrasm` or `wrasm.exe` file in the bin
 directory.
 
-### Compiling without glibc or `argp.h`
+### Compiling without glibc or `argp.h` on Linux
 
-If you are on a non Windows system without the `"argp.h"` header (provided with
+If you are on a Linux system without the `"argp.h"` header (provided with
 glibc or any `argp-standalone` package that may be available on your system),
-the `noargp` variable must be set. This can be done by calling `make noargp=`.
+the `noargp` variable must be set. This can be done by calling `make noargp=y`.
 
-On macOS, the `noargp` flag does not work. Please see the [macOS
-requirements](#macos-requirements)
+If you do use a system `argp-standalone` package or equivalent, compile with
+the `libargppath` variable set to the path containing `libargp.a` and the
+`libargpinclude` variable set to the path containing `argp.h` if it is not
+already available to the compiler. If `libargppath` is already a standard
+search location (such as `/usr/lib`), you can set `uselibargp` e.g. one of the
+following
+```sh
+make uselibargp=y
+make libargppath=/usr/local/lib
+make libargppath=/path/to/argp-standalone/libe \
+  libargpinclude=/path/to/argp-standalone/include
+```
+
+### A Note on Windows and macOS without glibc/`argp.h`
+
+On Windows, `noargp` is automatically set.
+
+On macOS, `libargppath` is automatically set to
+`/usr/local/opt/argp-standalone/lib` and `libargpinclude` is set similarly.
+Both are overridable from the command line, see [Compiling without glibc or
+`argp.h` on Linux](#compiling-without-glibc-or-argph-on-linux).
 
 ### Requirements
 
 The build system uses Unix make and clang by default to compile. These are
-required on all systems
+required on all systems.
 
 All systems compile with clang by default. To override this behaviour, set the
 `cc` variable when calling make
