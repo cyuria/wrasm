@@ -13,10 +13,21 @@ bin := bin
 
 dirs := $(h) $(lib) $(src) $(build) $(bin)
 
+debug := y
+cflags := -std=c17 -Wall
+lflags := -L$(lib) -largp-standalone
+
+ifeq ($(strip $(debug)),y)
+	cflags += -g
+else
+	cflags += -O3
+endif
+
 ifeq ($(OS),Windows_NT)
 	libprefix :=
 	libext := .lib
 	opext := .exe
+	lflags += -Wl,-nodefaultlib:libcmt -D_DLL -lucrt
 endif
 ifeq ($(OS),Linux)
 	libprefix := lib
@@ -31,16 +42,6 @@ endif
 
 argp-standalone-dir := argp-standalone/build/src
 argp-standalone := $(libprefix)argp-standalone$(libext)
-
-debug := y
-cflags := -std=c17 -Wall
-lflags := -L$(lib) -largp-standalone
-
-ifeq ($(strip $(debug)),y)
-	cflags += -g
-else
-	cflags += -O3
-endif
 
 output := $(bin)/wrasm$(opext)
 headers := $(wildcard $(h)/*.h)
