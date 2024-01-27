@@ -36,6 +36,7 @@ ifeq ($(OS),Darwin)
 endif
 
 ifdef noargp
+	libargpdir := argp-standalone/build/src
 	libargpinclude := argp-standalone/include/argp-standalone
 	lflags += -L$(lib) -largp-standalone
 	ifeq ($(OS),Windows_NT)
@@ -58,8 +59,6 @@ ifdef libargpinclude
 	h += $(libargpinclude)
 endif
 
-argp-standalone-dir := argp-standalone/build/src
-
 output := $(bin)/wrasm$(opext)
 headers := $(wildcard $(h)/*.h)
 sources := $(wildcard $(src)/*.c)
@@ -81,10 +80,10 @@ $(build)/%.o: $(src)/%.c $(headers)
 $(dirs):
 	mkdir -p $@
 
-$(lib)/$(argp-standalone):
+$(lib)/$(libargp):
 ifdef noargp
 	(cd argp-standalone && cmake . -Bbuild -DCMAKE_BUILD_TYPE=RelWithDebInfo && cmake --build build)
-	cp $$(find $(argp-standalone-dir) -type f -name $(argp-standalone)) $(lib)/
+	cp $$(find $(libargpdir) -type f -name $(libargp)) $(lib)/
 endif
 
 clean:
