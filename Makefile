@@ -10,11 +10,12 @@ bin:=bin
 
 dirs:=$(h) $(src) $(build) $(bin)
 
-argp-standalone=argp-standalone/build/src/libargp-standalone.a
+argp-standalone-dir:=argp-standalone/build/src
+argp-standalone:=$(argp-standalone-dir)/libargp-standalone.a
 
 debug:=y
 cflags:=-std=c17 -Wall
-lflags:=-l$(argp-standalone)
+lflags:=-L$(argp-standalone-dir) -largp-standalone
 
 ifeq ($(strip $(debug)),y)
 	cflags+= -g
