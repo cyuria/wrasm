@@ -12,15 +12,20 @@ and x86_64 GNU Linux have been tested)
 
 ## Compiling
 
-To compile, run `make` from the root directory.
+To compile for most people, install the [requirements](#requirements) listed
+for your system and run `make` from the root directory.
 
-##### Compiling without glibc or `argp.h`
+This should result in the creation of a `wrasm` or `wrasm.exe` file in the bin
+directory.
+
+### Compiling without glibc or `argp.h`
 
 If you are on a non Windows system without the `"argp.h"` header (provided with
 glibc or any `argp-standalone` package that may be available on your system),
 the `noargp` variable must be set. This can be done by calling `make noargp=`.
 
-On macOS, the `noargp` flag does not work. Please see the [macOS requirements](#macos-requirements)
+On macOS, the `noargp` flag does not work. Please see the [macOS
+requirements](#macos-requirements)
 
 ### Requirements
 
@@ -28,7 +33,10 @@ The build system uses Unix make and clang by default to compile. These are
 required on all systems
 
 All systems compile with clang by default. To override this behaviour, set the
-`cc` variable when calling make ```sh make cc=/path/to/cc ```
+`cc` variable when calling make
+```sh
+make cc=/path/to/cc
+```
 
 #### Linux Requirements
 
@@ -58,13 +66,15 @@ directory.
 MSYS, MinGW or any other Unix make compatible make. It is also possible to
 download GNUwin32 make directly
 
-#### macOS
+#### macOS Requirements
 
 The build system uses clang by default. Clang is Apple's default compiler and
 should be built in with Apple Xcode.
 
-The package `argp-standalone` is also required. Install it with ```sh brew
-install argp-standalone ```
+The package `argp-standalone` is also required. Install it with
+```sh
+brew install argp-standalone
+```
 
 Because the build system is Unix make based, `make` needs to be installed. The
 GNU toolchain, which contains make, should be available from
