@@ -14,7 +14,7 @@ bin := bin
 dirs := $(h) $(lib) $(src) $(build) $(bin)
 
 cflags := -std=c17 -Wall
-lflags := -lm
+lflags :=
 
 opext :=
 
@@ -26,6 +26,8 @@ endif
 
 ifeq ($(OS),Windows_NT)
 	cflags += -D_CRT_SECURE_NO_WARNINGS
+else
+	lflags += -lm
 endif
 
 output := $(bin)/wrasm$(opext)
