@@ -14,7 +14,7 @@ bin := bin
 dirs := $(h) $(lib) $(src) $(build) $(bin)
 
 cflags := -std=c17 -Wall
-lflags :=
+lflags := -lm
 
 opext :=
 
@@ -25,38 +25,7 @@ else
 endif
 
 ifeq ($(OS),Windows_NT)
-	noargp := y
-	lflags += -Wl,-nodefaultlib:libcmt -D_DLL -lucrt
-	opext := .exe
-endif
-ifeq ($(OS),Darwin)
-	libargppath := /usr/local/opt/argp-standalone/lib
-	libargpinclude := /usr/local/opt/argp-standalone/include
-	sysargp := y
-endif
-
-ifdef noargp
-	libargpdir := argp-standalone/build/src
-	libargpinclude := argp-standalone/include/argp-standalone
-	lflags += -L$(lib) -largp-standalone
-	ifeq ($(OS),Windows_NT)
-		libargp := argp-standalone.lib
-	else
-		libargp := libargp-standalone.a
-	endif
-endif
-
-ifdef libargppath
-	lflags += -L$(libargppath)
-	uselibargp := y
-endif
-
-ifdef uselibargp
-	lflags += -largp
-endif
-
-ifdef libargpinclude
-	h += $(libargpinclude)
+	cflags += -D_CRT_SECURE_NO_WARNINGS
 endif
 
 output := $(bin)/wrasm$(opext)
@@ -71,7 +40,7 @@ all: $(dirs) $(output)
 test: $(output)
 	@echo "tests have not yet been implemented"
 
-$(output): $(objects) $(lib)/$(libargp)
+$(output): $(objects)
 	$(cc) $(filter %.o,$^) $(lflags) -o $@
 
 $(build)/%.o: $(src)/%.c $(headers)
@@ -79,12 +48,6 @@ $(build)/%.o: $(src)/%.c $(headers)
 
 $(dirs):
 	mkdir -p $@
-
-$(lib)/$(libargp):
-ifdef noargp
-	(cd argp-standalone && cmake . -Bbuild -DCMAKE_BUILD_TYPE=RelWithDebInfo && cmake --build build)
-	cp $$(find $(libargpdir) -type f -name $(libargp)) $(lib)/
-endif
 
 clean:
 	rm -rf $(build) $(bin)

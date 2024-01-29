@@ -109,3 +109,11 @@ On macOS, `libargppath` is automatically set to
 Both are overridable from the command line, see [Compiling without glibc or
 `argp.h` on Linux](#compiling-without-glibc-or-argph-on-linux).
 
+## Copyright
+
+Wrasm is Copyright (C) 2024 Cyuria. Parts are Copyright (C) 1998-2001,2003-2011
+Stewart Heitmann. Parts are Copyright (C) 1989-1994, 1996-1999, 2001, 2003 Free
+Software Foundation, Inc.
+
+See [LICENSE](LICENSE) for more information.
+

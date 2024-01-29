@@ -4,8 +4,5 @@
 - [ ] Add shortcut instructions
 - [ ] Add/Fix preprocessor support
 - [ ] Compile for riscv64 target
-- [x] Use standalone argp for windows compatibility and builds
 - [ ] Add output format options
-
-- [?] MacOS support (unable to build argp-standalone)
 

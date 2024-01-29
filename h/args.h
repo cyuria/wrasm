@@ -1,22 +1,22 @@
 
-#include <argp.h>
+#include "argtable3.h"
 
-extern const char *argp_program_version;
-extern const char usagestr[];
-extern const char docstr[];
-
-extern const struct argp_option options[];
-
-struct cmdargs_t {
-  int verbose;
-  char *args[2];
-  char *input;
-  char *output;
+struct versioninfo_t {
+  int major, minor, patch;
+  const char *note;
 };
 
-extern const struct argp argp_config;
+extern const char progname[];
+extern const char helpstr[];
+extern const struct versioninfo_t versioninfo;
 
-error_t parseArgs(int, char *, struct argp_state *);
+struct cmdargs_t {
+  struct arg_lit *help, *version;
+  struct arg_lit *verbose;
+  struct arg_file *inputfile, *outputfile;
+  struct arg_end *end;
+};
+extern struct cmdargs_t cmdargs;
 
-struct cmdargs_t new_arguments(void);
+void parse_args(int argc, char *argv[]);
 

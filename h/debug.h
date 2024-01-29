@@ -31,7 +31,7 @@ enum loglvl_t {
   WARN,
   ERROR,
   CRITICAL,
-  NONE,
+  NODEBUG,
 };
 
 void set_min_loglevel(enum loglvl_t);

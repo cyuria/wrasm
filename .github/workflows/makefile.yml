@@ -16,12 +16,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-      with:
-        submodules: recursive
-
-    - name: Install argp-standalone (macOS)
-      if: runner.os == 'macOS'
-      run: brew install argp-standalone
 
     - name: Compile
       run: make

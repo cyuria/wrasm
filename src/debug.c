@@ -4,6 +4,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#include "args.h"
+
 #define TIMEFMT "YYYY/MM/DD HH:MM:SS"
 
 const char *level_names[] = {
@@ -32,8 +34,8 @@ void logger(enum loglvl_t level, int id, int line, const char *format, ...) {
 
   FILE *out = stderr;
 
-  fprintf(out, " %s0x%.02x\033[0m / %s%s\033[0m ", level_colours[level], id,
-          level_colours[level], level_names[level]);
+  fprintf(out, "%s: %s0x%.02x\033[0m / %s%s\033[0m ", progname,
+          level_colours[level], id, level_colours[level], level_names[level]);
   if (line)
     fprintf(out, "- %sL%d\033[0m ", level_colours[level], line);
 
