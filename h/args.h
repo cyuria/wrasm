@@ -18,5 +18,5 @@ struct cmdargs_t {
 };
 extern struct cmdargs_t cmdargs;
 
-void parse_args(int argc, char *argv[]);
+void parse_cmdargs(int argc, char *argv[]);
 

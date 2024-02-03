@@ -13,30 +13,30 @@ void closefiles(void) {
   if (inputfile)
     fclose(inputfile);
   if (outputtempfile)
-    fclose(inputfile);
-  if (outputfile)
-    fclose(inputfile);
+    fclose(outputtempfile);
+  if (outputfile && outputfile != stdin && outputfile != stdout && outputfile != stderr)
+    fclose(outputfile);
 }
 
 void open_files(void) {
-  logger(DEBUG, no_error, 0, "Opening files");
+  logger(DEBUG, no_error, "Opening files");
 
   outputtempfile = tmpfile();
   if (outputtempfile == NULL) {
-    logger(ERROR, error_system, 0, "Unable to create temporary file");
+    logger(ERROR, error_system, "Unable to create temporary file");
     exit(EXIT_FAILURE);
   }
 
   inputfile = fopen(*cmdargs.inputfile->filename, "r");
   if (inputfile == NULL) {
-    logger(ERROR, error_system, 0, "Unable to open input file");
+    logger(ERROR, error_system, "Unable to open input file");
     exit(EXIT_FAILURE);
   }
 
   if (**cmdargs.outputfile->filename) {
     outputfile = fopen(*cmdargs.outputfile->filename, "wb");
     if (outputfile == NULL) {
-      logger(ERROR, error_system, 0, "Unable to open output file");
+      logger(ERROR, error_system, "Unable to open output file");
       perror("Error: ");
       exit(EXIT_FAILURE);
     }
@@ -67,11 +67,12 @@ void copy_files(FILE *dest, FILE *src) {
 
 int main(int argc, char *argv[]) {
 
-  parse_args(argc, argv);
+  parse_cmdargs(argc, argv);
   open_files();
   parse_file(inputfile, outputtempfile);
 
-  logger(DEBUG, no_error, 0, "Done generating bytecode");
+  logger(DEBUG, no_error, "Done generating bytecode");
   copy_files(outputfile, outputtempfile);
-  logger(DEBUG, no_error, 0, "Finished writing bytecode to output");
+  logger(DEBUG, no_error, "Finished writing bytecode to output");
+  closefiles();
 }

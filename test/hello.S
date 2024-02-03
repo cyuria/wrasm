@@ -8,13 +8,13 @@ greeting: .asciz "Hello, World!\n"
 .text
 .global _start
 _start:
-  li a7, __NR_write
+  li a7, 64
   li a0, 1
   la a1, greeting
   li a2, greetlen
   ecall
 
-  li a7, __NR_exit
+  li a7, 93
   li a0, 0
   ecall
 

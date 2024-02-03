@@ -1,8 +1,17 @@
 
-- [ ] Make default output elf instead of bin
-- [ ] Add directives support
-- [ ] Add shortcut instructions
-- [ ] Add/Fix preprocessor support
-- [ ] Compile for riscv64 target
-- [ ] Add output format options
+[ ] - Make default output elf instead of bin
+[ ] - Add directives support
+[ ] - Add more instructions
+      - https://marks.page/riscv/asm.html
+[ ] - Add riscv extension support
+[ ] - Add/Fix preprocessor support
+[ ] - Compile for riscv64 target
+[ ] - Multiple output format options
+
+===================================
+ELF format output
+
+[ ] - Add .shstrtab
+[ ] - Fix section header size and other bits
+      - use `readelf -h` to get elf header info
 

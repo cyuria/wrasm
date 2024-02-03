@@ -6,7 +6,7 @@
 
 #include "args.h"
 
-#define TIMEFMT "YYYY/MM/DD HH:MM:SS"
+int linenumber;
 
 const char *level_names[] = {
     "debug", "info", "warning", "error", "critical", "none",
@@ -24,11 +24,11 @@ static enum loglvl_t minloglevel = INFO;
 
 void set_min_loglevel(enum loglvl_t level) {
   minloglevel = level;
-  logger(INFO, no_error, 0, "Log level set to %s%s\033[0m", level_colours[minloglevel],
+  logger(INFO, no_error, "Log level set to %s%s\033[0m", level_colours[minloglevel],
          level_names[minloglevel]);
 }
 
-void logger(enum loglvl_t level, int id, int line, const char *format, ...) {
+void logger(enum loglvl_t level, enum error_t id, const char *format, ...) {
   if (level < minloglevel)
     return;
 
@@ -36,8 +36,8 @@ void logger(enum loglvl_t level, int id, int line, const char *format, ...) {
 
   fprintf(out, "%s: %s0x%.02x\033[0m / %s%s\033[0m ", progname,
           level_colours[level], id, level_colours[level], level_names[level]);
-  if (line)
-    fprintf(out, "- %sL%d\033[0m ", level_colours[level], line);
+  if (linenumber)
+    fprintf(out, "- %sL%d\033[0m ", level_colours[level], linenumber);
 
   va_list format_params;
   va_start(format_params, format);

@@ -35,7 +35,7 @@ headers := $(wildcard $(h)/*.h)
 sources := $(wildcard $(src)/*.c)
 objects := $(sources:$(src)/%.c=$(build)/%.o)
 
-.PHONY: all test clean
+.PHONY: all test clean wordcount
 
 all: $(dirs) $(output)
 
@@ -53,4 +53,7 @@ $(dirs):
 
 clean:
 	rm -rf $(build) $(bin)
+
+wordcount:
+	wc $(filter-out src/argtable3.c,$(sources)) $(filter-out h/argtable3.h,$(headers)) Makefile test/Makefile $(wildcard test/*.S)
 

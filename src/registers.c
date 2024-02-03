@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* TODO: fix fp alias of s0 */
 #define BASE_REG_COUNT 32
 const char *reg_abi_map[BASE_REG_COUNT] = {
     "zero", "ra", "sp", "gp", "tp",  "t0",  "t1", "t2", "s0", "s1", "a0",
@@ -17,8 +16,12 @@ const char *reg_abi_map[BASE_REG_COUNT] = {
 #define FLOAT_REG_COUNT 0
 const char *float_reg_abi_map[FLOAT_REG_COUNT] = {};
 
+int is_register(const char *arg) {
+  return get_register_id(arg) != -1;
+}
+
 int get_register_id(const char *reg) {
-  logger(DEBUG, no_error, 0, "Searching for register (%s)", reg);
+  logger(DEBUG, no_error, "Searching for register (%s)", reg);
 
   if (*reg == 'x')
     return atoi(reg + 1);
@@ -26,6 +29,10 @@ int get_register_id(const char *reg) {
   for (int i = 0; i < BASE_REG_COUNT; i++)
     if (!strcmp(reg, reg_abi_map[i]))
       return i;
+
+  /* Check for "fp" alias of register "s0"/"x8" */
+  if (reg[0] == 'f' && reg[1] == 'p')
+    return 8;
 
   return -1;
 }
@@ -69,7 +76,7 @@ int get_immediate(const char *imm, int *res) {
   if (*res) return 0;
 
   /* check for anything that could've caused a failure
-   * NOTE: "-0" will cause a fail */
+   * NOTE: immediate negative zero ("-0") will cause a fail */
   while (*imm) {
     int digit = calc_digit(*imm);
     if (digit >= base || digit < 0)

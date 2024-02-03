@@ -3,6 +3,8 @@
 #define likely(x) __builtin_expect(!!(x), 1)
 #define unlikely(x) __builtin_expect(!!(x), 0)
 
+extern int linenumber;
+
 /* ERROR IDs
  *
  * 0x00 No error
@@ -35,4 +37,4 @@ enum loglvl_t {
 };
 
 void set_min_loglevel(enum loglvl_t);
-void logger(enum loglvl_t, int, int, const char *, ...);
+void logger(enum loglvl_t, enum error_t, const char *, ...);

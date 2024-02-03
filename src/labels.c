@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "debug.h"
+#include "output.h"
 
 static int labelcount = 0;
 static struct label_t *labels = NULL;
@@ -14,15 +15,15 @@ const char *get_label_name(int id) {
     return NULL;
   return labels[id].name;
 }
-int get_label_position(int id) {
+struct sectionpos_t get_label_position(int id) {
   if (id >= labelcount || id < 0) {
-    logger(INFO, error_internal, 0, "Unregistered label position fetched as 0");
-    return -1;
+    logger(INFO, error_internal, "Unregistered label position fetched as 0");
+    return (struct sectionpos_t){0, -1};
   }
   return labels[id].position;
 }
 
-int create_label(const char *name, int position) {
+int create_label(const char *name) {
   struct label_t *ptr = realloc(labels, (labelcount + 1) * sizeof(*labels));
   if (ptr == NULL)
     return -1;
@@ -33,21 +34,28 @@ int create_label(const char *name, int position) {
     return -1;
   strcpy(n, name);
 
-  logger(DEBUG, no_error, 0, "Creating label named \"%s\"", name);
+  logger(DEBUG, no_error, "Creating label named \"%s\"", name);
 
-  labels[labelcount] = (struct label_t){n, position};
+  labels[labelcount] = (struct label_t){n};
   labelcount++;
   return labelcount - 1;
+
+}
+
+void set_labelpos(const int id, struct sectionpos_t position) {
+  if (id >= labelcount || id < 0)
+    return;
+  labels[id].position = position;
 }
 int get_label_by_name(const char *name) {
-  logger(DEBUG, no_error, 0, "Searching for label with name \"%s\"", name);
+  logger(DEBUG, no_error, "Searching for label with name \"%s\"", name);
   for (int i = 0; i < labelcount; i++) {
     if (!strcmp(labels[i].name, name)) {
-      logger(DEBUG, no_error, 0, "Label found (0x%x)", i);
+      logger(DEBUG, no_error, "Label found (0x%x)", i);
       return i;
     }
   }
-  logger(DEBUG, no_error, 0, "Label not found");
+  logger(DEBUG, no_error, "Label not found");
   return -1;
 }
 

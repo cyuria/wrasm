@@ -7,7 +7,7 @@
 
 const char progname[] = "wrasm";
 const char *progcall = NULL;
-const struct versioninfo_t versioninfo = { 0, 0, 1, "alpha" };
+const struct versioninfo_t versioninfo = {0, 0, 1, "alpha"};
 const char helpstr[] =
     "The wrasm assembler\n"
     "\n"
@@ -16,18 +16,18 @@ const char helpstr[] =
 
 struct cmdargs_t cmdargs;
 
-void parse_args(int argc, char *argv[]) {
+void parse_cmdargs(int argc, char *argv[]) {
   const char *progcall = argv[0];
 
   void *argtable[] = {
-    cmdargs.help = arg_litn("h", "help", 0, 1, "display this help and exit"),
-    cmdargs.version = arg_litn("V", "version", 0, 1, "display version info and exit"),
-    cmdargs.verbose = arg_litn("v", "verbose", 0, 1, "verbose output"),
-    /* TODO: maybe change to arg_file1 */
-    cmdargs.inputfile = arg_file1(NULL, NULL, "<input>", "input file"),
-    cmdargs.outputfile = arg_file0("o", "output", "<filename>", "output file, leave blank for stdout"),
-    cmdargs.end = arg_end(20)
-  };
+      cmdargs.help = arg_litn("h", "help", 0, 1, "display this help and exit"),
+      cmdargs.version =
+          arg_litn("V", "version", 0, 1, "display version info and exit"),
+      cmdargs.verbose = arg_litn("v", "verbose", 0, 1, "verbose output"),
+      cmdargs.inputfile = arg_file1(NULL, NULL, "<input>", "input file"),
+      cmdargs.outputfile = arg_file0("o", "output", "<filename>",
+                                     "output file, leave blank for stdout"),
+      cmdargs.end = arg_end(20)};
 
   int nerrors = arg_parse(argc, argv, argtable);
 
@@ -60,4 +60,3 @@ void parse_args(int argc, char *argv[]) {
 
   arg_freetable(argtable, sizeof(argtable) / sizeof(*argtable));
 }
-
