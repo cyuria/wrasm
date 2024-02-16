@@ -40,8 +40,16 @@ static struct {
                    {0x00, 0x0, 0x0, 0x1, 0x0, sht_strtab},
                    {0x00, 0x0, 0x0, 0x1, 0x0, sht_strtab}};
 
+static const char *sectionnames[SECTION_COUNT] = {
+    "",        ".text",    ".rela.text",        ".data",
+    ".bss",    ".rodata",  ".riscv.attributes", ".symtab",
+    ".strtab", ".shstrtab"};
 
-void change_output(enum sections_e section) { outputsection = section; }
+void change_output(enum sections_e section) {
+  if (section >= SECTION_COUNT || section < 0)
+    return;
+  outputsection = section;
+}
 
 struct sectionpos_t get_outputpos(void) {
   return (struct sectionpos_t){.section = outputsection,
@@ -52,14 +60,11 @@ void inc_outputsize(enum sections_e section, long amount) {
   outputsections[section].size += amount;
 }
 
-void set_outputpos(struct sectionpos_t pos) {
-  change_output(pos.section);
-}
+void set_outputpos(struct sectionpos_t pos) { change_output(pos.section); }
 
 size_t calc_fileoffset(struct sectionpos_t a) {
   return outputsections[a.section].offset + a.offset;
 }
-
 
 static inline size_t align_offset(size_t offset, size_t align) {
   offset--;
@@ -68,6 +73,32 @@ static inline size_t align_offset(size_t offset, size_t align) {
   offset *= align;
   return offset;
 }
+
+
+void calc_shstrtab(void) {
+  outputsections[section_shstrtab].size = 0;
+  for (int i = 0; i < SECTION_COUNT; i++)
+    outputsections[section_shstrtab].size += strlen(sectionnames[i]) + 1;
+}
+
+int fill_shstrtab(void) {
+  size_t offset = 0;
+  for (int i = 0; i < SECTION_COUNT; i++) {
+    const size_t sz = strlen(sectionnames[i]) + 1;
+    const size_t count = write_sectiondata(
+        sectionnames[i], sz,
+        (struct sectionpos_t){.section = section_shstrtab, .offset = offset});
+    if (sz != count) {
+      logger(ERROR, error_internal,
+             "Unable to write data to memory for section .shstrtab");
+      return 1;
+    }
+    outputsections[i].nameoffset = offset;
+    offset += sz;
+  }
+  return 0;
+}
+
 
 int alloc_output(void) {
   size_t offset = sizeof(struct elf64header_t);
@@ -85,7 +116,7 @@ int alloc_output(void) {
   return 0;
 }
 
-size_t write_sectiondata(const char *bytes, size_t count,
+size_t write_sectiondata(const void *bytes, size_t count,
                          struct sectionpos_t position) {
   if (position.offset + count > outputsections[position.section].size) {
     logger(CRITICAL, error_internal,
@@ -99,6 +130,7 @@ size_t write_sectiondata(const char *bytes, size_t count,
 }
 
 int flush_output(FILE *elf) {
+  logger(DEBUG, no_error, "Writing ELF output to temporary file");
   /* Generate headers */
   struct elf64header_t elfheader = new_elf64header();
   elfheader.phoffset = 0;
@@ -106,6 +138,8 @@ int flush_output(FILE *elf) {
   elfheader.phcount = 0;
 
   elfheader.shcount = SECTION_COUNT;
+  elfheader.shentrysize = sizeof(struct elf64sectionheader_t);
+  elfheader.shstrindex = section_shstrtab;
 
   struct elf64sectionheader_t sectionheaders[SECTION_COUNT];
   for (int i = 0; i < SECTION_COUNT; i++) {
@@ -116,8 +150,12 @@ int flush_output(FILE *elf) {
     sectionheaders[i].addralign = sectiondata[i].align;
     sectionheaders[i].entrysize = sectiondata[i].entrysize;
     sectionheaders[i].type = sectiondata[i].type;
+    sectionheaders[i].name = outputsections[i].nameoffset;
     sectionheaders[i].offset = outputsections[i].offset;
     sectionheaders[i].size = outputsections[i].size;
+    logger(DEBUG, no_error,
+           "Creating section (%s) of size (0x%.08x) and offset (0x%.08x)",
+           sectionnames[i], sectionheaders[i].size, sectionheaders[i].offset);
   }
 
   /* Fix offset and alignment stuff */
@@ -126,12 +164,19 @@ int flush_output(FILE *elf) {
                                         outputsections[SECTION_COUNT - 1].size,
                                     8);
 
+  logger(DEBUG, no_error, "Section Header offset at 0x%.08x",
+         elfheader.shoffset);
+
   /* Write data to output */
+  logger(DEBUG, no_error, "Writing ELF header");
   fwrite(&elfheader, sizeof(elfheader), 1, elf);
   for (int i = 0; i < SECTION_COUNT; i++) {
+    logger(DEBUG, no_error, "Writing Section (%s)", sectionnames[i]);
     fseek(elf, outputsections[i].offset, SEEK_SET);
     fwrite(outputsections[i].contents, 1, outputsections[i].size, elf);
   }
+  logger(DEBUG, no_error, "Writing section headers");
+  fseek(elf, elfheader.shoffset, SEEK_SET);
   fwrite(sectionheaders, sizeof(sectionheaders), 1, elf);
 
   return 0;

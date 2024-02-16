@@ -6,6 +6,7 @@
 
 #include "asm.h"
 #include "debug.h"
+#include "directives.h"
 #include "labels.h"
 #include "output.h"
 #include "instructions.h"
@@ -80,13 +81,18 @@ void parse_file(FILE *ifp, FILE *ofp) {
     logger(DEBUG, no_error, " | Finished parsing line");
   }
 
+  linenumber = 0;
+
+  calc_shstrtab();
   alloc_output();
 
-  write_all_instructions();
+  write_all();
 
   free(line);
 
   linenumber = 0;
+
+  fill_shstrtab();
 
   flush_output(ofp);
 
@@ -134,7 +140,7 @@ int parse_label(char *line, struct sectionpos_t position) {
   if (end == NULL)
     return 0;
 
-  logger(INFO, no_error, "Setting position of label (%s)", line);
+  logger(DEBUG, no_error, "Setting position of label (%s)", line);
 
   *(end++) = '\0';
   char *labelstr = trim_whitespace(line);
@@ -165,32 +171,4 @@ int parse_preprocessor(const char *line) {
   logger(WARN, error_not_implemented, "Preprocessor not implemented");
   return 0;
 }
-int parse_directive(const char *line) {
-  /* TODO: implement directive stuff */
-  logger(WARN, error_not_implemented, "Assembler directives not implemented");
-  return 0;
-}
 
-int write_bytecode(struct bytecode_t *code, struct sectionpos_t position) {
-
-  if (unlikely(code == NULL)) {
-    logger(ERROR, error_internal, "Received invalid bytecode");
-    return 1;
-  }
-
-  size_t nwritten =
-      write_sectiondata((char *)code->data, code->size * sizeof(*code->data), position);
-
-  logger(DEBUG, no_error, "%zu bytes written to output", nwritten);
-
-  const int writeerr = nwritten != code->size * sizeof(*code->data);
-
-  free(code);
-
-  if (unlikely(writeerr)) {
-    logger(CRITICAL, error_system, "Error writing bytes to output");
-    return 1;
-  }
-
-  return 0;
-}

@@ -1,4 +1,5 @@
-greeting: .ascii "hello"
+
+.section .text
 _start:
   addi a7, x0, 64
   addi a0, x0, 1
@@ -9,4 +10,7 @@ _start:
   addi a7, x0, 93
   addi a0, x0, 0
   ecall
+
+.section .data
+greeting: .ascii "hello\n"
 

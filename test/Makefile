@@ -4,13 +4,13 @@
 all: compare clean
 
 compare: printwrasm printgas
-	-diff -u gas.hex wrasm.hex
+	-diff wrasm.hex gas.hex
 
 compile: wrasm gas
 
 wrasm:
-	../bin/wrasm w2.S -o workingwrasm.out
-	riscv64-unknown-elf-objcopy -O binary workingwrasm.out workingwrasm
+	../bin/wrasm w2.S -o b.out
+	riscv64-unknown-elf-objcopy -O binary b.out workingwrasm
 
 gas:
 	riscv64-unknown-elf-as -march rv64i w2.S
@@ -23,4 +23,4 @@ printgas: gas
 	unbuffer xxd -e -g 4 workinggas | tee gas.hex
 
 clean:
-	rm a.out workingwrasm workinggas wrasm.hex gas.hex
+	rm a.out b.out workingwrasm workinggas wrasm.hex gas.hex

@@ -21,6 +21,7 @@ enum error_t {
   error_invalid_instruction,
   error_instruction_other,
   error_not_implemented,
+  error_invalid_syntax,
   error_internal,
   error_system,
   error_unknown,

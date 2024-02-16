@@ -25,6 +25,7 @@ struct section_t {
   size_t offset;
   size_t size;
   char *contents;
+  size_t nameoffset;
 };
 
 extern enum sections_e outputsection;
@@ -38,9 +39,11 @@ void set_outputpos(struct sectionpos_t);
 
 size_t calc_fileoffset(struct sectionpos_t);
 
+void calc_shstrtab(void);
+int fill_shstrtab(void);
 
 int alloc_output(void);
 
-size_t write_sectiondata(const char *, size_t, struct sectionpos_t);
+size_t write_sectiondata(const void *, size_t, struct sectionpos_t);
 
 int flush_output(FILE *);
