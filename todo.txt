@@ -1,19 +1,22 @@
 
+[ ] - Add Global/Local Symbol Table (section .symtab)
+[ ] - Add Version Info (? .riscv.attributes)
+
 [ ] - Fix ELF output format stuff
+      - Add/Fix Relocation Section (section .rela.text)
 [ ] - Add more directives
       - https://ftp.gnu.org/old-gnu/Manuals/gas-2.9.1/html_chapter/as_7.html
+      - .equ (alias .set)
+        - expression parser
+      - .global/.local (alias .globl)
+      - .byte
+      - .ascii - multiple strings
+      - .include
+      - .err
+
 [ ] - Add more instructions
       - https://marks.page/riscv/asm.html
 [ ] - Add riscv extension support
 [ ] - Add/Fix preprocessor support
 [ ] - Compile for riscv64 target
 [ ] - Multiple output format options
-[ ] - Fix file organisation and relocate/rename functions
-
-===================================
-ELF format output
-
-[ ] - Add Symbol Table (section .symtab)
-[ ] - Add Version Info (? .riscv.attributes)
-[ ] - Add Relocation Section (section .rela.text)
-

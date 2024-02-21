@@ -40,7 +40,7 @@ objects := $(sources:$(src)/%.c=$(build)/%.o)
 all: $(dirs) $(output)
 
 test: $(output)
-	@echo "tests have not yet been implemented"
+	$(MAKE) -C test
 
 $(output): $(objects)
 	$(cc) $(filter %.o,$^) $(lflags) -o $@

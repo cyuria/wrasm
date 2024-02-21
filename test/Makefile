@@ -4,7 +4,7 @@
 all: compare clean
 
 compare: printwrasm printgas
-	-diff wrasm.hex gas.hex
+	diff wrasm.hex gas.hex
 
 compile: wrasm gas
 
