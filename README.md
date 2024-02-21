@@ -42,7 +42,6 @@ but it has not been tested and support is not planned at any point.
 
 Binaries for each required program are available below:
 
-- CMake from [the CMake website](https://cmake.org/download/#latest)
 - Clang from [the LLVM project](https://github.com/llvm/llvm-project/releases/latest)
 - Make[^1] from [GNUwin32](https://gnuwin32.sourceforge.net/install.html)
 

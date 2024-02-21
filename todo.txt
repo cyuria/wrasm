@@ -1,5 +1,5 @@
 
-[ ] - Make default output elf instead of bin
+[ ] - Fix ELF output format stuff
 [ ] - Add more directives
       - https://ftp.gnu.org/old-gnu/Manuals/gas-2.9.1/html_chapter/as_7.html
 [ ] - Add more instructions
