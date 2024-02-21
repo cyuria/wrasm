@@ -41,9 +41,9 @@ static struct {
                    {0x00, 0x0, 0x0, 0x1, 0x0, sht_strtab}};
 
 static const char *sectionnames[SECTION_COUNT] = {
-    "",        ".text",    ".rela.text",        ".data",
-    ".bss",    ".rodata",  ".riscv.attributes", ".symtab",
-    ".strtab", ".shstrtab"};
+    "",       ".text",   ".rela.text",        ".data",
+    ".bss",   ".rodata", ".riscv.attributes", ".symtab",
+    ".strtab"};
 
 void change_output(enum sections_e section) {
   if (section >= SECTION_COUNT || section < 0)
@@ -74,23 +74,22 @@ static inline size_t align_offset(size_t offset, size_t align) {
   return offset;
 }
 
-
-void calc_shstrtab(void) {
-  outputsections[section_shstrtab].size = 0;
+void calc_strtab(void) {
+  outputsections[section_strtab].size = 0;
   for (int i = 0; i < SECTION_COUNT; i++)
-    outputsections[section_shstrtab].size += strlen(sectionnames[i]) + 1;
+    outputsections[section_strtab].size += strlen(sectionnames[i]) + 1;
 }
 
-int fill_shstrtab(void) {
+int fill_strtab(void) {
   size_t offset = 0;
   for (int i = 0; i < SECTION_COUNT; i++) {
     const size_t sz = strlen(sectionnames[i]) + 1;
     const size_t count = write_sectiondata(
         sectionnames[i], sz,
-        (struct sectionpos_t){.section = section_shstrtab, .offset = offset});
+        (struct sectionpos_t){.section = section_strtab, .offset = offset});
     if (sz != count) {
       logger(ERROR, error_internal,
-             "Unable to write data to memory for section .shstrtab");
+             "Unable to write data to memory for section .strtab");
       return 1;
     }
     outputsections[i].nameoffset = offset;
@@ -98,7 +97,6 @@ int fill_shstrtab(void) {
   }
   return 0;
 }
-
 
 int alloc_output(void) {
   size_t offset = sizeof(struct elf64header_t);
@@ -139,7 +137,7 @@ int flush_output(FILE *elf) {
 
   elfheader.shcount = SECTION_COUNT;
   elfheader.shentrysize = sizeof(struct elf64sectionheader_t);
-  elfheader.shstrindex = section_shstrtab;
+  elfheader.shstrindex = section_strtab;
 
   struct elf64sectionheader_t sectionheaders[SECTION_COUNT];
   for (int i = 0; i < SECTION_COUNT; i++) {

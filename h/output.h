@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-#define SECTION_COUNT 10
+#define SECTION_COUNT 9
 enum sections_e {
   section_null,
   section_text,
@@ -13,7 +13,6 @@ enum sections_e {
   section_riscvattributes,
   section_symtab,
   section_strtab,
-  section_shstrtab,
 };
 
 struct sectionpos_t {
@@ -39,8 +38,8 @@ void set_outputpos(struct sectionpos_t);
 
 size_t calc_fileoffset(struct sectionpos_t);
 
-void calc_shstrtab(void);
-int fill_shstrtab(void);
+void calc_strtab(void);
+int fill_strtab(void);
 
 int alloc_output(void);
 

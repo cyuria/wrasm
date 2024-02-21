@@ -1,26 +1,26 @@
 
-.PHONY: compare compile wrasm gas printwrasm printgas clean
+.PHONY: compare compile wrasm llvmmc printwrasm printllvmmc clean
 
 all: compare clean
 
-compare: printwrasm printgas
-	diff wrasm.hex gas.hex
+compare: printwrasm printllvmmc
+	diff wrasm.hex llvmmc.hex
 
-compile: wrasm gas
+compile: wrasm llvmmc
 
 wrasm:
-	../bin/wrasm w2.S -o b.out
-	riscv64-unknown-elf-objcopy -O binary b.out workingwrasm
+	../bin/wrasm w2.S -o wrasm.o
+	riscv64-unknown-elf-objcopy -O binary wrasm.o workingwrasm
 
-gas:
-	riscv64-unknown-elf-as -march rv64i w2.S
-	riscv64-unknown-elf-objcopy -O binary a.out workinggas
+llvmmc:
+	llvm-mc --triple=riscv64-unknown-elf -filetype=obj w2.S -o llvmmc.o
+	llvm-objcopy -O binary llvmmc.o workingllvmmc
 
 printwrasm: wrasm
 	unbuffer xxd -e -g 4 workingwrasm | tee wrasm.hex
 
-printgas: gas
-	unbuffer xxd -e -g 4 workinggas | tee gas.hex
+printllvmmc: llvmmc
+	unbuffer xxd -e -g 4 workingllvmmc | tee llvmmc.hex
 
 clean:
-	rm a.out b.out workingwrasm workinggas wrasm.hex gas.hex
+	rm wrasm.o llvmmc.o workingwrasm workingllvmmc wrasm.hex llvmmc.hex

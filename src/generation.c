@@ -83,7 +83,7 @@ void parse_file(FILE *ifp, FILE *ofp) {
 
   linenumber = 0;
 
-  calc_shstrtab();
+  calc_strtab();
   alloc_output();
 
   write_all();
@@ -92,7 +92,7 @@ void parse_file(FILE *ifp, FILE *ofp) {
 
   linenumber = 0;
 
-  fill_shstrtab();
+  fill_strtab();
 
   flush_output(ofp);
 
