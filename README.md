@@ -7,7 +7,7 @@ following features:
 - Full support for GNU assembler features
 - A powerful, Turing complete preprocessor inspired by [nasm](https://nasm.us/)
 - Cross platform support for windows, Linux and macOS (currently only x86_64
-  GNU Linux has been tested, but CI builds succeed for windows and macOS)
+  GNU Linux has been tested, but CI builds succeed for windows and macOS, automated testing using the llvm toolchain will be implemented once it works with the elf binaries produced by the assembler, currently llvm segfaults)
 - Binaries for many if not all supported platforms
 
 ## Compiling
