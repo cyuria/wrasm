@@ -13,12 +13,10 @@ const char *reg_abi_map[BASE_REG_COUNT] = {
 };
 
 /* TODO: implement w/ float extension */
-#define FLOAT_REG_COUNT 0
+#define FLOAT_REG_COUNT 1
 const char *float_reg_abi_map[FLOAT_REG_COUNT] = {};
 
-int is_register(const char *arg) {
-  return get_register_id(arg) != -1;
-}
+int is_register(const char *arg) { return get_register_id(arg) != -1; }
 
 int get_register_id(const char *reg) {
   logger(DEBUG, no_error, "Searching for register (%s)", reg);
@@ -52,11 +50,16 @@ int get_float_register_id(const char *reg) {
 }
 
 int calc_digit(char digit) {
-  if (digit > 'z') return -1;
-  if (digit >= 'a') return digit - 'a' + 10;
-  if (digit > 'Z') return -1;
-  if (digit >= 'A') return digit - 'A' + 10;
-  if (digit > '9') return -1;
+  if (digit > 'z')
+    return -1;
+  if (digit >= 'a')
+    return digit - 'a' + 10;
+  if (digit > 'Z')
+    return -1;
+  if (digit >= 'A')
+    return digit - 'A' + 10;
+  if (digit > '9')
+    return -1;
   return digit - '0';
 }
 
@@ -73,7 +76,8 @@ int get_immediate(const char *imm, int *res) {
   *res = strtol(imm, NULL, base);
 
   /* We know strtol didn't fail */
-  if (*res) return 0;
+  if (*res)
+    return 0;
 
   /* check for anything that could've caused a failure
    * NOTE: immediate negative zero ("-0") will cause a fail */
