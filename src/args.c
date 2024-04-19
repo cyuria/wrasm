@@ -1,12 +1,12 @@
 #include "args.h"
-#include "argtable3.h"
 #include "debug.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <argtable3.h>
+
 const char progname[] = "wrasm";
-const char *progcall = NULL;
 const struct versioninfo_t versioninfo = {0, 0, 1, "alpha"};
 const char helpstr[] =
     "The wrasm assembler\n"

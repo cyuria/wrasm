@@ -16,36 +16,40 @@ following features:
 
 ## Compiling
 
-To compile wrasm, ensure you have [CMake](https://cmake.org/) (version 3.24 or newer) as well as a
-compatible C compiler installed on your system.
+To compile wrasm, ensure you have [meson](https://mesonbuild.com) as well as
+[ninja](https://ninja-build.org) and a compatible C compiler installed on your
+system.
 
 To compile run the following commands in a terminal or command prompt:
 ```sh
-cmake . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
-cmake --build build --config RelWithDebInfo
+meson setup build
+cd build
+meson compile
 ```
 
-You may add or change any CMake flags as you see fit (such as building debug
-or release configurations), however do keep in mind that there is a provided
-build directory which maintainers will be expected to use.
+When recompiling, it is only necessary to run
+```sh
+meson compile
+```
 
-### The Makefile
-
-There is a [Makefile](./Makefile) provided for your convenience that will call
-CMake for debug or release automatically, simply run one of `make debug` or
-`make release` to build the respective targets.
+If compiling from a different directory, run
+```sh
+meson compile -C path/to/build/directory
+```
 
 ## Installing
 
-If you have built wrasm yourself, you can run `cmake --install .` from the
-build directory to automatically install the final executable to
-`/usr/local/bin` on Unix or `C:\Program Files\wrasm\bin` on Windows.
+If you downloaded wrasm pre-built, you must install it manually. Simply copy
+the `wrasm` executable to `/usr/local/bin` on Unix or to
+`C:\Program Files\wrasm\bin` on Windows and ensure the executable is on your
+system path.
 
-If you have downloaded wrasm from the releases page (will be available once
-wrasm is functional), you will need to install the executable manually.
-
-Please ensure the `bin` folder into which wrasm was installed is on the system
-path, as otherwise you will not be able to use the executable.
+When building wrasm, you can run the command `meson install` from the build
+directory to automatically install the final executable to `/usr/local/bin` on
+Unix or `C:\Program Files\wrasm\bin` on Windows. Please ensure the `bin`
+directory to which the `wrasm` executable was installed is on your system path.
+This will likely need to be done when installing on Windows or in a non-standard
+location on Unix based systems.
 
 ## Copyright
 

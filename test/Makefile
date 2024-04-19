@@ -9,7 +9,7 @@ compare: printwrasm printllvmmc
 compile: wrasm llvmmc
 
 wrasm:
-	../build/bin/wrasm w2.S -o wrasm.o
+	../build/wrasm w2.S -o wrasm.o
 	llvm-objcopy -O binary wrasm.o workingwrasm
 
 llvmmc:

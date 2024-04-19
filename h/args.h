@@ -1,5 +1,6 @@
+#pragma once
 
-#include "argtable3.h"
+#include <argtable3.h>
 
 struct versioninfo_t {
   int major, minor, patch;
@@ -19,4 +20,3 @@ struct cmdargs_t {
 extern struct cmdargs_t cmdargs;
 
 void parse_cmdargs(int argc, char *argv[]);
-

@@ -1,0 +1,15 @@
+sources = files(
+  'main.c',
+  'args.c',
+  'asm.c',
+  'debug.c',
+  'directives.c',
+  'elf/def.c',
+  'elf/output.c',
+  'generation.c',
+  'instructions.c',
+  'parsers.c',
+  'registers.c',
+  'stringutil.c',
+  'symbols.c',
+)

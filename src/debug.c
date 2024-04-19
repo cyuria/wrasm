@@ -12,11 +12,7 @@ const char *level_names[] = {
     "debug", "info", "warning", "error", "critical", "none",
 };
 const char *level_colours[] = {
-    "",
-    "\033[0;36;1m",
-    "\033[0;35;1m",
-    "\033[0;31;1m",
-    "\033[1;31;1m",
+    "",        "\033[0;36;1m", "\033[0;35;1m", "\033[0;31;1m", "\033[1;31;1m",
     "\033[1m",
 };
 
@@ -24,8 +20,8 @@ static enum loglvl_t minloglevel = INFO;
 
 void set_min_loglevel(enum loglvl_t level) {
   minloglevel = level;
-  logger(INFO, no_error, "Log level set to %s%s\033[0m", level_colours[minloglevel],
-         level_names[minloglevel]);
+  logger(INFO, no_error, "Log level set to %s%s\033[0m",
+         level_colours[minloglevel], level_names[minloglevel]);
 }
 
 void logger(enum loglvl_t level, enum error_t id, const char *format, ...) {
