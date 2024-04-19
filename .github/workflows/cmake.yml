@@ -1,4 +1,4 @@
-name: Makefile CI
+name: Cmake CI
 
 on:
   push:
@@ -17,8 +17,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Compile
-      run: make
+    - name: builddir
+      run: |
+        mkdir -p build
+        cd build
 
-    - name: Test
-      run: make test
+    - name: Configure
+      run: cmake ..
+
+    - name: Build
+      run: cmake --build .
