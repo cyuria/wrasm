@@ -14,7 +14,8 @@ void closefiles(void) {
     fclose(inputfile);
   if (outputtempfile)
     fclose(outputtempfile);
-  if (outputfile && outputfile != stdin && outputfile != stdout && outputfile != stderr)
+  if (outputfile && outputfile != stdin && outputfile != stdout &&
+      outputfile != stderr)
     fclose(outputfile);
 }
 

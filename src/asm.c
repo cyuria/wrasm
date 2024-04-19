@@ -5,16 +5,16 @@
 #include <string.h>
 
 #include "debug.h"
+#include "elf/output.h"
 #include "instructions.h"
-#include "labels.h"
-#include "output.h"
 #include "parsers.h"
 #include "registers.h"
 #include "stringutil.h"
+#include "symbols.h"
 
 static int parse_parser(char *, struct parser_t *);
 static int parse_args(char *, struct args_t *);
-static int find_label_or_immediate(const char *, int *);
+static int find_symbol_or_immediate(const char *, int *);
 
 static struct args_t parse_failargs(int[3], uint32_t);
 static struct args_t parse_noargs(int[3], uint32_t);
@@ -68,13 +68,15 @@ int parse_asm(const char *line, struct sectionpos_t position) {
   return 0;
 }
 
-static int find_label_or_immediate(const char *arg, int *immediate) {
-  const int label = get_label_by_name(arg);
-  if (label >= 0) {
-    *immediate = calc_fileoffset(get_label_position(label));
-    return 0;
-  }
-  return get_immediate(arg, immediate);
+static int find_symbol_or_immediate(const char *arg, int *immediate) {
+  const struct symbol_t *symbol = get_symbol(arg);
+  if (!symbol)
+    return get_immediate(arg, immediate);
+  *immediate = calc_fileoffset((struct sectionpos_t){
+      .offset = symbol->value,
+      .section = symbol->section,
+  });
+  return 0;
 }
 
 static int parse_parser(char *parserstr, struct parser_t *parser) {
@@ -118,7 +120,7 @@ static int parse_args(char *argstr, struct args_t *args) {
       continue;
     }
 
-    if (unlikely(find_label_or_immediate(arg, (int32_t *)&immediate))) {
+    if (unlikely(find_symbol_or_immediate(arg, (int32_t *)&immediate))) {
       logger(ERROR, error_instruction_other,
              "Unable to calculate value for \"%s\"");
       return 1;

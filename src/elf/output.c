@@ -1,12 +1,12 @@
 
-#include "output.h"
+#include "elf/output.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "debug.h"
-#include "elfdef.h"
+#include "elf/def.h"
 
 enum sectiontypes_e {
   sht_null = 0x0,
@@ -97,6 +97,11 @@ int fill_strtab(void) {
   }
   return 0;
 }
+
+/* TODO: implement symbol table */
+void calc_symtab(void) { outputsections[section_symtab].size = 0; }
+
+int fill_symtab(void) { return 0; }
 
 int alloc_output(void) {
   size_t offset = sizeof(struct elf64header_t);

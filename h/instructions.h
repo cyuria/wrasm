@@ -2,8 +2,8 @@
 
 #include <stdbool.h>
 
+#include "elf/output.h"
 #include "parsers.h"
-#include "output.h"
 
 struct instruction_t {
   struct parser_t parser;

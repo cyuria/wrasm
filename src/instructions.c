@@ -5,8 +5,8 @@
 #include <stdlib.h>
 
 #include "debug.h"
+#include "elf/output.h"
 #include "generation.h"
-#include "output.h"
 
 static struct instruction_t *instructions = NULL;
 static size_t instructions_size = 0;
@@ -33,8 +33,7 @@ int add_instruction(struct instruction_t instruction) {
 
 int add_data(struct rawdata_t dataitem) {
   const size_t sz = dataitems_size + 1;
-  struct rawdata_t *newdataarr =
-      realloc(dataitems, sz * sizeof(*dataitems));
+  struct rawdata_t *newdataarr = realloc(dataitems, sz * sizeof(*dataitems));
 
   if (unlikely(newdataarr == NULL)) {
     logger(ERROR, error_internal, 0,
@@ -68,7 +67,8 @@ int write_all_instructions(void) {
 
 int write_instruction(struct instruction_t instruction) {
   linenumber = instruction.line;
-  logger(DEBUG, no_error, "Generating bytecode for %s instruction (offset: %zu)",
+  logger(DEBUG, no_error,
+         "Generating bytecode for %s instruction (offset: %zu)",
          instruction.parser.name, instruction.position.offset);
   set_outputpos(instruction.position);
   struct bytecode_t *bytecode =
@@ -79,9 +79,8 @@ int write_instruction(struct instruction_t instruction) {
     return 1;
   }
   const size_t bytesize = bytecode->size * sizeof(*bytecode->data);
-  size_t nwritten = write_sectiondata((char *)bytecode->data,
-                                      bytesize,
-                                      instruction.position);
+  size_t nwritten =
+      write_sectiondata((char *)bytecode->data, bytesize, instruction.position);
   free(bytecode);
   if (unlikely(nwritten != bytesize)) {
     logger(CRITICAL, error_system, "Error writing bytes to output");

@@ -9,8 +9,8 @@ compare: printwrasm printllvmmc
 compile: wrasm llvmmc
 
 wrasm:
-	../bin/wrasm w2.S -o wrasm.o
-	riscv64-unknown-elf-objcopy -O binary wrasm.o workingwrasm
+	../build/bin/wrasm w2.S -o wrasm.o
+	llvm-objcopy -O binary wrasm.o workingwrasm
 
 llvmmc:
 	llvm-mc --triple=riscv64-unknown-elf -filetype=obj w2.S -o llvmmc.o

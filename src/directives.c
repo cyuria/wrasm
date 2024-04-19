@@ -5,8 +5,8 @@
 #include <string.h>
 
 #include "debug.h"
+#include "elf/output.h"
 #include "instructions.h"
-#include "output.h"
 #include "stringutil.h"
 
 struct directive_t {
@@ -23,13 +23,10 @@ struct directive_t directive_map[] = {
 struct {
   const char *name;
   enum sections_e section;
-}
-section_map[] = {
-  {".text", section_text},
-  {".data", section_data},
-  {".rodata", section_rodata},
-  {".bss", section_bss}
-};
+} section_map[] = {{".text", section_text},
+                   {".data", section_data},
+                   {".rodata", section_rodata},
+                   {".bss", section_bss}};
 #define SELECTABLE_SECTION_COUNT (sizeof(section_map) / sizeof(*section_map))
 
 static struct directive_t get_parser(const char *name) {
@@ -134,19 +131,13 @@ static int parse_ascii_generic(const char *str, const bool nullterm) {
   memcpy(data, parsed, size);
   free(parsed);
   const struct sectionpos_t position = get_outputpos();
-  const int res = add_data((struct rawdata_t){.data = data,
-                                              .size = size,
-                                              .position = position,
-                                              .line = linenumber});
+  const int res = add_data((struct rawdata_t){
+      .data = data, .size = size, .position = position, .line = linenumber});
   inc_outputsize(position.section, size);
   return res;
 }
-int parse_asciz(const char *str) {
-  return parse_ascii_generic(str, true);
-}
-int parse_ascii(const char *str) {
-  return parse_ascii_generic(str, false);
-}
+int parse_asciz(const char *str) { return parse_ascii_generic(str, true); }
+int parse_ascii(const char *str) { return parse_ascii_generic(str, false); }
 int parse_section(const char *str) {
   logger(DEBUG, no_error, "Selecting Section \"%s\"", str);
   for (int i = 0; i < SELECTABLE_SECTION_COUNT; i++) {

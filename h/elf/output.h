@@ -29,7 +29,6 @@ struct section_t {
 
 extern enum sections_e outputsection;
 
-
 void change_output(enum sections_e);
 
 struct sectionpos_t get_outputpos(void);
@@ -40,6 +39,9 @@ size_t calc_fileoffset(struct sectionpos_t);
 
 void calc_strtab(void);
 int fill_strtab(void);
+
+void calc_symtab(void);
+int fill_symtab(void);
 
 int alloc_output(void);
 

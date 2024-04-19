@@ -7,10 +7,10 @@
 #include "asm.h"
 #include "debug.h"
 #include "directives.h"
-#include "labels.h"
-#include "output.h"
+#include "elf/output.h"
 #include "instructions.h"
 #include "stringutil.h"
+#include "symbols.h"
 
 /* custom getline implementation for cross platform support */
 /* NOTE: removes newline at end of line and therefore not compatible with
@@ -70,7 +70,7 @@ void parse_file(FILE *ifp, FILE *ofp) {
   linenumber = 0;
 
   while ((nread = getl(&line, &linesize, ifp)) != -1)
-    label_forward_declare(line);
+    symbol_forward_declare(line);
   fseek(ifp, 0L, SEEK_SET);
 
   while ((nread = getl(&line, &linesize, ifp)) != -1) {
@@ -125,13 +125,13 @@ int parse_line_trimmed(char *line, struct sectionpos_t position) {
   return parse_asm(line, position);
 }
 
-int label_forward_declare(char *line) {
+int symbol_forward_declare(char *line) {
   char *colon = strchr(line, ':');
   if (colon == NULL)
     return 0;
   *colon = '\0';
-  char *label = trim_whitespace(line);
-  return create_label(label);
+  char *name = trim_whitespace(line);
+  return !create_symbol(name);
 }
 
 int parse_label(char *line, struct sectionpos_t position) {
@@ -143,16 +143,21 @@ int parse_label(char *line, struct sectionpos_t position) {
   logger(DEBUG, no_error, "Setting position of label (%s)", line);
 
   *(end++) = '\0';
-  char *labelstr = trim_whitespace(line);
+  char *name = trim_whitespace(line);
 
-  const int label = get_label_by_name(labelstr);
-  if (label < 0) {
-    logger(ERROR, error_internal, "Unknown label encountered (%s)", labelstr);
-    free(labelstr);
+  struct symbol_t *label = get_symbol(name);
+  if (!label) {
+    logger(ERROR, error_internal, "Unknown label encountered (%s)", name);
+    free(name);
+    return 1;
+  }
+  if (label->type != symbol_label) {
+    logger(ERROR, error_internal, "%s is defined but is not a label", name);
+    free(name);
     return 1;
   }
 
-  free(labelstr);
+  free(name);
 
   const struct sectionpos_t fpos = get_outputpos();
   if (unlikely(fpos.offset == -1L)) {
@@ -160,7 +165,8 @@ int parse_label(char *line, struct sectionpos_t position) {
     return 1;
   }
 
-  set_labelpos(label, fpos);
+  label->section = fpos.section;
+  label->value = fpos.offset;
 
   logger(DEBUG, no_error, "Moving on to line (%s %p)", end, end);
   return parse_line(end, position);
@@ -171,4 +177,3 @@ int parse_preprocessor(const char *line) {
   logger(WARN, error_not_implemented, "Preprocessor not implemented");
   return 0;
 }
-
