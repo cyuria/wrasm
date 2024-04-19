@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.24)
 
 project(wrasm VERSION 0.0.1 LANGUAGES C)
 
@@ -12,3 +12,4 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 target_include_directories(${PROJECT_NAME} PRIVATE h)
 target_link_libraries(${PROJECT_NAME} m)
 
+install(TARGETS ${PROJECT_NAME} DESTINATION bin)

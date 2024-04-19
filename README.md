@@ -6,60 +6,46 @@ The assembler is currently under development, but is planned to have the
 following features:
 - Full support for GNU assembler features
 - A powerful, Turing complete preprocessor inspired by [nasm](https://nasm.us/)
-- Cross platform support for windows, Linux and macOS (currently only x86_64
-  GNU Linux has been tested, but CI builds succeed for windows and macOS, automated testing using the llvm toolchain will be implemented once it works with the elf binaries produced by the assembler, currently llvm segfaults)
-- Binaries for many if not all supported platforms
+- Cross platform support for windows, Linux and macOS
+  - currently only x86_64 GNU Linux has been tested, but CI builds succeed for
+    windows and macOS, automated testing using the LLVM toolchain will be
+    implemented once it works with the elf binaries produced by the assembler,
+    currently LLVM segfaults.
+- Binaries for as many platforms as have C compilers (probably not, but I can
+  dream)
 
 ## Compiling
 
-To compile for most people, install the [requirements](#requirements) listed
-for your system and run `make` from the root directory.
+To compile wrasm, ensure you have [CMake](https://cmake.org/) (version 3.24 or newer) as well as a
+compatible C compiler installed on your system.
 
-This should result in the creation of a `wrasm` or `wrasm.exe` file in the bin
-directory.
-
-### Requirements
-
-The build system for wrasm uses Unix makefiles. All systems require a Unix
-compatible make to be installed.
-
-The default compiler used and tested by the CI system is clang, which must be
-on path unless using a different compiler. To override the compiler, set the
-`cc` variable when calling make
+To compile run the following commands in a terminal or command prompt:
 ```sh
-make cc=/path/to/cc
+cmake . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
+cmake --build build --config RelWithDebInfo
 ```
 
-#### Linux Requirements
+You may add or change any CMake flags as you see fit (such as building debug
+or release configurations), however do keep in mind that there is a provided
+build directory which maintainers will be expected to use.
 
-There are no extra requirements for building Linux
+### The Makefile
 
-#### Windows Requirements
+There is a [Makefile](./Makefile) provided for your convenience that will call
+CMake for debug or release automatically, simply run one of `make debug` or
+`make release` to build the respective targets.
 
-Compiling on Windows requires clang (or another `gcc` compatible compiler) and
-a Unix compatible make. It may be possible to compile with the MSVC toolchain,
-but it has not been tested and support is not planned at any point.
+## Installing
 
-Binaries for each required program are available below:
+If you have built wrasm yourself, you can run `cmake --install .` from the
+build directory to automatically install the final executable to
+`/usr/local/bin` on Unix or `C:\Program Files\wrasm\bin` on Windows.
 
-- Clang from [the LLVM project](https://github.com/llvm/llvm-project/releases/latest)
-- Make[^1] from [GNUwin32](https://gnuwin32.sourceforge.net/install.html)
+If you have downloaded wrasm from the releases page (will be available once
+wrasm is functional), you will need to install the executable manually.
 
-Once these are available on path, simply execute the `make` command in the root
-project directory.
-
-[^1]: Any Unix compatible make works, alternatives include `make` from Cygwin,
-    MSYS, MinGW or any other Unix compatible `make`. It is also possible to
-    download GNUwin32 make directly
-
-#### macOS Requirements
-
-The build system uses clang by default. Clang is Apple's default compiler and
-should be built in with Apple Xcode.
-
-Because the build system is Unix make based, `make` needs to be installed. The
-GNU toolchain, which contains make, should be available from
-<https://developer.apple.com/>
+Please ensure the `bin` folder into which wrasm was installed is on the system
+path, as otherwise you will not be able to use the executable.
 
 ## Copyright
 
