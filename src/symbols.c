@@ -11,18 +11,18 @@ static struct symbolmap_t {
   struct symbol_t *data;
 } symbols[256] = {{.count = 0, .data = NULL}};
 
-static unsigned char hash_str(const char *str) {
-  unsigned char hash = 5;
+static size_t hash_str(const char *str) {
+  size_t hash = 5381;
   char c;
 
   while ((c = *str++))
     hash = hash * 33 ^ c;
 
-  return hash;
+  return hash % (sizeof(symbols) / sizeof(*symbols));
 }
 
 struct symbol_t *get_symbol(const char *name) {
-  const unsigned char hash = hash_str(name);
+  const size_t hash = hash_str(name);
   for (int i = 0; i < symbols[hash].count; i++)
     if (!strcmp(name, symbols[hash].data[i].name))
       return &symbols[hash].data[i];
@@ -30,7 +30,7 @@ struct symbol_t *get_symbol(const char *name) {
 }
 
 struct symbol_t *create_symbol(const char *name) {
-  const unsigned char hash = hash_str(name);
+  const size_t hash = hash_str(name);
   const int index = symbols[hash].count;
 
   symbols[hash].count++;
@@ -47,8 +47,7 @@ struct symbol_t *create_symbol(const char *name) {
 }
 
 void free_labels(void) {
-  for (unsigned char hash = 0;
-       hash < (unsigned char)(sizeof(symbols) / sizeof(*symbols)); hash++) {
+  for (size_t hash = 0; hash < sizeof(symbols) / sizeof(*symbols); hash++) {
     for (int index = 0; index < symbols[hash].count; index++)
       free(symbols[hash].data[index].name);
     free(symbols[hash].data);
