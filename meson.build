@@ -28,9 +28,11 @@ sources = files(
   'src/symbols.c',
 )
 
-executable(
+wrasm = executable(
   'wrasm', sources,
   include_directories : [ headers ],
   dependencies : [ threads, argtable3_dep ],
   install : true
 )
+
+subdir('test')

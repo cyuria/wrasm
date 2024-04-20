@@ -104,10 +104,10 @@ void calc_symtab(void) {
 }
 
 int fill_symtab(void) {
-  const size_t sz = sizeof(struct elf64sym_t);
+  const struct elf64sym_t blank = (struct elf64sym_t){0, 0, 0, 0, 0, 0};
   write_sectiondata(
-      &(struct elf64sym_t){0, 0, 0, 0, 0, 0}, sz,
-      (struct sectionpos_t){.section = section_strtab, .offset = 0});
+      &blank, sizeof(blank),
+      (struct sectionpos_t){.section = section_symtab, .offset = 0});
   return 0;
 }
 
