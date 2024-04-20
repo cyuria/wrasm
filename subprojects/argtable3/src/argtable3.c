@@ -915,10 +915,6 @@ int arg_hashtable_change(arg_hashtable_t* h, void* k, void* v) {
 #include <stdlib.h>
 #include <string.h>
 
-/* Clang gives a warning about an implicitly defined vsnprintf function but it
- * should be present in <stdarg.h> included above */
-int vsnprintf(char *str, size_t size, const char *format, va_list ap);
-
 #if defined(_MSC_VER)
 #pragma warning(push)
 #pragma warning(disable : 4996)
