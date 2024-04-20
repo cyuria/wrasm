@@ -36,8 +36,11 @@ jobs:
     - name: Build
       run: meson compile -C build
 
-    - run: ls -a . *
-      if: matrix.os != 'windows-latest'
+    - run: |
+        pwd
+        ls -a . *
+        find ~+ -type f -name llvmcompare.sh
+      if: matrix.os == 'macos-latest'
 
     - name: Test
       run: meson test -C build
