@@ -36,6 +36,7 @@ jobs:
     - name: Build
       run: meson compile -C build
 
+    - run: which bash
     - run: |
         pwd
         ls -a . *
