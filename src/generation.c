@@ -84,6 +84,7 @@ void parse_file(FILE *ifp, FILE *ofp) {
   linenumber = 0;
 
   calc_strtab();
+  calc_symtab();
   alloc_output();
 
   write_all();
@@ -93,6 +94,7 @@ void parse_file(FILE *ifp, FILE *ofp) {
   linenumber = 0;
 
   fill_strtab();
+  fill_symtab();
 
   flush_output(ofp);
 
@@ -131,7 +133,7 @@ int symbol_forward_declare(char *line) {
     return 0;
   *colon = '\0';
   char *name = trim_whitespace(line);
-  return !create_symbol(name);
+  return !create_symbol(name, symbol_label);
 }
 
 int parse_label(char *line, struct sectionpos_t position) {

@@ -16,7 +16,7 @@ struct symbol_t {
 };
 
 struct symbol_t *get_symbol(const char *);
-struct symbol_t *create_symbol(const char *);
+struct symbol_t *create_symbol(const char *, enum symbol_types_e);
 
 struct elf64sym_t create_symtab_entry(const char *);
 

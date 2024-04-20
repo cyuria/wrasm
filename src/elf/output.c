@@ -99,9 +99,17 @@ int fill_strtab(void) {
 }
 
 /* TODO: implement symbol table */
-void calc_symtab(void) { outputsections[section_symtab].size = 0; }
+void calc_symtab(void) {
+  outputsections[section_symtab].size = sizeof(struct elf64sym_t);
+}
 
-int fill_symtab(void) { return 0; }
+int fill_symtab(void) {
+  const size_t sz = sizeof(struct elf64sym_t);
+  write_sectiondata(
+      &(struct elf64sym_t){0, 0, 0, 0, 0, 0}, sz,
+      (struct sectionpos_t){.section = section_strtab, .offset = 0});
+  return 0;
+}
 
 int alloc_output(void) {
   size_t offset = sizeof(struct elf64header_t);

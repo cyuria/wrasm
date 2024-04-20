@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "debug.h"
+#include "elf/def.h"
 
 static struct symbolmap_t {
   int count;
@@ -29,7 +30,7 @@ struct symbol_t *get_symbol(const char *name) {
   return NULL;
 }
 
-struct symbol_t *create_symbol(const char *name) {
+struct symbol_t *create_symbol(const char *name, enum symbol_types_e type) {
   const size_t hash = hash_str(name);
   const int index = symbols[hash].count;
 
@@ -41,9 +42,17 @@ struct symbol_t *create_symbol(const char *name) {
   strcpy(n, name);
   symbols[hash].data[index].name = n;
 
+  symbols[hash].data[index].type = type;
+
   logger(DEBUG, no_error, "Created symbol named \"%s\"", n);
 
   return &symbols[hash].data[index];
+}
+
+struct elf64sym_t create_symtab_entry(const char *name) {
+  // TODO: implement symtab entry
+  (void)name;
+  return (struct elf64sym_t){.name = 0};
 }
 
 void free_labels(void) {
