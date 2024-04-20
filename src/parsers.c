@@ -9,70 +9,70 @@ struct bytecode_t error_bytecode = {.size = -1};
 
 /* TODO: Add HINT parser support */
 const struct parser_t rv64i[] = {
-    {"add", R_TYPE, &gen_rtype, OP_OP, 0b000, 0x00},
-    {"addi", ISB_TYPE, &gen_itype, OP_OPI, 0b000},
-    {"addw", R_TYPE, &gen_rtype, OP_OP32, 0b000, 0x00},
-    {"addiw", ISB_TYPE, &gen_itype, OP_OPI32, 0b000},
-    {"sub", R_TYPE, &gen_rtype, OP_OP, 0b000, 0x20},
-    {"subw", R_TYPE, &gen_rtype, OP_OP32, 0b000, 0x20},
-    {"and", R_TYPE, &gen_rtype, OP_OP, 0b111, 0x00},
-    {"andi", ISB_TYPE, &gen_itype, OP_OPI, 0b111},
-    {"or", R_TYPE, &gen_rtype, OP_OP, 0b110, 0x00},
-    {"ori", ISB_TYPE, &gen_itype, OP_OPI, 0b110},
-    {"xor", R_TYPE, &gen_rtype, OP_OP, 0b100, 0x00},
-    {"xori", ISB_TYPE, &gen_itype, OP_OPI, 0b100},
-    {"sll", R_TYPE, &gen_rtype, OP_OP, 0b001, 0x00},
-    {"slli", ISB_TYPE, &gen_itype, OP_OPI, 0b001, 0x00},
-    {"sllw", R_TYPE, &gen_rtype, OP_OP32, 0b001, 0x00},
-    {"slliw", ISB_TYPE, &gen_itype, OP_OPI32, 0b000, 0x00},
-    {"srl", R_TYPE, &gen_rtype, OP_OP, 0b101, 0x00},
-    {"srli", ISB_TYPE, &gen_itype, OP_OPI, 0b101, 0x00},
-    {"srlw", R_TYPE, &gen_rtype, OP_OP32, 0b101, 0x00},
-    {"srliw", ISB_TYPE, &gen_itype, OP_OPI32, 0b101},
-    {"sra", R_TYPE, &gen_rtype, OP_OP, 0b101, 0x20},
-    {"srai", ISB_TYPE, &gen_itype2, OP_OPI, 0b101},
-    {"sraw", R_TYPE, &gen_rtype, OP_OP32, 0b101, 0x20},
-    {"sraiw", ISB_TYPE, &gen_itype2, OP_OPI32, 0b101},
-    {"slt", R_TYPE, &gen_rtype, OP_OP, 0b010, 0x00},
-    {"slti", ISB_TYPE, &gen_itype, OP_OPI, 0b010},
-    {"sltu", R_TYPE, &gen_rtype, OP_OP, 0b011, 0x00},
-    {"sltiu", ISB_TYPE, &gen_itype, OP_OPI, 0b011},
+    {"add", R_TYPE, &gen_rtype, OP_OP, 0x0, 0x00},
+    {"addi", ISB_TYPE, &gen_itype, OP_OPI, 0x0, 0},
+    {"addw", R_TYPE, &gen_rtype, OP_OP32, 0x0, 0x00},
+    {"addiw", ISB_TYPE, &gen_itype, OP_OPI32, 0x0, 0},
+    {"sub", R_TYPE, &gen_rtype, OP_OP, 0x0, 0x20},
+    {"subw", R_TYPE, &gen_rtype, OP_OP32, 0x0, 0x20},
+    {"and", R_TYPE, &gen_rtype, OP_OP, 0x7, 0x00},
+    {"andi", ISB_TYPE, &gen_itype, OP_OPI, 0x7, 0},
+    {"or", R_TYPE, &gen_rtype, OP_OP, 0x6, 0x00},
+    {"ori", ISB_TYPE, &gen_itype, OP_OPI, 0x6, 0},
+    {"xor", R_TYPE, &gen_rtype, OP_OP, 0x4, 0x00},
+    {"xori", ISB_TYPE, &gen_itype, OP_OPI, 0x4, 0},
+    {"sll", R_TYPE, &gen_rtype, OP_OP, 0x1, 0x00},
+    {"slli", ISB_TYPE, &gen_itype, OP_OPI, 0x1, 0x00},
+    {"sllw", R_TYPE, &gen_rtype, OP_OP32, 0x1, 0x00},
+    {"slliw", ISB_TYPE, &gen_itype, OP_OPI32, 0x0, 0x00},
+    {"srl", R_TYPE, &gen_rtype, OP_OP, 0x5, 0x00},
+    {"srli", ISB_TYPE, &gen_itype, OP_OPI, 0x5, 0x00},
+    {"srlw", R_TYPE, &gen_rtype, OP_OP32, 0x5, 0x00},
+    {"srliw", ISB_TYPE, &gen_itype, OP_OPI32, 0x5, 0},
+    {"sra", R_TYPE, &gen_rtype, OP_OP, 0x5, 0x20},
+    {"srai", ISB_TYPE, &gen_itype2, OP_OPI, 0x5, 0},
+    {"sraw", R_TYPE, &gen_rtype, OP_OP32, 0x5, 0x20},
+    {"sraiw", ISB_TYPE, &gen_itype2, OP_OPI32, 0x5, 0},
+    {"slt", R_TYPE, &gen_rtype, OP_OP, 0x2, 0x00},
+    {"slti", ISB_TYPE, &gen_itype, OP_OPI, 0x2, 0},
+    {"sltu", R_TYPE, &gen_rtype, OP_OP, 0x3, 0x00},
+    {"sltiu", ISB_TYPE, &gen_itype, OP_OPI, 0x3, 0},
 
-    {"beq", ISB_TYPE, &gen_btype, OP_BRANCH, 0b000},
-    {"bne", ISB_TYPE, &gen_btype, OP_BRANCH, 0b001},
-    {"bge", ISB_TYPE, &gen_btype, OP_BRANCH, 0b101},
-    {"bgeu", ISB_TYPE, &gen_btype, OP_BRANCH, 0b111},
-    {"blt", ISB_TYPE, &gen_btype, OP_BRANCH, 0b100},
-    {"bltu", ISB_TYPE, &gen_btype, OP_BRANCH, 0b110},
-    {"jal", UJ_TYPE, &gen_jtype, OP_JAL},
-    {"jalr", ISB_TYPE, &gen_itype, OP_JALR, 0b000},
+    {"beq", ISB_TYPE, &gen_btype, OP_BRANCH, 0x0, 0},
+    {"bne", ISB_TYPE, &gen_btype, OP_BRANCH, 0x1, 0},
+    {"bge", ISB_TYPE, &gen_btype, OP_BRANCH, 0x5, 0},
+    {"bgeu", ISB_TYPE, &gen_btype, OP_BRANCH, 0x7, 0},
+    {"blt", ISB_TYPE, &gen_btype, OP_BRANCH, 0x4, 0},
+    {"bltu", ISB_TYPE, &gen_btype, OP_BRANCH, 0x6, 0},
+    {"jal", UJ_TYPE, &gen_jtype, OP_JAL, 0, 0},
+    {"jalr", ISB_TYPE, &gen_itype, OP_JALR, 0x0, 0},
 
-    {"ecall", NOARGS_TYPE, &gen_syscall, OP_SYSTEM, 0b000, 0x000},
-    {"ebreak", NOARGS_TYPE, &gen_syscall, OP_SYSTEM, 0b000, 0x001},
+    {"ecall", NOARGS_TYPE, &gen_syscall, OP_SYSTEM, 0x0, 0x000},
+    {"ebreak", NOARGS_TYPE, &gen_syscall, OP_SYSTEM, 0x0, 0x001},
 
-    {"lb", ISB_TYPE, &gen_itype, OP_LOAD, 0b000},
-    {"lh", ISB_TYPE, &gen_itype, OP_LOAD, 0b001},
-    {"lw", ISB_TYPE, &gen_itype, OP_LOAD, 0b010},
-    {"ld", ISB_TYPE, &gen_itype, OP_LOAD, 0b011},
-    {"lbu", ISB_TYPE, &gen_itype, OP_LOAD, 0b100},
-    {"lhu", ISB_TYPE, &gen_itype, OP_LOAD, 0b101},
-    {"lwu", ISB_TYPE, &gen_itype, OP_LOAD, 0b110},
+    {"lb", ISB_TYPE, &gen_itype, OP_LOAD, 0x0, 0},
+    {"lh", ISB_TYPE, &gen_itype, OP_LOAD, 0x1, 0},
+    {"lw", ISB_TYPE, &gen_itype, OP_LOAD, 0x2, 0},
+    {"ld", ISB_TYPE, &gen_itype, OP_LOAD, 0x3, 0},
+    {"lbu", ISB_TYPE, &gen_itype, OP_LOAD, 0x4, 0},
+    {"lhu", ISB_TYPE, &gen_itype, OP_LOAD, 0x5, 0},
+    {"lwu", ISB_TYPE, &gen_itype, OP_LOAD, 0x6, 0},
 
-    {"sb", ISB_TYPE, &gen_stype, OP_STORE, 0b000},
-    {"sh", ISB_TYPE, &gen_stype, OP_STORE, 0b001},
-    {"sw", ISB_TYPE, &gen_stype, OP_STORE, 0b010},
-    {"sd", ISB_TYPE, &gen_stype, OP_STORE, 0b011},
+    {"sb", ISB_TYPE, &gen_stype, OP_STORE, 0x0, 0},
+    {"sh", ISB_TYPE, &gen_stype, OP_STORE, 0x1, 0},
+    {"sw", ISB_TYPE, &gen_stype, OP_STORE, 0x2, 0},
+    {"sd", ISB_TYPE, &gen_stype, OP_STORE, 0x3, 0},
 
-    {"lui", UJ_TYPE, &gen_utype, OP_LUI},
-    {"auipc", UJ_TYPE, &gen_utype, OP_AUIPC},
+    {"lui", UJ_TYPE, &gen_utype, OP_LUI, 0, 0},
+    {"auipc", UJ_TYPE, &gen_utype, OP_AUIPC, 0, 0},
 
-    {"fence", ISB_TYPE, &gen_fence, OP_MISC_MEM, 0b000},
+    {"fence", ISB_TYPE, &gen_fence, OP_MISC_MEM, 0x0, 0},
     /* zifencei standard extension */
     // { "FENCEI", ISB_TYPE, &gen_ifence, OP_MISC_MEM, 0b001 },
 
-    {"nop", NOARGS_TYPE, &gen_nop, OP_OPI},
+    {"nop", NOARGS_TYPE, &gen_nop, OP_OPI, 0, 0},
 
-    {NULL, 0, NULL} /* Ending null terminator */
+    {NULL, 0, NULL, 0, 0, 0} /* Ending null terminator */
 };
 
 struct bytecode_t *gen_empty_bytecode(void) {
@@ -86,9 +86,11 @@ struct bytecode_t *gen_empty_bytecode(void) {
 
 struct bytecode_t *gen_rtype(struct parser_t parser, struct args_t args,
                              int position) {
+  (void)position;
   logger(DEBUG, no_error, "Generating R type parser (%s)", parser.name);
 
-  struct bytecode_t *res = malloc(sizeof(*res) + RV64I_SIZE * sizeof(*res->data));
+  struct bytecode_t *res =
+      malloc(sizeof(*res) + RV64I_SIZE * sizeof(*res->data));
   if (!res)
     return NULL;
 
@@ -101,6 +103,7 @@ struct bytecode_t *gen_rtype(struct parser_t parser, struct args_t args,
 
 struct bytecode_t *gen_itype(struct parser_t parser, struct args_t args,
                              int position) {
+  (void)position;
   logger(DEBUG, no_error, "Generating I type parser (%s, x%d, x%d, %d)",
          parser.name, args.isb.r1, args.isb.r2, args.isb.imm);
 
@@ -126,6 +129,7 @@ struct bytecode_t *gen_itype2(struct parser_t parser, struct args_t args,
 
 struct bytecode_t *gen_stype(struct parser_t parser, struct args_t args,
                              int position) {
+  (void)position;
   logger(DEBUG, no_error, "Generating S type parser (%s)", parser.name);
 
   struct bytecode_t *res =
@@ -155,6 +159,7 @@ struct bytecode_t *gen_btype(struct parser_t parser, struct args_t args,
 
 struct bytecode_t *gen_utype(struct parser_t parser, struct args_t args,
                              int position) {
+  (void)position;
   logger(DEBUG, no_error, "Generating U type parser (%s)", parser.name);
 
   struct bytecode_t *res =
@@ -189,6 +194,8 @@ struct bytecode_t *gen_jtype(struct parser_t parser, struct args_t args,
 
 struct bytecode_t *gen_syscall(struct parser_t parser, struct args_t args,
                                int position) {
+  (void)args;
+  (void)position;
   struct bytecode_t *res =
       malloc(sizeof(*res) + RV64I_SIZE * sizeof(*res->data));
   if (!res)
@@ -202,6 +209,7 @@ struct bytecode_t *gen_syscall(struct parser_t parser, struct args_t args,
 
 struct bytecode_t *gen_fence(struct parser_t parser, struct args_t args,
                              int position) {
+  (void)position;
   /* TODO: fix fence implementation w/ flags and stuff */
   logger(DEBUG, no_error, "Generating FENCE parser (%s)", parser.name);
 
@@ -211,13 +219,15 @@ struct bytecode_t *gen_fence(struct parser_t parser, struct args_t args,
     return NULL;
 
   res->size = RV64I_SIZE;
-  *(uint32_t *)&(res->data) =
-      (parser.opcode | (parser.funct1 << 12) | (((uint32_t)args.isb.imm) << 20));
+  *(uint32_t *)&(res->data) = (parser.opcode | (parser.funct1 << 12) |
+                               (((uint32_t)args.isb.imm) << 20));
   return res;
 }
 
 struct bytecode_t *gen_nop(struct parser_t parser, struct args_t args,
                            int position) {
+  (void)args;
+  (void)position;
   logger(DEBUG, no_error, "Generating NOP instruction (%s)", parser.name);
   return gen_itype(parser, (struct args_t){ISB_TYPE, {{0, 0, 0}}}, position);
 }

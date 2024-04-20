@@ -1,3 +1,0 @@
--Ih
--Iargp-standalone/include/argp-standalone
--Wall

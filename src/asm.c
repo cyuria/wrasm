@@ -140,10 +140,14 @@ static int parse_args(char *argstr, struct args_t *args) {
 }
 
 static struct args_t parse_failargs(int registers[3], uint32_t immediate) {
+  (void)registers;
+  (void)immediate;
   logger(WARN, error_invalid_instruction, "Unknown argument format found");
   return (struct args_t){.type = ERROR_ARGTYPE};
 }
 static struct args_t parse_noargs(int registers[3], uint32_t immediate) {
+  (void)registers;
+  (void)immediate;
   return (struct args_t){.type = NOARGS_TYPE};
 }
 static struct args_t parse_uj_args(int registers[3], uint32_t immediate) {
@@ -156,6 +160,7 @@ static struct args_t parse_isb_args(int registers[3], uint32_t immediate) {
       .isb = {.r1 = registers[0], .r2 = registers[1], .imm = immediate}};
 }
 static struct args_t parse_r_args(int registers[3], uint32_t immediate) {
+  (void)immediate;
   return (struct args_t){
       .type = R_TYPE,
       .r = {.rd = registers[0], .rs1 = registers[1], .rs2 = registers[2]}};

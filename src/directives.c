@@ -30,7 +30,7 @@ struct {
 #define SELECTABLE_SECTION_COUNT (sizeof(section_map) / sizeof(*section_map))
 
 static struct directive_t get_parser(const char *name) {
-  for (int i = 0; i < DIRECTIVE_COUNT; i++)
+  for (unsigned long i = 0; i < DIRECTIVE_COUNT; i++)
     if (!strcmp(name, directive_map[i].name))
       return directive_map[i];
   logger(ERROR, error_invalid_instruction,
@@ -75,8 +75,6 @@ static char get_escapedchar(const char **str) {
     break;
   case 'b':
     return '\b';
-  case 'e':
-    return '\e';
   case 'f':
     return '\f';
   case 'n':
@@ -140,7 +138,7 @@ int parse_asciz(const char *str) { return parse_ascii_generic(str, true); }
 int parse_ascii(const char *str) { return parse_ascii_generic(str, false); }
 int parse_section(const char *str) {
   logger(DEBUG, no_error, "Selecting Section \"%s\"", str);
-  for (int i = 0; i < SELECTABLE_SECTION_COUNT; i++) {
+  for (unsigned long i = 0; i < SELECTABLE_SECTION_COUNT; i++) {
     if (!strcmp(str, section_map[i].name)) {
       change_output(section_map[i].section);
       return 0;

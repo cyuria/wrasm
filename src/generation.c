@@ -18,7 +18,7 @@
 size_t getl(char **lineptr, size_t *n, FILE *stream) {
   char *bufptr = NULL;
   char *p = bufptr;
-  size_t size;
+  long size;
   int c;
 
   if (lineptr == NULL)
@@ -69,11 +69,11 @@ void parse_file(FILE *ifp, FILE *ofp) {
 
   linenumber = 0;
 
-  while ((nread = getl(&line, &linesize, ifp)) != -1)
+  while ((nread = getl(&line, &linesize, ifp)) != (size_t)-1)
     symbol_forward_declare(line);
   fseek(ifp, 0L, SEEK_SET);
 
-  while ((nread = getl(&line, &linesize, ifp)) != -1) {
+  while ((nread = getl(&line, &linesize, ifp)) != (size_t)-1) {
     linenumber++;
     logger(DEBUG, no_error, "Parsing line \"%s\"", line);
     if (parse_line(line, get_outputpos()))
@@ -174,6 +174,7 @@ int parse_label(char *line, struct sectionpos_t position) {
 
 int parse_preprocessor(const char *line) {
   /* TODO: implement preprocessor stuff */
+  (void)line;
   logger(WARN, error_not_implemented, "Preprocessor not implemented");
   return 0;
 }

@@ -47,7 +47,8 @@ struct symbol_t *create_symbol(const char *name) {
 }
 
 void free_labels(void) {
-  for (int hash = 0; hash < sizeof(symbols) / sizeof(*symbols); hash++) {
+  for (unsigned char hash = 0;
+       hash < (unsigned char)sizeof(symbols) / sizeof(*symbols); hash++) {
     for (int index = 0; index < symbols[hash].count; index++)
       free(symbols[hash].data[index].name);
     free(symbols[hash].data);

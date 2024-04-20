@@ -14,7 +14,7 @@ const char *reg_abi_map[BASE_REG_COUNT] = {
 
 /* TODO: implement w/ float extension */
 #define FLOAT_REG_COUNT 1
-const char *float_reg_abi_map[FLOAT_REG_COUNT] = {};
+const char *float_reg_abi_map[FLOAT_REG_COUNT] = {0};
 
 int is_register(const char *arg) { return get_register_id(arg) != -1; }
 

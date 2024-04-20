@@ -37,3 +37,11 @@ struct elf64sectionheader_t {
 struct elf64header_t new_elf64header(void);
 struct elf64sectionheader_t new_elf64sectionheader(void);
 
+struct elf64sym_t {
+  uint32_t name;
+  unsigned char info;
+  unsigned char other;
+  uint16_t shndx;
+  uint64_t value;
+  uint64_t size;
+};
