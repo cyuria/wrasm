@@ -123,7 +123,7 @@ static inline size_t parse_nullstr(char *dest, const char *str) {
 static int parse_ascii_generic(const char *str, const bool nullterm) {
   char *parsed = malloc(strlen(str) - 1);
   const size_t size = parse_nullstr(parsed, str) - !nullterm;
-  if (size < 0)
+  if (size == (size_t)-1)
     return 1;
   char *data = malloc(size);
   memcpy(data, parsed, size);
