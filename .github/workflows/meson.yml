@@ -36,6 +36,8 @@ jobs:
     - name: Build
       run: meson compile -C build
 
+    - run: ls -a . *
+
     - name: Test
       run: meson test -C build
 
