@@ -16,9 +16,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
     - uses: actions/setup-python@v5
       with:
         python-version: '3.x'
+
     - run: pip install meson ninja
 
     - name: Configure
@@ -29,3 +31,11 @@ jobs:
 
     - name: Test
       run: meson test -C build
+
+    - uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: meson-logs
+        path: build/meson-logs/
+        retention-days: 5
+
