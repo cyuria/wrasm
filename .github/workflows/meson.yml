@@ -21,6 +21,8 @@ jobs:
       with:
         python-version: '3.x'
 
+    - uses: numworks/setup-llvm@latest
+
     - run: pip install meson ninja
 
     - name: Configure
