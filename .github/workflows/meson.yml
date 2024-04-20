@@ -36,15 +36,8 @@ jobs:
     - name: Build
       run: meson compile -C build
 
-    - run: which bash.exe
-      if: matrix.os == 'windows-latest'
-    - run: find ~+ -type f -name llvmcompare.sh
-      if: matrix.os == 'macos-latest'
-
     - name: Test
-      if: matrix.os != 'macos-latest'
       run: meson test -C build
-      shell: bash
 
     - uses: actions/upload-artifact@v4
       if: failure()
