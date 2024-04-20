@@ -21,7 +21,12 @@ jobs:
       with:
         python-version: '3.x'
 
-    - uses: numworks/setup-llvm@latest
+    - run: sudo apt-get install llvm
+      if: matrix.os == ubuntu-latest
+    - run: brew install llvm
+      if: matrix.os == macos-latest
+    - run: choco install llvm
+      if: matrix.os == windows-latest
 
     - run: pip install meson ninja
 
