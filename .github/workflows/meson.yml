@@ -36,11 +36,9 @@ jobs:
     - name: Build
       run: meson compile -C build
 
-    - run: which bash
-    - run: |
-        pwd
-        ls -a . *
-        find ~+ -type f -name llvmcompare.sh
+    - run: where bash.exe
+      if: matrix.os == 'windows-latest'
+    - run: find ~+ -type f -name llvmcompare.sh
       if: matrix.os == 'macos-latest'
 
     - name: Test
