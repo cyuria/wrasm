@@ -5,7 +5,7 @@
 
 #include "debug.h"
 
-struct bytecode_t error_bytecode = {.size = -1};
+struct bytecode_t error_bytecode = {.size = (size_t)-1};
 
 /* TODO: Add HINT parser support */
 const struct parser_t rv64i[] = {
@@ -162,7 +162,7 @@ struct bytecode_t gen_jtype(struct parser_t parser, struct args_t args,
   logger(DEBUG, no_error, "Generating J type parser (%s)", parser.name);
 
   int offset = args.uj.imm;
-  offset -= position;
+  offset -= (int)position;
   logger(DEBUG, no_error, "Offset of J type parser is 0x%x", offset);
 
   const uint32_t a = (offset & 0x0007FE) << 20;

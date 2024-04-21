@@ -47,7 +47,7 @@ size_t getl(char **lineptr, size_t *n, FILE *stream) {
     }
     if (c == '\n')
       break;
-    *p++ = c;
+    *p++ = (char)c;
     c = fgetc(stream);
   }
 
@@ -164,7 +164,7 @@ int parse_label(char *line, struct sectionpos_t position) {
   }
 
   label->section = fpos.section;
-  label->value = fpos.offset;
+  label->value = (long)fpos.offset;
 
   logger(DEBUG, no_error, "Moving on to line (%s %p)", end, end);
   return parse_line(end, position);

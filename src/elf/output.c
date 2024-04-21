@@ -81,12 +81,13 @@ void calc_strtab(void) {
 }
 
 int fill_strtab(void) {
-  size_t offset = 0;
+  int offset = 0;
   for (int i = 0; i < SECTION_COUNT; i++) {
     const size_t sz = strlen(sectionnames[i]) + 1;
-    const size_t count = write_sectiondata(
-        sectionnames[i], sz,
-        (struct sectionpos_t){.section = section_strtab, .offset = offset});
+    const size_t count =
+        write_sectiondata(sectionnames[i], sz,
+                          (struct sectionpos_t){.section = section_strtab,
+                                                .offset = (size_t)offset});
     if (sz != count) {
       logger(ERROR, error_internal,
              "Unable to write data to memory for section .strtab");
