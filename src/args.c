@@ -24,9 +24,9 @@ void parse_cmdargs(int argc, char *argv[]) {
       cmdargs.version =
           arg_litn("V", "version", 0, 1, "display version info and exit"),
       cmdargs.verbose = arg_litn("v", "verbose", 0, 1, "verbose output"),
-      cmdargs.inputfile = arg_file1(NULL, NULL, "<input>", "input file"),
+      cmdargs.inputfile = arg_filen(NULL, NULL, "<input>", 1, 3, "input file"),
       cmdargs.outputfile =
-          arg_file1("o", "output", "<filename>", "output file"),
+          arg_filen("o", "output", "<filename>", 1, 3, "output file"),
       cmdargs.end = arg_end(20)};
 
   int nerrors = arg_parse(argc, argv, argtable);
@@ -46,6 +46,9 @@ void parse_cmdargs(int argc, char *argv[]) {
     arg_freetable(argtable, sizeof(argtable) / sizeof(*argtable));
     exit(EXIT_SUCCESS);
   }
+
+  if (cmdargs.inputfile->count > 1 || cmdargs.outputfile->count > 1)
+    nerrors++;
 
   if (nerrors) {
     arg_print_errors(stdout, cmdargs.end, progname);
