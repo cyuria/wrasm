@@ -26,9 +26,8 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
     - name: MacOS Dependencies
       run: |
-        brew install llvm ninja
-        pip install meson
-        echo 'PATH="/usr/local/opt/llvm/bin:$PATH" >> $GITHUB_ENV
+        brew install llvm meson ninja
+        echo 'PATH="/usr/local/opt/llvm/bin:$PATH"' >> $GITHUB_ENV
       if: matrix.os == 'macos-latest'
     - name: Windows Dependencies
       run: |
