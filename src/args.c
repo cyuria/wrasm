@@ -25,8 +25,8 @@ void parse_cmdargs(int argc, char *argv[]) {
           arg_litn("V", "version", 0, 1, "display version info and exit"),
       cmdargs.verbose = arg_litn("v", "verbose", 0, 1, "verbose output"),
       cmdargs.inputfile = arg_file1(NULL, NULL, "<input>", "input file"),
-      cmdargs.outputfile = arg_file0("o", "output", "<filename>",
-                                     "output file, leave blank for stdout"),
+      cmdargs.outputfile =
+          arg_file1("o", "output", "<filename>", "output file"),
       cmdargs.end = arg_end(20)};
 
   int nerrors = arg_parse(argc, argv, argtable);
