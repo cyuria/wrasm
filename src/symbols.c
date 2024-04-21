@@ -7,10 +7,6 @@
 #include "debug.h"
 #include "elf/def.h"
 
-#ifdef _WIN32
-#define _CRT_SECURE_NO_WARNINGS
-#endif
-
 static struct symbolmap_t {
   int count;
   struct symbol_t *data;
