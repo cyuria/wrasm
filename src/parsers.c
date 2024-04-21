@@ -103,7 +103,7 @@ struct bytecode_t gen_itype(struct parser_t parser, struct args_t args,
   struct bytecode_t res = {.size = RV64I_SIZE,
                            .data = malloc(RV64I_SIZE * sizeof(*res.data))};
 
-  *(uint32_t *)&(res.data) =
+  *(uint32_t *)res.data =
       (parser.opcode | (args.isb.r1 << 7) | (args.isb.r2 << 15) |
        (parser.funct1 << 12) | ((args.isb.imm & 0xFFF) << 20));
   return res;
@@ -113,7 +113,7 @@ struct bytecode_t gen_itype2(struct parser_t parser, struct args_t args,
                              size_t position) {
   logger(DEBUG, no_error, "Generating I type 2 parser (%s)", parser.name);
   struct bytecode_t res = gen_itype(parser, args, position);
-  *(uint32_t *)&(res.data) |= 0x40000000; /* set type 2 bit */
+  *(uint32_t *)res.data |= 0x40000000; /* set type 2 bit */
   return res;
 }
 
@@ -125,7 +125,7 @@ struct bytecode_t gen_stype(struct parser_t parser, struct args_t args,
   struct bytecode_t res = {.size = RV64I_SIZE,
                            .data = malloc(RV64I_SIZE * sizeof(*res.data))};
 
-  *(uint32_t *)&(res.data) =
+  *(uint32_t *)res.data =
       (parser.opcode | (args.isb.r1 << 15) | (args.isb.r2 << 20) |
        (parser.funct1 << 12) | ((args.isb.imm & 0x1F) << 7) |
        ((args.isb.imm & 0xFE0) << 21));
@@ -152,7 +152,7 @@ struct bytecode_t gen_utype(struct parser_t parser, struct args_t args,
   struct bytecode_t res = {.size = RV64I_SIZE,
                            .data = malloc(RV64I_SIZE * sizeof(*res.data))};
 
-  *(uint32_t *)&(res.data) =
+  *(uint32_t *)res.data =
       (parser.opcode | (args.uj.rd << 7) | (args.uj.imm & 0xFFFFF000));
   return res;
 }
@@ -182,7 +182,7 @@ struct bytecode_t gen_syscall(struct parser_t parser, struct args_t args,
   struct bytecode_t res = {.size = RV64I_SIZE,
                            .data = malloc(RV64I_SIZE * sizeof(*res.data))};
 
-  *(uint32_t *)&(res.data) =
+  *(uint32_t *)res.data =
       (parser.opcode | (parser.funct1 << 12) | (parser.funct2 << 20));
   return res;
 }
@@ -196,8 +196,8 @@ struct bytecode_t gen_fence(struct parser_t parser, struct args_t args,
   struct bytecode_t res = {.size = RV64I_SIZE,
                            .data = malloc(RV64I_SIZE * sizeof(*res.data))};
 
-  *(uint32_t *)&(res.data) = (parser.opcode | (parser.funct1 << 12) |
-                              (((uint32_t)args.isb.imm) << 20));
+  *(uint32_t *)res.data = (parser.opcode | (parser.funct1 << 12) |
+                           (((uint32_t)args.isb.imm) << 20));
   return res;
 }
 

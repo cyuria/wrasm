@@ -97,7 +97,7 @@ void parse_file(FILE *ifp, FILE *ofp) {
   free_instructions();
 }
 
-int parse_line_trimmed(char *, struct sectionpos_t);
+static int parse_line_trimmed(char *, struct sectionpos_t);
 int parse_line(char *line, struct sectionpos_t position) {
   char *trimmed_line = trim_whitespace(line);
   const int result = parse_line_trimmed(trimmed_line, position);
@@ -105,7 +105,7 @@ int parse_line(char *line, struct sectionpos_t position) {
   return result;
 }
 
-int parse_line_trimmed(char *line, struct sectionpos_t position) {
+static int parse_line_trimmed(char *line, struct sectionpos_t position) {
   logger(DEBUG, no_error, " |-> \"%s\"", line);
 
   if (*line == '\0')

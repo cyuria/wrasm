@@ -8,8 +8,9 @@ systemtests = [
   'w2.S',
 ]
 
-bash = find_program('bash')
-llvmcompare = find_program('system' / 'llvmcompare.sh')
+pymod = import('python')
+python = pymod.find_installation('python3')
+llvmcompare = find_program('system' / 'llvmcompare.py')
 
 compiler = meson.get_compiler('c')
 
@@ -38,7 +39,7 @@ foreach function : functiontests
 endforeach
 
 foreach file : systemtests
-  test('llvm compare ' + file, bash, args : [
+  test('llvm compare ' + file, python, args : [
     llvmcompare.full_path(),
     wrasm.full_path(),
     meson.source_root() / 'test' / 'system' / file
