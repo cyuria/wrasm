@@ -93,6 +93,9 @@ void copy_files(FILE *dest, FILE *src) {
 }
 
 int main(int argc, char *argv[]) {
+  for (int i = 0; i < argc; i++)
+    logger(DEBUG, no_error, "[%d]: %s\n", i, argv[i]);
+
   parse_cmdargs(argc, argv);
   open_files();
   parse_file(inputfile, outputtempfile);
