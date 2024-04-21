@@ -24,10 +24,10 @@ void closefiles(void) {
 
 void open_files(void) {
   logger(DEBUG, no_error, "Opening files");
-  logger(DEBUG, no_error, "  - Input Filename:  %p",
-         cmdargs.inputfile->filename);
-  logger(DEBUG, no_error, "  - Output Filename: %p",
-         cmdargs.outputfile->filename);
+  logger(DEBUG, no_error, "  - Input Filename:  %.16x",
+         (unsigned long)cmdargs.inputfile->filename);
+  logger(DEBUG, no_error, "  - Output Filename: %.16x",
+         (unsigned long)cmdargs.outputfile->filename);
   logger(DEBUG, no_error, "  - Input:  %s", *cmdargs.inputfile->filename);
   logger(DEBUG, no_error, "  - Output: %s", *cmdargs.outputfile->filename);
 

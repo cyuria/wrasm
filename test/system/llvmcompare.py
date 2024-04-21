@@ -78,6 +78,5 @@ if __name__ == "__main__":
 
     try:
         execute(wrasmexe, asmfile, id)
-    except Exception as e:
+    finally:
         cleanup(id)
-        raise
