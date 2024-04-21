@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdint.h>
 #include <stdio.h>
 
 #define SECTION_COUNT 9
@@ -17,14 +18,14 @@ enum sections_e {
 
 struct sectionpos_t {
   enum sections_e section;
-  long offset;
+  size_t offset;
 };
 
 struct section_t {
   size_t offset;
   size_t size;
   char *contents;
-  size_t nameoffset;
+  uint32_t nameoffset;
 };
 
 extern enum sections_e outputsection;
@@ -32,7 +33,7 @@ extern enum sections_e outputsection;
 void change_output(enum sections_e);
 
 struct sectionpos_t get_outputpos(void);
-void inc_outputsize(enum sections_e, long);
+void inc_outputsize(enum sections_e, size_t);
 void set_outputpos(struct sectionpos_t);
 
 size_t calc_fileoffset(struct sectionpos_t);

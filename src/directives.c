@@ -68,7 +68,7 @@ static char get_escapedchar(const char **str) {
       return '\0';
     }
     *str = end - 1;
-    return val;
+    return (char)val;
   }
   case 'a':
     return '\a';
@@ -95,7 +95,7 @@ static char get_escapedchar(const char **str) {
 
 static inline size_t parse_nullstr(char *dest, const char *str) {
   if (*str != '"')
-    return -1;
+    return (size_t)-1;
   str++;
   int size = 0;
   while (*str != '"') {
@@ -104,7 +104,7 @@ static inline size_t parse_nullstr(char *dest, const char *str) {
       logger(ERROR, error_invalid_syntax,
              "Expected '\"' (0x22 double quote) character at start or end of "
              "ascii string");
-      return -1;
+      return (size_t)-1;
     }
     if (val == '\\') {
       str++;

@@ -61,21 +61,21 @@ void open_files(void) {
 }
 
 void copy_files(FILE *dest, FILE *src) {
-  const size_t pos = ftell(src);
+  const long pos = ftell(src);
   fseek(src, 0L, SEEK_END);
   size_t sz = ftell(outputtempfile);
   rewind(outputtempfile);
 
+  char *buffer = malloc(BUFSIZ);
   while (sz > BUFSIZ) {
-    char buffer[BUFSIZ];
-    fread(buffer, 1, sizeof(buffer), src);
-    fwrite(buffer, 1, sizeof(buffer), dest);
+    fread(buffer, 1, BUFSIZ, src);
+    fwrite(buffer, 1, BUFSIZ, dest);
     sz -= BUFSIZ;
   }
-
-  char buffer[sz];
-  fread(buffer, 1, sizeof(buffer), src);
-  fwrite(buffer, 1, sizeof(buffer), dest);
+  buffer = realloc(buffer, sz);
+  fread(buffer, 1, sz, src);
+  fwrite(buffer, 1, sz, dest);
+  free(buffer);
 
   fseek(src, pos, SEEK_SET);
 }

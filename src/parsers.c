@@ -75,78 +75,65 @@ const struct parser_t rv64i[] = {
     {NULL, 0, NULL, 0, 0, 0} /* Ending null terminator */
 };
 
-struct bytecode_t *gen_empty_bytecode(void) {
+struct bytecode_t gen_empty_bytecode(void) {
   logger(DEBUG, no_error, "Generating empty parser");
-  struct bytecode_t *res = malloc(sizeof(*res));
-  if (!res)
-    return NULL; /* if malloc fails */
-  res->size = 0;
-  return res;
+  return (struct bytecode_t){.size = 0, .data = NULL};
 }
 
-struct bytecode_t *gen_rtype(struct parser_t parser, struct args_t args,
-                             int position) {
+struct bytecode_t gen_rtype(struct parser_t parser, struct args_t args,
+                            size_t position) {
   (void)position;
   logger(DEBUG, no_error, "Generating R type parser (%s)", parser.name);
 
-  struct bytecode_t *res =
-      malloc(sizeof(*res) + RV64I_SIZE * sizeof(*res->data));
-  if (!res)
-    return NULL;
+  struct bytecode_t res = {.size = RV64I_SIZE,
+                           .data = malloc(RV64I_SIZE * sizeof(*res.data))};
 
-  res->size = RV64I_SIZE;
-  *(uint32_t *)&(res->data) =
+  *(uint32_t *)&(res.data) =
       (parser.opcode | (args.r.rd << 7) | (args.r.rs1 << 15) |
        (args.r.rs2 << 20) | (parser.funct1 << 12) | (parser.funct2 << 25));
   return res;
 }
 
-struct bytecode_t *gen_itype(struct parser_t parser, struct args_t args,
-                             int position) {
+struct bytecode_t gen_itype(struct parser_t parser, struct args_t args,
+                            size_t position) {
   (void)position;
   logger(DEBUG, no_error, "Generating I type parser (%s, x%d, x%d, %d)",
          parser.name, args.isb.r1, args.isb.r2, args.isb.imm);
 
-  struct bytecode_t *res =
-      malloc(sizeof(*res) + RV64I_SIZE * sizeof(*res->data));
-  if (!res)
-    return NULL;
+  struct bytecode_t res = {.size = RV64I_SIZE,
+                           .data = malloc(RV64I_SIZE * sizeof(*res.data))};
 
-  res->size = RV64I_SIZE;
-  *(uint32_t *)&(res->data) =
+  *(uint32_t *)&(res.data) =
       (parser.opcode | (args.isb.r1 << 7) | (args.isb.r2 << 15) |
        (parser.funct1 << 12) | ((args.isb.imm & 0xFFF) << 20));
   return res;
 }
 
-struct bytecode_t *gen_itype2(struct parser_t parser, struct args_t args,
-                              int position) {
+struct bytecode_t gen_itype2(struct parser_t parser, struct args_t args,
+                             size_t position) {
   logger(DEBUG, no_error, "Generating I type 2 parser (%s)", parser.name);
-  struct bytecode_t *res = gen_itype(parser, args, position);
-  *(uint32_t *)&(res->data) |= 0x40000000; /* set type 2 bit */
+  struct bytecode_t res = gen_itype(parser, args, position);
+  *(uint32_t *)&(res.data) |= 0x40000000; /* set type 2 bit */
   return res;
 }
 
-struct bytecode_t *gen_stype(struct parser_t parser, struct args_t args,
-                             int position) {
+struct bytecode_t gen_stype(struct parser_t parser, struct args_t args,
+                            size_t position) {
   (void)position;
   logger(DEBUG, no_error, "Generating S type parser (%s)", parser.name);
 
-  struct bytecode_t *res =
-      malloc(sizeof(*res) + RV64I_SIZE * sizeof(*res->data));
-  if (!res)
-    return NULL;
+  struct bytecode_t res = {.size = RV64I_SIZE,
+                           .data = malloc(RV64I_SIZE * sizeof(*res.data))};
 
-  res->size = RV64I_SIZE;
-  *(uint32_t *)&(res->data) =
+  *(uint32_t *)&(res.data) =
       (parser.opcode | (args.isb.r1 << 15) | (args.isb.r2 << 20) |
        (parser.funct1 << 12) | ((args.isb.imm & 0x1F) << 7) |
        ((args.isb.imm & 0xFE0) << 21));
   return res;
 }
 
-struct bytecode_t *gen_btype(struct parser_t parser, struct args_t args,
-                             int position) {
+struct bytecode_t gen_btype(struct parser_t parser, struct args_t args,
+                            size_t position) {
   logger(DEBUG, no_error, "Generating B type parser (%s)", parser.name);
 
   const uint32_t dup = args.isb.imm >> 1;
@@ -157,29 +144,24 @@ struct bytecode_t *gen_btype(struct parser_t parser, struct args_t args,
   return gen_stype(parser, args, position);
 }
 
-struct bytecode_t *gen_utype(struct parser_t parser, struct args_t args,
-                             int position) {
+struct bytecode_t gen_utype(struct parser_t parser, struct args_t args,
+                            size_t position) {
   (void)position;
   logger(DEBUG, no_error, "Generating U type parser (%s)", parser.name);
 
-  struct bytecode_t *res =
-      malloc(sizeof(*res) + RV64I_SIZE * sizeof(*res->data));
-  if (!res)
-    return &error_bytecode;
+  struct bytecode_t res = {.size = RV64I_SIZE,
+                           .data = malloc(RV64I_SIZE * sizeof(*res.data))};
 
-  res->size = RV64I_SIZE;
-  *(uint32_t *)&(res->data) =
+  *(uint32_t *)&(res.data) =
       (parser.opcode | (args.uj.rd << 7) | (args.uj.imm & 0xFFFFF000));
   return res;
 }
 
-struct bytecode_t *gen_jtype(struct parser_t parser, struct args_t args,
-                             int position) {
+struct bytecode_t gen_jtype(struct parser_t parser, struct args_t args,
+                            size_t position) {
   logger(DEBUG, no_error, "Generating J type parser (%s)", parser.name);
 
   int offset = args.uj.imm;
-  if (unlikely(offset < 0))
-    return NULL;
   offset -= position;
   logger(DEBUG, no_error, "Offset of J type parser is 0x%x", offset);
 
@@ -192,40 +174,35 @@ struct bytecode_t *gen_jtype(struct parser_t parser, struct args_t args,
   return gen_utype(parser, args, position);
 }
 
-struct bytecode_t *gen_syscall(struct parser_t parser, struct args_t args,
-                               int position) {
+struct bytecode_t gen_syscall(struct parser_t parser, struct args_t args,
+                              size_t position) {
   (void)args;
   (void)position;
-  struct bytecode_t *res =
-      malloc(sizeof(*res) + RV64I_SIZE * sizeof(*res->data));
-  if (!res)
-    return NULL;
 
-  res->size = RV64I_SIZE;
-  *(uint32_t *)&(res->data) =
+  struct bytecode_t res = {.size = RV64I_SIZE,
+                           .data = malloc(RV64I_SIZE * sizeof(*res.data))};
+
+  *(uint32_t *)&(res.data) =
       (parser.opcode | (parser.funct1 << 12) | (parser.funct2 << 20));
   return res;
 }
 
-struct bytecode_t *gen_fence(struct parser_t parser, struct args_t args,
-                             int position) {
+struct bytecode_t gen_fence(struct parser_t parser, struct args_t args,
+                            size_t position) {
   (void)position;
   /* TODO: fix fence implementation w/ flags and stuff */
   logger(DEBUG, no_error, "Generating FENCE parser (%s)", parser.name);
 
-  struct bytecode_t *res =
-      malloc(sizeof(*res) + RV64I_SIZE * sizeof(*res->data));
-  if (!res)
-    return NULL;
+  struct bytecode_t res = {.size = RV64I_SIZE,
+                           .data = malloc(RV64I_SIZE * sizeof(*res.data))};
 
-  res->size = RV64I_SIZE;
-  *(uint32_t *)&(res->data) = (parser.opcode | (parser.funct1 << 12) |
-                               (((uint32_t)args.isb.imm) << 20));
+  *(uint32_t *)&(res.data) = (parser.opcode | (parser.funct1 << 12) |
+                              (((uint32_t)args.isb.imm) << 20));
   return res;
 }
 
-struct bytecode_t *gen_nop(struct parser_t parser, struct args_t args,
-                           int position) {
+struct bytecode_t gen_nop(struct parser_t parser, struct args_t args,
+                          size_t position) {
   (void)args;
   (void)position;
   logger(DEBUG, no_error, "Generating NOP instruction (%s)", parser.name);

@@ -14,10 +14,11 @@ static struct symbolmap_t {
 
 static size_t hash_str(const char *str) {
   size_t hash = 5381;
-  char c;
 
-  while ((c = *str++))
-    hash = hash * 33 ^ c;
+  while (*str) {
+    hash = hash * 33 ^ *str;
+    str++;
+  }
 
   return hash % (sizeof(symbols) / sizeof(*symbols));
 }

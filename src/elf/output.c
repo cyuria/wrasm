@@ -56,7 +56,7 @@ struct sectionpos_t get_outputpos(void) {
                                .offset = outputsections[outputsection].size};
 }
 
-void inc_outputsize(enum sections_e section, long amount) {
+void inc_outputsize(enum sections_e section, size_t amount) {
   outputsections[section].size += amount;
 }
 
@@ -183,11 +183,11 @@ int flush_output(FILE *elf) {
   fwrite(&elfheader, sizeof(elfheader), 1, elf);
   for (int i = 0; i < SECTION_COUNT; i++) {
     logger(DEBUG, no_error, "Writing Section (%s)", sectionnames[i]);
-    fseek(elf, outputsections[i].offset, SEEK_SET);
+    fseek(elf, (long)outputsections[i].offset, SEEK_SET);
     fwrite(outputsections[i].contents, 1, outputsections[i].size, elf);
   }
   logger(DEBUG, no_error, "Writing section headers");
-  fseek(elf, elfheader.shoffset, SEEK_SET);
+  fseek(elf, (long)elfheader.shoffset, SEEK_SET);
   fwrite(sectionheaders, sizeof(sectionheaders), 1, elf);
 
   return 0;

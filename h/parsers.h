@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include <stdlib.h>
 
 #define OP_LOAD 0x03
 #define OP_STORE 0x23
@@ -52,14 +53,14 @@ struct args_t {
 };
 
 struct bytecode_t {
-  int size;
-  uint16_t data[];
+  size_t size;
+  uint16_t *data;
 };
 
 struct parser_t {
   const char *name;
   enum argtype_t argtype;
-  struct bytecode_t *(*handler)(struct parser_t, struct args_t, int);
+  struct bytecode_t (*handler)(struct parser_t, struct args_t, size_t);
   uint8_t opcode;
   uint8_t funct1;
   uint16_t funct2;
@@ -77,16 +78,16 @@ extern const struct parser_t rv64d[];
 extern const struct parser_t rv64c[];
 extern const struct parser_t rv64z[]; /* zifencei and zicsr extensions */
 
-struct bytecode_t *gen_empty_bytecode(void);
+struct bytecode_t gen_empty_bytecode(void);
 
 /* basic integer instruction type bytecode generation */
-struct bytecode_t *gen_rtype(struct parser_t, struct args_t, int);
-struct bytecode_t *gen_itype(struct parser_t, struct args_t, int);
-struct bytecode_t *gen_itype2(struct parser_t, struct args_t, int);
-struct bytecode_t *gen_stype(struct parser_t, struct args_t, int);
-struct bytecode_t *gen_btype(struct parser_t, struct args_t, int);
-struct bytecode_t *gen_utype(struct parser_t, struct args_t, int);
-struct bytecode_t *gen_jtype(struct parser_t, struct args_t, int);
-struct bytecode_t *gen_syscall(struct parser_t, struct args_t, int);
-struct bytecode_t *gen_fence(struct parser_t, struct args_t, int);
-struct bytecode_t *gen_nop(struct parser_t, struct args_t, int);
+struct bytecode_t gen_rtype(struct parser_t, struct args_t, size_t);
+struct bytecode_t gen_itype(struct parser_t, struct args_t, size_t);
+struct bytecode_t gen_itype2(struct parser_t, struct args_t, size_t);
+struct bytecode_t gen_stype(struct parser_t, struct args_t, size_t);
+struct bytecode_t gen_btype(struct parser_t, struct args_t, size_t);
+struct bytecode_t gen_utype(struct parser_t, struct args_t, size_t);
+struct bytecode_t gen_jtype(struct parser_t, struct args_t, size_t);
+struct bytecode_t gen_syscall(struct parser_t, struct args_t, size_t);
+struct bytecode_t gen_fence(struct parser_t, struct args_t, size_t);
+struct bytecode_t gen_nop(struct parser_t, struct args_t, size_t);

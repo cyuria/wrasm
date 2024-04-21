@@ -72,7 +72,7 @@ static int find_symbol_or_immediate(const char *arg, int *immediate) {
   const struct symbol_t *symbol = get_symbol(arg);
   if (!symbol)
     return get_immediate(arg, immediate);
-  *immediate = calc_fileoffset((struct sectionpos_t){
+  *immediate = (int)calc_fileoffset((struct sectionpos_t){
       .offset = symbol->value,
       .section = symbol->section,
   });
@@ -85,7 +85,7 @@ static int parse_parser(char *parserstr, struct parser_t *parser) {
   const struct parser_t *parser_cur = rv64i;
   while (strcmp(parserstr, parser_cur->name)) {
     parser_cur++;
-    if (unlikely(!parser_cur->name)) {
+    if (!parser_cur->name) {
       logger(ERROR, error_invalid_instruction,
              "Unknown assembly instruction - %s\n", parserstr);
       return 1;
@@ -107,7 +107,7 @@ static int parse_args(char *argstr, struct args_t *args) {
   while (arg_raw) {
     char *arg = trim_whitespace(arg_raw);
 
-    if (unlikely(regcount >= 3)) {
+    if (regcount >= 3) {
       logger(ERROR, error_instruction_other,
              "Instruction has too many arguments");
       return 1;
@@ -120,7 +120,7 @@ static int parse_args(char *argstr, struct args_t *args) {
       continue;
     }
 
-    if (unlikely(find_symbol_or_immediate(arg, (int32_t *)&immediate))) {
+    if (find_symbol_or_immediate(arg, (int32_t *)&immediate)) {
       logger(ERROR, error_instruction_other,
              "Unable to calculate value for \"%s\"");
       return 1;
@@ -152,16 +152,18 @@ static struct args_t parse_noargs(int registers[3], uint32_t immediate) {
 }
 static struct args_t parse_uj_args(int registers[3], uint32_t immediate) {
   return (struct args_t){.type = UJ_TYPE,
-                         .uj = {.rd = registers[0], .imm = immediate}};
+                         .uj = {.rd = (uint8_t)registers[0], .imm = immediate}};
 }
 static struct args_t parse_isb_args(int registers[3], uint32_t immediate) {
-  return (struct args_t){
-      .type = ISB_TYPE,
-      .isb = {.r1 = registers[0], .r2 = registers[1], .imm = immediate}};
+  return (struct args_t){.type = ISB_TYPE,
+                         .isb = {.r1 = (uint8_t)registers[0],
+                                 .r2 = (uint8_t)registers[1],
+                                 .imm = (uint16_t)immediate}};
 }
 static struct args_t parse_r_args(int registers[3], uint32_t immediate) {
   (void)immediate;
-  return (struct args_t){
-      .type = R_TYPE,
-      .r = {.rd = registers[0], .rs1 = registers[1], .rs2 = registers[2]}};
+  return (struct args_t){.type = R_TYPE,
+                         .r = {.rd = (uint8_t)registers[0],
+                               .rs1 = (uint8_t)registers[1],
+                               .rs2 = (uint8_t)registers[2]}};
 }

@@ -18,36 +18,32 @@
 size_t getl(char **lineptr, size_t *n, FILE *stream) {
   char *bufptr = NULL;
   char *p = bufptr;
-  long size;
+  size_t size;
   int c;
 
   if (lineptr == NULL)
-    return -1;
+    return (size_t)-1;
   if (stream == NULL)
-    return -1;
+    return (size_t)-1;
   if (n == NULL)
-    return -1;
+    return (size_t)-1;
 
   bufptr = *lineptr;
   size = *n;
 
   c = fgetc(stream);
   if (c == EOF)
-    return -1;
+    return (size_t)-1;
 
-  if (bufptr == NULL) {
-    bufptr = malloc(128);
-    if (bufptr == NULL)
-      return -1;
+  if (!bufptr) {
     size = 128;
+    bufptr = malloc(size);
   }
   p = bufptr;
   while (c != EOF) {
-    if ((p - bufptr) > (size - 1)) {
+    if ((size_t)(p - bufptr) > (size - 1)) {
       size = size + 128;
       bufptr = realloc(bufptr, size);
-      if (bufptr == NULL)
-        return -1;
     }
     if (c == '\n')
       break;
@@ -55,11 +51,11 @@ size_t getl(char **lineptr, size_t *n, FILE *stream) {
     c = fgetc(stream);
   }
 
-  *p++ = '\0';
+  *(p++) = '\0';
   *lineptr = bufptr;
   *n = size;
 
-  return p - bufptr - 1;
+  return (size_t)(p - bufptr - 1);
 }
 
 void parse_file(FILE *ifp, FILE *ofp) {
@@ -162,7 +158,7 @@ int parse_label(char *line, struct sectionpos_t position) {
   free(name);
 
   const struct sectionpos_t fpos = get_outputpos();
-  if (unlikely(fpos.offset == -1L)) {
+  if (fpos.offset == (size_t)-1) {
     logger(CRITICAL, error_system, "Unable to determine section file position");
     return 1;
   }
