@@ -1,21 +1,20 @@
 #!/usr/bin/bash -e
 
+wrasm=$1
+asmfile=$2
+
 function cleanup {
-  rm -f flatwrasm flatllvmmc
-  rm -f wrasm.o llvmmc.o
-  rm -f wrasm.hex llvmmc.hex
+  rm -f "${asmfile}.wrasm.o" "${asmfile}.llvmmc.o"
+  rm -f "${asmfile}.flatwrasm" "${asmfile}.flatllvmmc"
 }
 
 trap cleanup EXIT
 
-$1 "$2" -o wrasm.o
-llvm-mc --triple=riscv64-unknown-elf -filetype=obj "$2" -o llvmmc.o
+${wrasm} "${asmfile}" -o "${asmfile}.wrasm.o"
+llvm-mc --triple=riscv64-unknown-elf -filetype=obj "${asmfile}" -o "${asmfile}.llvmmc.o"
 
-llvm-objcopy -O binary wrasm.o flatwrasm
-llvm-objcopy -O binary llvmmc.o flatllvmmc
+llvm-objcopy -O binary "${asmfile}.wrasm.o" "${asmfile}.flatwrasm"
+llvm-objcopy -O binary "${asmfile}.llvmmc.o" "${asmfile}.flatllvmmc"
 
-xxd flatwrasm > wrasm.hex
-xxd flatllvmmc > llvmmc.hex
-
-diff wrasm.hex llvmmc.hex
+diff <(xxd "${asmfile}.flatwrasm") <(xxd "${asmfile}.flatllvmmc")
 

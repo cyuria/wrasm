@@ -2,7 +2,7 @@ project('wrasm', 'c', default_options : [
   'c_std=c17',
   'warning_level=3',
   'werror=true',
-])
+], version : '0.0.1-alpha')
 
 threads = dependency('threads')
 argtable3 = subproject('argtable3', default_options : [
