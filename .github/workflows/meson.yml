@@ -27,7 +27,7 @@ jobs:
     - name: MacOS Dependencies
       run: |
         brew install llvm meson ninja
-        echo 'export PATH="/usr/local/opt/llvm/bin:$PATH" >> ~/.bash_profile'
+        echo 'PATH="/usr/local/opt/llvm/bin:$PATH" >> $GITHUB_ENV
       if: matrix.os == 'macos-latest'
     - name: Windows Dependencies
       run: |
