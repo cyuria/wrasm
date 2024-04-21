@@ -7,6 +7,7 @@
 
 #include "debug.h"
 #include "elf/def.h"
+#include "xmalloc.h"
 
 enum sectiontypes_e {
   sht_null = 0x0,
@@ -115,7 +116,7 @@ int fill_symtab(void) {
 int alloc_output(void) {
   size_t offset = sizeof(struct elf64header_t);
   for (int i = 0; i < SECTION_COUNT; i++) {
-    outputsections[i].contents = malloc(outputsections[i].size);
+    outputsections[i].contents = xmalloc(outputsections[i].size);
     logger(DEBUG, no_error, "%d bytes allocated to section (%p)",
            outputsections[i].size, outputsections[i].contents);
     offset = align_offset(offset, sectiondata[i].align);

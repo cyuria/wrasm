@@ -8,6 +8,7 @@
 #include "args.h"
 #include "debug.h"
 #include "generation.h"
+#include "xmalloc.h"
 
 FILE *inputfile = NULL;
 FILE *outputtempfile = NULL;
@@ -78,7 +79,7 @@ void copy_files(FILE *dest, FILE *src) {
   size_t sz = ftell(outputtempfile);
   rewind(outputtempfile);
 
-  char *buffer = malloc(BUFSIZ);
+  char *buffer = xmalloc(BUFSIZ);
   while (sz > BUFSIZ) {
     fread(buffer, 1, BUFSIZ, src);
     fwrite(buffer, 1, BUFSIZ, dest);

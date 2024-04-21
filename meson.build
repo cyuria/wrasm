@@ -25,6 +25,7 @@ sources = [
   'src/registers.c',
   'src/stringutil.c',
   'src/symbols.c',
+  'src/xmalloc.c',
 ]
 
 wrasm = executable(

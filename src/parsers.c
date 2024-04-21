@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "debug.h"
+#include "xmalloc.h"
 
 struct bytecode_t error_bytecode = {.size = (size_t)-1};
 
@@ -86,7 +87,7 @@ struct bytecode_t gen_rtype(struct parser_t parser, struct args_t args,
   logger(DEBUG, no_error, "Generating R type parser (%s)", parser.name);
 
   struct bytecode_t res = {.size = RV64I_SIZE,
-                           .data = malloc(RV64I_SIZE * sizeof(*res.data))};
+                           .data = xmalloc(RV64I_SIZE * sizeof(*res.data))};
 
   *(uint32_t *)&(res.data) =
       (parser.opcode | (args.r.rd << 7) | (args.r.rs1 << 15) |
@@ -101,7 +102,7 @@ struct bytecode_t gen_itype(struct parser_t parser, struct args_t args,
          parser.name, args.isb.r1, args.isb.r2, args.isb.imm);
 
   struct bytecode_t res = {.size = RV64I_SIZE,
-                           .data = malloc(RV64I_SIZE * sizeof(*res.data))};
+                           .data = xmalloc(RV64I_SIZE * sizeof(*res.data))};
 
   *(uint32_t *)res.data =
       (parser.opcode | (args.isb.r1 << 7) | (args.isb.r2 << 15) |
@@ -123,7 +124,7 @@ struct bytecode_t gen_stype(struct parser_t parser, struct args_t args,
   logger(DEBUG, no_error, "Generating S type parser (%s)", parser.name);
 
   struct bytecode_t res = {.size = RV64I_SIZE,
-                           .data = malloc(RV64I_SIZE * sizeof(*res.data))};
+                           .data = xmalloc(RV64I_SIZE * sizeof(*res.data))};
 
   *(uint32_t *)res.data =
       (parser.opcode | (args.isb.r1 << 15) | (args.isb.r2 << 20) |
@@ -150,7 +151,7 @@ struct bytecode_t gen_utype(struct parser_t parser, struct args_t args,
   logger(DEBUG, no_error, "Generating U type parser (%s)", parser.name);
 
   struct bytecode_t res = {.size = RV64I_SIZE,
-                           .data = malloc(RV64I_SIZE * sizeof(*res.data))};
+                           .data = xmalloc(RV64I_SIZE * sizeof(*res.data))};
 
   *(uint32_t *)res.data =
       (parser.opcode | (args.uj.rd << 7) | (args.uj.imm & 0xFFFFF000));
@@ -180,7 +181,7 @@ struct bytecode_t gen_syscall(struct parser_t parser, struct args_t args,
   (void)position;
 
   struct bytecode_t res = {.size = RV64I_SIZE,
-                           .data = malloc(RV64I_SIZE * sizeof(*res.data))};
+                           .data = xmalloc(RV64I_SIZE * sizeof(*res.data))};
 
   *(uint32_t *)res.data =
       (parser.opcode | (parser.funct1 << 12) | (parser.funct2 << 20));
@@ -194,7 +195,7 @@ struct bytecode_t gen_fence(struct parser_t parser, struct args_t args,
   logger(DEBUG, no_error, "Generating FENCE parser (%s)", parser.name);
 
   struct bytecode_t res = {.size = RV64I_SIZE,
-                           .data = malloc(RV64I_SIZE * sizeof(*res.data))};
+                           .data = xmalloc(RV64I_SIZE * sizeof(*res.data))};
 
   *(uint32_t *)res.data = (parser.opcode | (parser.funct1 << 12) |
                            (((uint32_t)args.isb.imm) << 20));

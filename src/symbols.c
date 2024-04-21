@@ -6,6 +6,7 @@
 
 #include "debug.h"
 #include "elf/def.h"
+#include "xmalloc.h"
 
 static struct symbolmap_t {
   int count;
@@ -39,7 +40,7 @@ struct symbol_t *create_symbol(const char *name, enum symbol_types_e type) {
   symbols[hash].data = realloc(
       symbols[hash].data, symbols[hash].count * sizeof(*symbols[hash].data));
 
-  char *n = malloc(strlen(name) + 1);
+  char *n = xmalloc(strlen(name) + 1);
   strcpy(n, name);
   symbols[hash].data[index].name = n;
 

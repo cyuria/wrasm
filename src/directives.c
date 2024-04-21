@@ -8,6 +8,7 @@
 #include "elf/output.h"
 #include "instructions.h"
 #include "stringutil.h"
+#include "xmalloc.h"
 
 struct directive_t {
   const char *name;
@@ -121,11 +122,11 @@ static inline size_t parse_nullstr(char *dest, const char *str) {
 }
 
 static int parse_ascii_generic(const char *str, const bool nullterm) {
-  char *parsed = malloc(strlen(str) - 1);
+  char *parsed = xmalloc(strlen(str) - 1);
   const size_t size = parse_nullstr(parsed, str) - !nullterm;
   if (size == (size_t)-1)
     return 1;
-  char *data = malloc(size);
+  char *data = xmalloc(size);
   memcpy(data, parsed, size);
   free(parsed);
   const struct sectionpos_t position = get_outputpos();

@@ -11,6 +11,7 @@
 #include "instructions.h"
 #include "stringutil.h"
 #include "symbols.h"
+#include "xmalloc.h"
 
 /* custom getline implementation for cross platform support */
 /* NOTE: removes newline at end of line and therefore not compatible with
@@ -37,7 +38,7 @@ size_t getl(char **lineptr, size_t *n, FILE *stream) {
 
   if (!bufptr) {
     size = 128;
-    bufptr = malloc(size);
+    bufptr = xmalloc(size);
   }
   p = bufptr;
   while (c != EOF) {

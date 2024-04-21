@@ -11,6 +11,7 @@
 #include "registers.h"
 #include "stringutil.h"
 #include "symbols.h"
+#include "xmalloc.h"
 
 static int parse_parser(char *, struct parser_t *);
 static int parse_args(char *, struct args_t *);
@@ -29,7 +30,7 @@ static struct args_t (*arg_parsers[])(int[3], uint32_t) = {
 int parse_asm(const char *line, struct sectionpos_t position) {
   logger(DEBUG, no_error, "Parsing assembly %s", line);
 
-  char *linestr = malloc(strlen(line) + 1);
+  char *linestr = xmalloc(strlen(line) + 1);
   strcpy(linestr, line);
 
   char *argstart = linestr;
