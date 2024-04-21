@@ -11,9 +11,17 @@ systemtests = [
 bash = find_program('bash')
 llvmcompare = find_program('system' / 'llvmcompare.sh')
 
+compiler = meson.get_compiler('c')
+
+includeflag = '-include'
+
+if (compiler.get_id() == 'msvc')
+  includeflag = '/FI'
+endif
+
 srcincludeargs = []
 foreach file : sources
-  srcincludeargs += '-include' + file
+  srcincludeargs += includeflag + file
 endforeach
 
 root = include_directories('../')
