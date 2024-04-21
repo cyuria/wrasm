@@ -34,7 +34,8 @@ void logger(enum loglvl_t level, enum error_t id, const char *format, ...) {
   fprintf(out, "%s: %s0x%.02x\033[0m / %s%s\033[0m ", progname,
           level_colours[level], id, level_colours[level], level_names[level]);
   if (linenumber)
-    fprintf(out, "- %sL%zu\033[0m ", level_colours[level], linenumber);
+    fprintf(out, "- %sL%lu\033[0m ", level_colours[level],
+            (unsigned long)linenumber);
 
   va_list format_params;
   va_start(format_params, format);
