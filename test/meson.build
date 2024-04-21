@@ -24,7 +24,7 @@ foreach function : functiontests
     'function' / function,
     include_directories : [ headers, root ],
     dependencies : [ threads, argtable3_dep ],
-    c_args : srcincludeargs,
+    c_args : [ srcincludeargs, '-D_CRT_SECURE_NO_WARNINGS', ],
   )
   test('c function ' + function, e)
 endforeach

@@ -2,7 +2,6 @@ project('wrasm', 'c', default_options : [
   'c_std=c17',
   'warning_level=3',
   'werror=true',
-  'c_args=[ -D_CRT_SECURE_NO_WARNINGS ]',
 ], version : '0.0.1-alpha')
 
 threads = dependency('threads')
@@ -32,6 +31,7 @@ wrasm = executable(
   'wrasm', [ 'src/main.c', files(sources) ],
   include_directories : [ headers ],
   dependencies : [ threads, argtable3_dep ],
+  c_args : [ '-D_CRT_SECURE_NO_WARNINGS', ],
   install : true
 )
 
