@@ -20,6 +20,7 @@
 [ ] - Add/Fix preprocessor support
 [ ] - Compile for riscv64 target
 [ ] - Multiple output format options
+[ ] - Create man pages & proper docs
 
 [ ] - Use hashmap to store symbols
 

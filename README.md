@@ -44,12 +44,16 @@ the `wrasm` executable to `/usr/local/bin` on Unix or to
 `C:\Program Files\wrasm\bin` on Windows and ensure the executable is on your
 system path.
 
+```sh
+meson install
+```
+
 When building wrasm, you can run the command `meson install` from the build
 directory to automatically install the final executable to `/usr/local/bin` on
-Unix or `C:\Program Files\wrasm\bin` on Windows. Please ensure the `bin`
-directory to which the `wrasm` executable was installed is on your system path.
-This will likely need to be done when installing on Windows or in a non-standard
-location on Unix based systems.
+Unix or `C:\Program Files\wrasm\bin` on Windows (Note this requires elevated
+priveledges). Please ensure the `bin` directory to which the `wrasm` executable
+was installed is on your system path. This will need to be done when installing
+on Windows or in a non-standard location on Unix based systems.
 
 ## Copyright
 

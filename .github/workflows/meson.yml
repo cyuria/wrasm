@@ -21,14 +21,15 @@ jobs:
       with:
         python-version: '3.x'
 
-    - run: sudo apt-get install llvm
+    - name: Ubuntu Dependencies
+      run: sudo apt-get install llvm meson ninja-build
       if: matrix.os == 'ubuntu-latest'
-    - run: brew install llvm
+    - name: MacOS Dependencies
+      run: brew install llvm meson ninja
       if: matrix.os == 'macos-latest'
-    - run: choco install diffutils xxd
+    - name: Windows Dependencies
+      run: choco install meson ninja diffutils xxd
       if: matrix.os == 'windows-latest'
-
-    - run: pip install meson ninja
 
     - name: Configure
       run: meson setup build
