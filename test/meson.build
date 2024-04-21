@@ -8,8 +8,7 @@ systemtests = [
   'w2.S',
 ]
 
-pymod = import('python')
-python = pymod.find_installation('python3')
+python = find_program(['python3', 'python', 'py'])
 llvmcompare = find_program('system' / 'llvmcompare.py')
 
 compiler = meson.get_compiler('c')
