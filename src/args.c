@@ -16,18 +16,25 @@ const char helpstr[] =
 
 struct cmdargs_t cmdargs;
 
+void *argtable[6];
+static void free_argtable(void);
+
 void parse_cmdargs(int argc, char *argv[]) {
   const char *progcall = argv[0];
 
-  void *argtable[] = {
-      cmdargs.help = arg_litn("h", "help", 0, 1, "display this help and exit"),
-      cmdargs.version =
-          arg_litn("V", "version", 0, 1, "display version info and exit"),
-      cmdargs.verbose = arg_litn("v", "verbose", 0, 1, "verbose output"),
-      cmdargs.inputfile = arg_filen(NULL, NULL, "<input>", 1, 3, "input file"),
-      cmdargs.outputfile =
-          arg_filen("o", "output", "<filename>", 1, 3, "output file"),
-      cmdargs.end = arg_end(20)};
+  argtable[0] = cmdargs.help =
+      arg_litn("h", "help", 0, 1, "display this help and exit");
+  argtable[1] = cmdargs.version =
+      arg_litn("V", "version", 0, 1, "display version info and exit");
+  argtable[2] = cmdargs.verbose =
+      arg_litn("v", "verbose", 0, 1, "verbose output");
+  argtable[3] = cmdargs.inputfile =
+      arg_filen(NULL, NULL, "<input>", 1, 3, "input file");
+  argtable[4] = cmdargs.outputfile =
+      arg_filen("o", "output", "<filename>", 1, 3, "output file");
+  argtable[5] = cmdargs.end = arg_end(20);
+
+  atexit(&free_argtable);
 
   int nerrors = arg_parse(argc, argv, argtable);
 
@@ -36,14 +43,12 @@ void parse_cmdargs(int argc, char *argv[]) {
     arg_print_syntax(stdout, argtable, "\n");
     puts(helpstr);
     arg_print_glossary(stdout, argtable, "  %-25s %s\n");
-    arg_freetable(argtable, sizeof(argtable) / sizeof(*argtable));
     exit(EXIT_SUCCESS);
   }
 
   if (cmdargs.version->count) {
     printf("%s version %d.%d.%d %s\n", progname, versioninfo.major,
            versioninfo.minor, versioninfo.patch, versioninfo.note);
-    arg_freetable(argtable, sizeof(argtable) / sizeof(*argtable));
     exit(EXIT_SUCCESS);
   }
 
@@ -53,13 +58,14 @@ void parse_cmdargs(int argc, char *argv[]) {
   if (nerrors) {
     arg_print_errors(stdout, cmdargs.end, progname);
     printf("Try '%s --help' for more information\n", progcall);
-    arg_freetable(argtable, sizeof(argtable) / sizeof(*argtable));
     exit(EXIT_FAILURE);
   }
 
   if (cmdargs.verbose->count) {
     set_min_loglevel(DEBUG);
   }
+}
 
+static void free_argtable(void) {
   arg_freetable(argtable, sizeof(argtable) / sizeof(*argtable));
 }
