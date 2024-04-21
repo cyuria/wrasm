@@ -12,6 +12,10 @@
 #include "stringutil.h"
 #include "symbols.h"
 
+#ifdef _WIN32
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 static int parse_parser(char *, struct parser_t *);
 static int parse_args(char *, struct args_t *);
 static int find_symbol_or_immediate(const char *, int *);

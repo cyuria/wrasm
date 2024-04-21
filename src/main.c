@@ -1,3 +1,6 @@
+
+#define __STDC_WANT_LIB_EXT1__ 1
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -28,21 +31,32 @@ void open_files(void) {
     exit(EXIT_FAILURE);
   }
 
+#ifdef __STDC_LIB_EXT1__
+  if (fopen_s(&inputfile, *cmdargs.inputfile->filename, "r"))
+#else
   inputfile = fopen(*cmdargs.inputfile->filename, "r");
-  if (inputfile == NULL) {
+  if (inputfile == NULL)
+#endif
+  {
     logger(ERROR, error_system, "Unable to open input file");
     exit(EXIT_FAILURE);
   }
 
-  if (**cmdargs.outputfile->filename) {
-    outputfile = fopen(*cmdargs.outputfile->filename, "wb");
-    if (outputfile == NULL) {
-      logger(ERROR, error_system, "Unable to open output file");
-      perror("Error: ");
-      exit(EXIT_FAILURE);
-    }
-  } else {
+  if (!**cmdargs.outputfile->filename) {
     outputfile = stdout;
+    return;
+  }
+
+#ifdef __STDC_LIB_EXT1__
+  if (fopen_s(&outputfile, *cmdargs.outputfile->filename, "wb"))
+#else
+  outputfile = fopen(*cmdargs.outputfile->filename, "wb");
+  if (!outputfile)
+#endif
+  {
+    logger(ERROR, error_system, "Unable to open output file");
+    perror("Error: ");
+    exit(EXIT_FAILURE);
   }
 }
 

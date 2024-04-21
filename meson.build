@@ -12,8 +12,7 @@ argtable3_dep = argtable3.get_variable('argtable3_dep')
 
 headers = include_directories('h')
 
-sources = files(
-  'src/main.c',
+sources = [
   'src/args.c',
   'src/asm.c',
   'src/debug.c',
@@ -26,10 +25,10 @@ sources = files(
   'src/registers.c',
   'src/stringutil.c',
   'src/symbols.c',
-)
+]
 
 wrasm = executable(
-  'wrasm', sources,
+  'wrasm', [ 'src/main.c', files(sources) ],
   include_directories : [ headers ],
   dependencies : [ threads, argtable3_dep ],
   install : true

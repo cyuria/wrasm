@@ -21,15 +21,26 @@ int is_register(const char *arg) { return get_register_id(arg) != -1; }
 int get_register_id(const char *reg) {
   logger(DEBUG, no_error, "Searching for register (%s)", reg);
 
-  if (*reg == 'x')
-    return atoi(reg + 1);
+  /* limit the number of possible characters in the register */
+  int l = 0;
+  while (reg[l] && reg[l] != ' ')
+    l++;
+  if (l > 4)
+    return -1;
+
+  if (*reg == 'x') {
+    unsigned int r = atoi(reg + 1);
+    if (r >= 32)
+      return -1;
+    return r;
+  }
 
   for (int i = 0; i < BASE_REG_COUNT; i++)
     if (!strcmp(reg, reg_abi_map[i]))
       return i;
 
   /* Check for "fp" alias of register "s0"/"x8" */
-  if (reg[0] == 'f' && reg[1] == 'p')
+  if (!strcmp(reg, "fp"))
     return 8;
 
   return -1;

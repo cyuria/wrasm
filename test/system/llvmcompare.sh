@@ -1,4 +1,6 @@
-#!/usr/bin/bash -e
+#!/usr/bin/bash
+
+set -e
 
 wrasm=$1
 asmfile=$2
