@@ -24,6 +24,8 @@ void closefiles(void) {
 
 void open_files(void) {
   logger(DEBUG, no_error, "Opening files");
+  logger(DEBUG, no_error, "  - Input:  %s", *cmdargs.inputfile->filename);
+  logger(DEBUG, no_error, "  - Output: %s", *cmdargs.outputfile->filename);
 
   outputtempfile = tmpfile();
   if (!outputtempfile) {
@@ -31,6 +33,7 @@ void open_files(void) {
     exit(EXIT_FAILURE);
   }
 
+  logger(DEBUG, no_error, "Opening %s", *cmdargs.inputfile->filename);
 #ifdef __STDC_LIB_EXT1__
   if (fopen_s(&inputfile, *cmdargs.inputfile->filename, "r"))
 #else
@@ -43,10 +46,12 @@ void open_files(void) {
   }
 
   if (!**cmdargs.outputfile->filename) {
+    logger(DEBUG, no_error, "All files opened successfully");
     outputfile = stdout;
     return;
   }
 
+  logger(DEBUG, no_error, "Opening %s", *cmdargs.outputfile->filename);
 #ifdef __STDC_LIB_EXT1__
   if (fopen_s(&outputfile, *cmdargs.outputfile->filename, "wb"))
 #else
