@@ -28,7 +28,7 @@ jobs:
       run: brew install llvm meson ninja
       if: matrix.os == 'macos-latest'
     - name: Windows Dependencies
-      run: choco install meson ninja diffutils xxd
+      run: choco install ninja diffutils xxd && pip install meson
       if: matrix.os == 'windows-latest'
 
     - name: Configure
