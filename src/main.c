@@ -26,7 +26,7 @@ void open_files(void) {
   logger(DEBUG, no_error, "Opening files");
 
   outputtempfile = tmpfile();
-  if (outputtempfile == NULL) {
+  if (!outputtempfile) {
     logger(ERROR, error_system, "Unable to create temporary file");
     exit(EXIT_FAILURE);
   }
@@ -35,7 +35,7 @@ void open_files(void) {
   if (fopen_s(&inputfile, *cmdargs.inputfile->filename, "r"))
 #else
   inputfile = fopen(*cmdargs.inputfile->filename, "r");
-  if (inputfile == NULL)
+  if (!inputfile)
 #endif
   {
     logger(ERROR, error_system, "Unable to open input file");
@@ -58,6 +58,8 @@ void open_files(void) {
     perror("Error: ");
     exit(EXIT_FAILURE);
   }
+
+  logger(DEBUG, no_error, "All files opened successfully");
 }
 
 void copy_files(FILE *dest, FILE *src) {
