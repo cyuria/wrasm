@@ -1,6 +1,7 @@
 
 #define __STDC_WANT_LIB_EXT1__ 1
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -25,9 +26,9 @@ void closefiles(void) {
 void open_files(void) {
   logger(DEBUG, no_error, "Opening files");
   logger(DEBUG, no_error, "  - Input Filename:  %.16x",
-         (unsigned long)cmdargs.inputfile->filename);
+         (uint64_t)cmdargs.inputfile->filename);
   logger(DEBUG, no_error, "  - Output Filename: %.16x",
-         (unsigned long)cmdargs.outputfile->filename);
+         (uint64_t)cmdargs.outputfile->filename);
   logger(DEBUG, no_error, "  - Input:  %s", *cmdargs.inputfile->filename);
   logger(DEBUG, no_error, "  - Output: %s", *cmdargs.outputfile->filename);
 
