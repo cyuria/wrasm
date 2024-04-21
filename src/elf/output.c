@@ -94,7 +94,7 @@ int fill_strtab(void) {
       return 1;
     }
     outputsections[i].nameoffset = offset;
-    offset += sz;
+    offset += (int)sz;
   }
   return 0;
 }
