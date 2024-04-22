@@ -21,26 +21,14 @@ jobs:
       with:
         python-version: '3.x'
 
-    - name: Ubuntu LLVM
-      run: sudo apt-get install llvm
-      if: matrix.os == 'ubuntu-latest'
-    - name: MacOS LLVM
+    - name: Check Installed Dependencies
       run: |
-        brew install llvm
-        echo 'PATH="/usr/local/opt/llvm/bin:$PATH"' >> $GITHUB_ENV
-      if: matrix.os == 'macos-latest'
+        which clang
+        which llvm-objcopy
+      shell: bash
 
-    - name: Install Meson
+    - name: Dependencies
       run: pip install meson ninja
-
-    - name: Macos Version Info
-      run: |
-        ls /usr/local/opt/llvm/bin/clang
-        ls /usr/bin
-        meson --version
-        ninja --version
-        /usr/local/opt/llvm/bin/clang --version
-      if: matrix.os == 'macos-latest'
 
     - name: Configure
       run: meson setup build
