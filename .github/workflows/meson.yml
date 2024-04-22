@@ -21,7 +21,12 @@ jobs:
       with:
         python-version: '3.x'
 
-    - name: Check Installed Dependencies
+    - name: Install LLVM
+      uses: KyleMayes/install-llvm-action@v2
+      with:
+        version: "17"
+
+    - name: Check LLVM
       run: |
         which clang
         which llvm-objcopy
