@@ -33,18 +33,7 @@ jobs:
         echo "$PATH"
       if: matrix.os == 'macos-latest'
 
-    - name: Windows Install LLVM
-      run: choco install llvm
-      if: matrix.os == 'windows-latest'
-
-    - name: Check LLVM
-      run: |
-        echo $PATH
-        which clang
-        which llvm-objcopy
-      shell: bash
-
-    - name: Dependencies
+    - name: Install Meson
       run: pip install meson ninja
 
     - name: Configure
