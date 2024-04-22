@@ -21,13 +21,25 @@ jobs:
       with:
         python-version: '3.x'
 
-    - name: Install LLVM
-      uses: KyleMayes/install-llvm-action@v2
-      with:
-        version: "17"
+    - name: Ubuntu Install LLVM
+      run: sudo apt-get install llvm
+      if: matrix.os == 'ubuntu-latest'
+
+    - name: MacOS Install LLVM
+      run: |
+        brew install llvm
+        echo "$PATH"
+        echo "PATH=/usr/local/opt/llvm/bin:$PATH" >> $GITHUB_ENV
+        echo "$PATH"
+      if: matrix.os == 'macos-latest'
+
+    - name: Windows Install LLVM
+      run: choco install llvm
+      if: matrix.os == 'windows-latest'
 
     - name: Check LLVM
       run: |
+        echo $PATH
         which clang
         which llvm-objcopy
       shell: bash
