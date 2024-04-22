@@ -1,5 +1,5 @@
 
-[ ] - Add Global/Local Symbol Table (section .symtab)
+[ ] - Set global/local symbol binding
 [ ] - Add Version Info (? .riscv.attributes)
 
 [ ] - Add more directives

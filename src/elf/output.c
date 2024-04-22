@@ -7,6 +7,7 @@
 
 #include "debug.h"
 #include "elf/def.h"
+#include "symbols.h"
 #include "xmalloc.h"
 
 enum sectiontypes_e {
@@ -72,38 +73,76 @@ void calc_strtab(void) {
   outputsections[section_strtab].size = 0;
   for (int i = 0; i < SECTION_COUNT; i++)
     outputsections[section_strtab].size += strlen(sectionnames[i]) + 1;
+  outputsections[section_strtab].size += calc_symtab_str_buf_size();
 }
 
 int fill_strtab(void) {
-  int offset = 0;
+  const size_t symtab_strings_sz = calc_symtab_str_buf_size();
+  char *symtab_strings = create_symtab_str_buf(symtab_strings_sz);
+  const size_t count = write_sectiondata(symtab_strings, symtab_strings_sz,
+                                         (struct sectionpos_t){
+                                             .section = section_strtab,
+                                             .offset = 0,
+                                         });
+  free(symtab_strings);
+  if (count != symtab_strings_sz) {
+    logger(ERROR, error_internal,
+           "Unable to write data to memory for section .strtab");
+    return 1;
+  }
+  size_t offset = count;
   for (int i = 0; i < SECTION_COUNT; i++) {
     const size_t sz = strlen(sectionnames[i]) + 1;
     const size_t count = write_sectiondata(sectionnames[i], sz,
                                            (struct sectionpos_t){
                                                .section = section_strtab,
-                                               .offset = (size_t)offset,
+                                               .offset = offset,
                                            });
     if (sz != count) {
       logger(ERROR, error_internal,
              "Unable to write data to memory for section .strtab");
       return 1;
     }
-    outputsections[i].nameoffset = offset;
-    offset += (int)sz;
+    outputsections[i].nameoffset = (uint32_t)offset;
+    offset += sz;
   }
   return 0;
 }
 
-/* TODO: implement symbol table */
 void calc_symtab(void) {
-  outputsections[section_symtab].size = sizeof(struct elf64sym_t);
+  size_t sz = 1;
+  for (size_t hash = 0; hash < SYMBOLMAP_ENTRIES; hash++)
+    sz += symbols[hash].count;
+  outputsections[section_symtab].size = sz * sizeof(struct elf64sym_t);
 }
 
+/* TODO: implement symbol table */
 int fill_symtab(void) {
   const struct elf64sym_t blank = (struct elf64sym_t){0, 0, 0, 0, 0, 0};
   write_sectiondata(
       &blank, sizeof(blank),
       (struct sectionpos_t){.section = section_symtab, .offset = 0});
+  uint32_t strtab_addr = 1;
+  size_t count = 1;
+  for (size_t hash = 0; hash < SYMBOLMAP_ENTRIES; hash++) {
+    for (int index = 0; index < symbols[hash].count; index++) {
+      const struct symbol_t *sym = &symbols[hash].data[index];
+      struct elf64sym_t entry = (struct elf64sym_t){
+          .name = strtab_addr,
+          .info = sym->binding,
+          .other = 0, /* TODO: add other visibility attributes */
+          .shndx = sym->section,
+          .value = sym->value,
+          .size = 0, /* TODO: support for symbol sizes? */
+      };
+      write_sectiondata(
+          &entry, sizeof(entry),
+          (struct sectionpos_t){.section = section_symtab,
+                                .offset = count * sizeof(struct elf64sym_t)});
+      strtab_addr += sym->name_sz;
+      count++;
+    }
+  }
   return 0;
 }
 

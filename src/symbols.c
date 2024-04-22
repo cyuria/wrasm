@@ -5,13 +5,9 @@
 #include <string.h>
 
 #include "debug.h"
-#include "elf/def.h"
 #include "xmalloc.h"
 
-static struct symbolmap_t {
-  int count;
-  struct symbol_t *data;
-} symbols[256] = {{.count = 0, .data = NULL}};
+struct symbolmap_t symbols[] = {{.count = 0, .data = NULL}};
 
 static size_t hash_str(const char *str) {
   size_t hash = 5381;
@@ -21,7 +17,7 @@ static size_t hash_str(const char *str) {
     str++;
   }
 
-  return hash % (sizeof(symbols) / sizeof(*symbols));
+  return hash % SYMBOLMAP_ENTRIES;
 }
 
 struct symbol_t *get_symbol(const char *name) {
@@ -40,10 +36,11 @@ struct symbol_t *create_symbol(const char *name, enum symbol_types_e type) {
   symbols[hash].data = realloc(
       symbols[hash].data, symbols[hash].count * sizeof(*symbols[hash].data));
 
-  char *n = xmalloc(strlen(name) + 1);
-  strcpy(n, name);
+  const size_t n_sz = strlen(name) + 1;
+  char *n = xmalloc(n_sz);
+  memcpy(n, name, n_sz);
   symbols[hash].data[index].name = n;
-
+  symbols[hash].data[index].name_sz = n_sz;
   symbols[hash].data[index].type = type;
 
   logger(DEBUG, no_error, "Created symbol named \"%s\"", n);
@@ -51,14 +48,30 @@ struct symbol_t *create_symbol(const char *name, enum symbol_types_e type) {
   return &symbols[hash].data[index];
 }
 
-struct elf64sym_t create_symtab_entry(const char *name) {
-  // TODO: implement symtab entry
-  (void)name;
-  return (struct elf64sym_t){.name = 0};
+size_t calc_symtab_str_buf_size(void) {
+  size_t sz = 1;
+  for (size_t hash = 0; hash < SYMBOLMAP_ENTRIES; hash++)
+    for (int index = 0; index < symbols[hash].count; index++)
+      sz += symbols[hash].data[index].name_sz;
+  return sz;
+}
+
+char *create_symtab_str_buf(size_t sz) {
+  char *buf = malloc(sz);
+  buf[0] = '\0';
+  size_t offset = 1;
+  for (size_t hash = 0; hash < SYMBOLMAP_ENTRIES; hash++) {
+    for (int index = 0; index < symbols[hash].count; index++) {
+      const size_t name_sz = symbols[hash].data[index].name_sz;
+      memcpy(buf + offset, symbols[hash].data[index].name, name_sz);
+      offset += name_sz;
+    }
+  }
+  return buf;
 }
 
 void free_labels(void) {
-  for (size_t hash = 0; hash < sizeof(symbols) / sizeof(*symbols); hash++) {
+  for (size_t hash = 0; hash < SYMBOLMAP_ENTRIES; hash++) {
     for (int index = 0; index < symbols[hash].count; index++)
       free(symbols[hash].data[index].name);
     free(symbols[hash].data);
