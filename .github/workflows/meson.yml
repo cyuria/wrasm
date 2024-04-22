@@ -34,13 +34,13 @@ jobs:
       run: pip install meson ninja
 
     - name: Macos Version Info
-      if: ${{ matrix.os }} == 'macos-latest'
       run: |
         ls /usr/local/opt/llvm/bin/clang
         ls /usr/bin
         meson --version
         ninja --version
         /usr/local/opt/llvm/bin/clang --version
+      if: matrix.os == 'macos-latest'
 
     - name: Configure
       run: meson setup build
