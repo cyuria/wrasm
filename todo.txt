@@ -2,8 +2,6 @@
 [ ] - Add Global/Local Symbol Table (section .symtab)
 [ ] - Add Version Info (? .riscv.attributes)
 
-[ ] - Fix ELF output format stuff
-      - Add/Fix Relocation Section (section .rela.text)
 [ ] - Add more directives
       - https://ftp.gnu.org/old-gnu/Manuals/gas-2.9.1/html_chapter/as_7.html
       - .equ (alias .set)
@@ -18,9 +16,10 @@
       - https://marks.page/riscv/asm.html
 [ ] - Add riscv extension support
 [ ] - Add/Fix preprocessor support
+[ ] - Make ELF stuff not hardcoded
+[ ] - Create man pages & proper docs
 [ ] - Compile for riscv64 target
 [ ] - Multiple output format options
-[ ] - Create man pages & proper docs
 
 [ ] - Use hashmap to store symbols
 
