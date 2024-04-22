@@ -33,6 +33,12 @@ jobs:
     - name: Install Meson
       run: pip install meson ninja
 
+    - name: Version Info
+      run: |
+        meson --version
+        ninja --version
+        clang --version
+
     - name: Configure
       run: meson setup build
 
