@@ -33,7 +33,8 @@ jobs:
     - name: Install Meson
       run: pip install meson ninja
 
-    - name: Version Info
+    - name: Macos Version Info
+      if: ${{ matrix.os }} == 'macos-latest'
       run: |
         ls /usr/local/opt/llvm/bin/clang
         ls /usr/bin
