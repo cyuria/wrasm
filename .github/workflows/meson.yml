@@ -35,9 +35,11 @@ jobs:
 
     - name: Version Info
       run: |
+        ls /usr/local/opt/llvm/bin/clang
+        ls /usr/bin
         meson --version
         ninja --version
-        clang --version
+        /usr/local/opt/llvm/bin/clang --version
 
     - name: Configure
       run: meson setup build
