@@ -14,9 +14,6 @@ enum sectiontypes_e {
   sht_progbits = 0x1,
   sht_symtab = 0x2,
   sht_strtab = 0x3,
-  sht_rela = 0x4,
-  sht_nobits = 0x8,
-  sht_riscv_attribute = 0x70000003,
 };
 
 enum sections_e outputsection = section_text;
@@ -30,21 +27,17 @@ static struct {
   uint64_t align;
   uint64_t entrysize;
   uint32_t type;
-} sectiondata[] = {{0x00, 0x0, 0x0, 0x1, 0x0, sht_null},
-                   {0x06, 0x0, 0x0, 0x4, 0x0, sht_progbits},
-                   {0x40, 0x7, 0x1, 0x8, 0x18, sht_rela},
-                   {0x03, 0x0, 0x0, 0x1, 0x0, sht_progbits},
-                   {0x03, 0x0, 0x0, 0x1, 0x0, sht_nobits},
-                   {0x02, 0x0, 0x0, 0x1, 0x0, sht_progbits},
-                   {0x00, 0x0, 0x0, 0x1, 0x0, sht_riscv_attribute},
-                   {0x00, 0x8, 0x11, 0x8, 0x18, sht_symtab},
-                   {0x00, 0x0, 0x0, 0x1, 0x0, sht_strtab},
-                   {0x00, 0x0, 0x0, 0x1, 0x0, sht_strtab}};
+} sectiondata[SECTION_COUNT] = {
+    {0x00, 0x0, 0x0, 0x1, 0x0, sht_null},
+    {0x00, 0x0, 0x0, 0x1, 0x0, sht_strtab},   // .strtab
+    {0x06, 0x0, 0x0, 0x4, 0x0, sht_progbits}, // .text
+    {0x03, 0x0, 0x0, 0x1, 0x0, sht_progbits}, // .data
+    {0x00, 0x1, 0x3, 0x8, 0x18, sht_symtab},  // .symtab
+};
 
 static const char *sectionnames[SECTION_COUNT] = {
-    "",       ".text",   ".rela.text",        ".data",
-    ".bss",   ".rodata", ".riscv.attributes", ".symtab",
-    ".strtab"};
+    "", ".strtab", ".text", ".data", ".symtab",
+};
 
 void change_output(enum sections_e section) {
   if (section >= SECTION_COUNT || section < 0)
@@ -61,7 +54,7 @@ void inc_outputsize(enum sections_e section, size_t amount) {
   outputsections[section].size += amount;
 }
 
-void set_outputpos(struct sectionpos_t pos) { change_output(pos.section); }
+void set_section(enum sections_e section) { outputsection = section; }
 
 size_t calc_fileoffset(struct sectionpos_t a) {
   return outputsections[a.section].offset + a.offset;
@@ -85,10 +78,11 @@ int fill_strtab(void) {
   int offset = 0;
   for (int i = 0; i < SECTION_COUNT; i++) {
     const size_t sz = strlen(sectionnames[i]) + 1;
-    const size_t count =
-        write_sectiondata(sectionnames[i], sz,
-                          (struct sectionpos_t){.section = section_strtab,
-                                                .offset = (size_t)offset});
+    const size_t count = write_sectiondata(sectionnames[i], sz,
+                                           (struct sectionpos_t){
+                                               .section = section_strtab,
+                                               .offset = (size_t)offset,
+                                           });
     if (sz != count) {
       logger(ERROR, error_internal,
              "Unable to write data to memory for section .strtab");

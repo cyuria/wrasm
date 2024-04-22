@@ -60,7 +60,7 @@ int write_instruction(struct instruction_t instruction) {
   logger(DEBUG, no_error,
          "Generating bytecode for %s instruction (offset: %zu)",
          instruction.parser.name, instruction.position.offset);
-  set_outputpos(instruction.position);
+  set_section(instruction.position.section);
   struct bytecode_t bytecode =
       instruction.parser.handler(instruction.parser, instruction.args,
                                  calc_fileoffset(instruction.position));
@@ -91,7 +91,7 @@ int write_all_data(void) {
 int write_data(struct rawdata_t data) {
   linenumber = data.line;
   logger(DEBUG, no_error, "Writing data (offset: %zu)", data.position.offset);
-  set_outputpos(data.position);
+  set_section(data.position.section);
   const size_t written = write_sectiondata(data.data, data.size, data.position);
   free(data.data);
   if (written != data.size) {

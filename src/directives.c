@@ -24,10 +24,11 @@ struct directive_t directive_map[] = {
 struct {
   const char *name;
   enum sections_e section;
-} section_map[] = {{".text", section_text},
-                   {".data", section_data},
-                   {".rodata", section_rodata},
-                   {".bss", section_bss}};
+} section_map[] = {
+    {".text", section_text}, {".data", section_data},
+    //{".rodata", section_rodata},
+    //{".bss", section_bss},
+};
 #define SELECTABLE_SECTION_COUNT (sizeof(section_map) / sizeof(*section_map))
 
 static struct directive_t get_parser(const char *name) {

@@ -41,10 +41,10 @@ def execute(wrasmexe: Path, asmfile: Path, id: str):
         '-o', wrasmobj
     ], check=True)
     subprocess.run([
-        'llvm-mc',
-        '--triple=riscv64-unknown-elf',
-        '-filetype=obj',
-        asmfile,
+        'clang',
+        '-target', 'riscv64-unknown-elf',
+        '-march=rv64i',
+        '-c', asmfile,
         '-o', llvmobj
     ], check=True)
 

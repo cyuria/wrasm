@@ -3,17 +3,13 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define SECTION_COUNT 9
 enum sections_e {
   section_null,
-  section_text,
-  section_relatext,
-  section_data,
-  section_bss,
-  section_rodata,
-  section_riscvattributes,
-  section_symtab,
   section_strtab,
+  section_text,
+  section_data,
+  section_symtab,
+  SECTION_COUNT
 };
 
 struct sectionpos_t {
@@ -34,7 +30,7 @@ void change_output(enum sections_e);
 
 struct sectionpos_t get_outputpos(void);
 void inc_outputsize(enum sections_e, size_t);
-void set_outputpos(struct sectionpos_t);
+void set_section(enum sections_e);
 
 size_t calc_fileoffset(struct sectionpos_t);
 

@@ -12,5 +12,5 @@ _start:
   ecall
 
 .section .data
-greeting: .ascii "hello\n"
+greeting: .asciz "hello\n"
 
