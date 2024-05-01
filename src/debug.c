@@ -18,11 +18,12 @@ const char *level_colours[6] = {
 };
 size_t level_instances[6] = {0};
 
-static enum loglvl_t minloglevel = INFO;
+static enum loglvl_t minloglevel = WARN;
 static enum loglvl_t exitloglevel = ERROR;
 
 void set_min_loglevel(enum loglvl_t level) {
   minloglevel = level;
+  printf("setting min log level to %s\n", level_names[minloglevel]);
   logger(INFO, no_error, "Log level set to %s%s\033[0m",
          level_colours[minloglevel], level_names[minloglevel]);
 }

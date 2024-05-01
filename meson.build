@@ -38,4 +38,3 @@ wrasm = executable(
 )
 
 subdir('test/unit')
-subdir('test/system')

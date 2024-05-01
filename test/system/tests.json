@@ -1,0 +1,7 @@
+[
+  {
+    "name": "helloworld",
+    "asm": "asm/helloworld.S",
+    "expected": "expected/helloworld.txt"
+  }
+]
