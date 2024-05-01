@@ -5,7 +5,7 @@
 _start:
   addi a0, zero, 1
   la a1, greeting
-  addi a2, zero, 6
+  addi a2, zero, 14
   addi a7, zero, 64 // write syscall
   ecall
 
@@ -14,5 +14,5 @@ _start:
   ecall
 
 .section .data
-greeting: .asciz "hello\n"
+greeting: .asciz "Hello, World!\n"
 

@@ -37,4 +37,5 @@ wrasm = executable(
   install : true
 )
 
-subdir('test')
+subdir('test/unit')
+subdir('test/system')
