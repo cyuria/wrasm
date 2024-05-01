@@ -252,10 +252,10 @@ struct bytecode_t gen_btype(struct parser_t parser, struct args_t args,
                             size_t position) {
   logger(DEBUG, no_error, "Generating B type parser (%s)", parser.name);
 
-  const uint32_t dup = args.arg[3] >> 1;
-  args.arg[3] &= 0x7FE;
-  args.arg[3] |= (dup >> 10) & 0x1;
-  args.arg[3] |= dup & 0x800;
+  const uint32_t dup = args.arg[2] >> 1;
+  args.arg[2] &= 0x7FE;
+  args.arg[2] |= (dup >> 10) & 0x1;
+  args.arg[2] |= dup & 0x800;
 
   return gen_stype(parser, args, position);
 }

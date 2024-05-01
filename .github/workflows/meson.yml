@@ -21,18 +21,6 @@ jobs:
       with:
         python-version: '3.x'
 
-    - name: Ubuntu Install LLVM
-      run: sudo apt-get install llvm
-      if: matrix.os == 'ubuntu-latest'
-
-    - name: MacOS Install LLVM
-      run: |
-        brew install llvm
-        echo "$PATH"
-        echo "PATH=/usr/local/opt/llvm/bin:$PATH" >> $GITHUB_ENV
-        echo "$PATH"
-      if: matrix.os == 'macos-latest'
-
     - name: Install Meson
       run: pip install meson ninja
 
