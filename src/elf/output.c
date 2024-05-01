@@ -33,7 +33,7 @@ static struct {
     {0x00, 0x0, 0x0, 0x1, 0x0, sht_strtab},   // .strtab
     {0x06, 0x0, 0x0, 0x4, 0x0, sht_progbits}, // .text
     {0x03, 0x0, 0x0, 0x1, 0x0, sht_progbits}, // .data
-    {0x00, 0x1, 0x3, 0x8, 0x18, sht_symtab},  // .symtab
+    {0x00, 0x1, 0x0, 0x8, 0x18, sht_symtab},  // .symtab
 };
 
 static const char *sectionnames[SECTION_COUNT] = {
@@ -110,10 +110,11 @@ int fill_strtab(void) {
 }
 
 void calc_symtab(void) {
-  size_t sz = 1;
+  size_t sz = 0;
   for (size_t hash = 0; hash < SYMBOLMAP_ENTRIES; hash++)
     sz += symbols[hash].count;
-  outputsections[section_symtab].size = sz * sizeof(struct elf64sym_t);
+  outputsections[section_symtab].size = (sz + 1) * sizeof(struct elf64sym_t);
+  sectiondata[section_symtab].info = sz;
 }
 
 /* TODO: implement symbol table */

@@ -14,18 +14,8 @@
 #include "xmalloc.h"
 
 static int parse_parser(char *, struct parser_t *);
+static int parse_arg(const char *, enum argtype_e *, size_t *);
 static int parse_args(char *, struct args_t *);
-static int find_symbol_or_immediate(const char *, int *);
-
-static struct args_t parse_failargs(int[3], uint32_t);
-static struct args_t parse_noargs(int[3], uint32_t);
-static struct args_t parse_uj_args(int[3], uint32_t);
-static struct args_t parse_isb_args(int[3], uint32_t);
-static struct args_t parse_r_args(int[3], uint32_t);
-
-static struct args_t (*arg_parsers[])(int[3], uint32_t) = {
-    &parse_noargs,   &parse_failargs, &parse_failargs, &parse_uj_args,
-    &parse_failargs, &parse_isb_args, &parse_r_args};
 
 int parse_asm(const char *line, struct sectionpos_t position) {
   logger(DEBUG, no_error, "Parsing assembly %s", line);
@@ -63,108 +53,88 @@ int parse_asm(const char *line, struct sectionpos_t position) {
                                          .line = linenumber,
                                          .parser = parser,
                                          .position = position});
-  inc_outputsize(position.section, sizeof(uint16_t) * RV64I_SIZE);
+  inc_outputsize(position.section, parser.isize);
   logger(DEBUG, no_error, "Updated position to offset (%zu)", position.offset);
 
-  return 0;
-}
-
-static int find_symbol_or_immediate(const char *arg, int *immediate) {
-  const struct symbol_t *symbol = get_symbol(arg);
-  if (!symbol)
-    return get_immediate(arg, immediate);
-  *immediate = (int)calc_fileoffset((struct sectionpos_t){
-      .offset = symbol->value,
-      .section = symbol->section,
-  });
   return 0;
 }
 
 static int parse_parser(char *parserstr, struct parser_t *parser) {
   logger(DEBUG, no_error, "Getting parser for instruction (%s)", parserstr);
 
-  const struct parser_t *parser_cur = rv64i;
-  while (strcmp(parserstr, parser_cur->name)) {
-    parser_cur++;
-    if (!parser_cur->name) {
-      logger(ERROR, error_invalid_instruction,
-             "Unknown assembly instruction - %s\n", parserstr);
-      return 1;
+  const struct parser_t *sets[] = {
+      rv64s,
+      rv64i,
+  };
+  for (size_t i = 0; i < 2; i++) {
+    while (sets[i]->name) {
+      if (!strcmp(parserstr, sets[i]->name)) {
+        *parser = *sets[i];
+        return 0;
+      }
+      sets[i]++;
     }
   }
-  *parser = *parser_cur;
+  logger(ERROR, error_invalid_instruction,
+         "Unknown assembly instruction - %s\n", parserstr);
+  return 1;
+}
+
+static int parse_arg(const char *str, enum argtype_e *type, size_t *arg) {
+  size_t reg = get_register_id(str);
+  if (reg != (size_t)-1) {
+    *type = arg_register;
+    *arg = reg;
+    return 0;
+  }
+  struct symbol_t *sym = get_symbol(str);
+  if (sym) {
+    *type = arg_symbol;
+    *arg = (size_t)sym;
+    return 0;
+  }
+  const int status = get_immediate(str, arg);
+  if (!status) {
+    *type = arg_immediate;
+    return 0;
+  }
+  logger(ERROR, error_instruction_other, "Uknown argument (%s) encountered",
+         str);
   return 0;
 }
 
 static int parse_args(char *argstr, struct args_t *args) {
+  // TODO: reimplement
   logger(DEBUG, no_error, "Parsing arguments for instruction (%s)", argstr);
 
-  int regcount = 0;
-  int has_immediate = 0;
-  uint32_t immediate = 0;
-  int registers[3];
+  args->type[0] = arg_none;
+  args->type[1] = arg_none;
+  args->type[2] = arg_none;
 
-  char *arg_raw = strtok(argstr, ",");
-  while (arg_raw) {
-    char *arg = trim_whitespace(arg_raw);
+  char **arg_strs = NULL;
+  size_t arg_count = 0;
 
-    if (regcount >= 3) {
+  char *raw = NULL;
+  raw = strtok(argstr, ",");
+  while (raw) {
+    const size_t i = arg_count;
+    arg_count++;
+    if (arg_count > 3) {
       logger(ERROR, error_instruction_other,
              "Instruction has too many arguments");
       return 1;
     }
-
-    if ((registers[regcount] = get_register_id(arg)) != -1) {
-      regcount++;
-      free(arg);
-      arg_raw = strtok(NULL, ",");
-      continue;
-    }
-
-    if (find_symbol_or_immediate(arg, (int32_t *)&immediate)) {
-      logger(ERROR, error_instruction_other,
-             "Unable to calculate value for \"%s\"");
-      return 1;
-    }
-
-    has_immediate = 1;
-    break;
+    arg_strs = xrealloc(arg_strs, arg_count * sizeof(*arg_strs));
+    arg_strs[i] = trim_whitespace(raw);
+    raw = strtok(NULL, ",");
   }
 
-  *args = arg_parsers[regcount * 2 + has_immediate](registers, immediate);
-  if (args->type == ERROR_ARGTYPE) {
-    logger(ERROR, error_instruction_other, "Invalid arguments given");
-    return 1;
-  }
+  for (size_t i = 0; i < arg_count; i++)
+    parse_arg(arg_strs[i], &args->type[i], &args->arg[i]);
+
+  logger(DEBUG, no_error, "Arguments parsed, (%d, %d), (%d, %d), (%d, %d)",
+         args->type[0], args->arg[0], args->type[1], args->arg[1],
+         args->type[2], args->arg[2]);
 
   return 0;
-}
-
-static struct args_t parse_failargs(int registers[3], uint32_t immediate) {
-  (void)registers;
-  (void)immediate;
-  logger(WARN, error_invalid_instruction, "Unknown argument format found");
-  return (struct args_t){.type = ERROR_ARGTYPE};
-}
-static struct args_t parse_noargs(int registers[3], uint32_t immediate) {
-  (void)registers;
-  (void)immediate;
-  return (struct args_t){.type = NOARGS_TYPE};
-}
-static struct args_t parse_uj_args(int registers[3], uint32_t immediate) {
-  return (struct args_t){.type = UJ_TYPE,
-                         .uj = {.rd = (uint8_t)registers[0], .imm = immediate}};
-}
-static struct args_t parse_isb_args(int registers[3], uint32_t immediate) {
-  return (struct args_t){.type = ISB_TYPE,
-                         .isb = {.r1 = (uint8_t)registers[0],
-                                 .r2 = (uint8_t)registers[1],
-                                 .imm = (uint16_t)immediate}};
-}
-static struct args_t parse_r_args(int registers[3], uint32_t immediate) {
-  (void)immediate;
-  return (struct args_t){.type = R_TYPE,
-                         .r = {.rd = (uint8_t)registers[0],
-                               .rs1 = (uint8_t)registers[1],
-                               .rs2 = (uint8_t)registers[2]}};
 }

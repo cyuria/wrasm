@@ -8,4 +8,4 @@ int get_section_by_name(const char *);
 int parse_asciz(const char *);
 int parse_ascii(const char *);
 int parse_section(const char *);
-
+int parse_global(const char *);

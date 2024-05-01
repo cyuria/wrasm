@@ -16,57 +16,44 @@
 #define OP_LUI 0x37
 #define OP_AUIPC 0x17
 
-#define RV64I_SIZE 2
-#define RV64M_SIZE 2
-#define RV64A_SIZE 2
-#define RV64F_SIZE 2
-#define RV64D_SIZE 2
-#define RV64C_SIZE 1
-#define RV64Z_SIZE 2
+#define RV64I_SIZE 4
+#define RV64M_SIZE 4
+#define RV64A_SIZE 4
+#define RV64F_SIZE 4
+#define RV64D_SIZE 4
+#define RV64C_SIZE 2
+#define RV64Z_SIZE 4
 
-enum argtype_t {
-  ERROR_ARGTYPE,
-  R_TYPE,
-  ISB_TYPE,
-  UJ_TYPE,
-  NOARGS_TYPE,
+enum argtype_e {
+  arg_none,
+  arg_immediate,
+  arg_register,
+  arg_symbol,
 };
 
 struct args_t {
-  enum argtype_t type;
-  union {
-    struct {
-      uint8_t rd;
-      uint8_t rs1;
-      uint8_t rs2;
-    } r;
-    struct {
-      uint8_t r1;
-      uint8_t r2;
-      uint16_t imm;
-    } isb;
-    struct {
-      uint8_t rd;
-      uint32_t imm;
-    } uj;
-  };
+  enum argtype_e type[3];
+  size_t arg[3];
 };
 
 struct bytecode_t {
   size_t size;
-  uint16_t *data;
+  unsigned char *data;
 };
+
+struct parser_t;
+typedef struct bytecode_t(parser)(struct parser_t, struct args_t, size_t);
 
 struct parser_t {
   const char *name;
-  enum argtype_t argtype;
-  struct bytecode_t (*handler)(struct parser_t, struct args_t, size_t);
+  size_t isize;
+  parser *handler;
   uint8_t opcode;
   uint8_t funct1;
   uint16_t funct2;
 };
 
-extern struct bytecode_t error_bytecode;
+extern const struct bytecode_t error_bytecode;
 
 /* parser sets */
 extern const struct parser_t rv64s[]; /* Shortcuts */
@@ -80,14 +67,24 @@ extern const struct parser_t rv64z[]; /* zifencei and zicsr extensions */
 
 struct bytecode_t gen_empty_bytecode(void);
 
+/* shortcut instructions bytecode generation */
+parser gen_nop;
+parser gen_load_short;
+parser gen_math;
+parser gen_setif;
+parser gen_single; // implement with float extension
+parser gen_double; // ^^^
+parser gen_branchif;
+parser gen_jump;
+parser gen_ret;
+
 /* basic integer instruction type bytecode generation */
-struct bytecode_t gen_rtype(struct parser_t, struct args_t, size_t);
-struct bytecode_t gen_itype(struct parser_t, struct args_t, size_t);
-struct bytecode_t gen_itype2(struct parser_t, struct args_t, size_t);
-struct bytecode_t gen_stype(struct parser_t, struct args_t, size_t);
-struct bytecode_t gen_btype(struct parser_t, struct args_t, size_t);
-struct bytecode_t gen_utype(struct parser_t, struct args_t, size_t);
-struct bytecode_t gen_jtype(struct parser_t, struct args_t, size_t);
-struct bytecode_t gen_syscall(struct parser_t, struct args_t, size_t);
-struct bytecode_t gen_fence(struct parser_t, struct args_t, size_t);
-struct bytecode_t gen_nop(struct parser_t, struct args_t, size_t);
+parser gen_rtype;
+parser gen_itype;
+parser gen_itype2;
+parser gen_stype;
+parser gen_btype;
+parser gen_utype;
+parser gen_jtype;
+parser gen_syscall;
+parser gen_fence;

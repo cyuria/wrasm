@@ -3,7 +3,7 @@
 
 struct {
   const char *symbol;
-  const int value;
+  const size_t value;
 } tests[] = {
     {"0", 0},           {"1", 1},
     {"10", 10},         {"100", 100},
@@ -18,8 +18,8 @@ struct {
 int main(void) {
   int errors = 0;
   for (size_t i = 0; i < sizeof(tests) / sizeof(*tests); i++) {
-    int imm = 0;
-    find_symbol_or_immediate(tests[i].symbol, &imm);
+    size_t imm = 0;
+    get_immediate(tests[i].symbol, &imm);
     if (imm != tests[i].value) {
       logger(CRITICAL, error_internal,
              "Test Failed, expected \"%s\" to equal %d but was given %d",

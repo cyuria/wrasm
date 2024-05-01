@@ -1,12 +1,12 @@
 
 [ ] - Set global/local symbol binding
-[ ] - Add Version Info (? .riscv.attributes)
+[ ] - fix inline comment
 
 [ ] - Add more directives
       - https://ftp.gnu.org/old-gnu/Manuals/gas-2.9.1/html_chapter/as_7.html
       - .equ (alias .set)
         - expression parser
-      - .global/.local (alias .globl)
+      - .local
       - .byte
       - .ascii - multiple strings
       - .include

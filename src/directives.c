@@ -8,6 +8,7 @@
 #include "elf/output.h"
 #include "instructions.h"
 #include "stringutil.h"
+#include "symbols.h"
 #include "xmalloc.h"
 
 struct directive_t {
@@ -15,19 +16,17 @@ struct directive_t {
   int (*parser)(const char *);
 };
 struct directive_t directive_map[] = {
-    {".string", parse_asciz},
-    {".asciz", parse_asciz},
-    {".ascii", parse_ascii},
-    {".section", parse_section},
+    {".string", parse_asciz}, {".asciz", parse_asciz},
+    {".ascii", parse_ascii},  {".section", parse_section},
+    {".globl", parse_global},
 };
 #define DIRECTIVE_COUNT (sizeof(directive_map) / sizeof(*directive_map))
 struct {
   const char *name;
   enum sections_e section;
 } section_map[] = {
-    {".text", section_text}, {".data", section_data},
-    //{".rodata", section_rodata},
-    //{".bss", section_bss},
+    {".text", section_text},
+    {".data", section_data},
 };
 #define SELECTABLE_SECTION_COUNT (sizeof(section_map) / sizeof(*section_map))
 
@@ -41,7 +40,6 @@ static struct directive_t get_parser(const char *name) {
 }
 
 int parse_directive(char *line) {
-  /* TODO: implement directive parsing */
   char *directivename = line;
   while (!is_whitespace(*line) && *line)
     line++;
@@ -148,4 +146,13 @@ int parse_section(const char *str) {
   }
   logger(WARN, error_invalid_instruction, "Unknown Section \"%s\"", str);
   return 1;
+}
+int parse_global(const char *str) {
+  struct symbol_t *sym = get_symbol(str);
+  if (!sym) {
+    logger(ERROR, error_unknown, "Uknown symbol (%s) encountered", sym->name);
+    return 1;
+  }
+  sym->binding = 0x10;
+  return 0;
 }

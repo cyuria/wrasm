@@ -6,6 +6,7 @@
 
 #include "debug.h"
 #include "elf/output.h"
+#include "xmalloc.h"
 
 static struct instruction_t *instructions = NULL;
 static size_t instructions_size = 0;
@@ -14,7 +15,7 @@ static size_t dataitems_size = 0;
 
 int add_instruction(struct instruction_t instruction) {
   const size_t sz = instructions_size + 1;
-  instructions = realloc(instructions, sz * sizeof(*instructions));
+  instructions = xrealloc(instructions, sz * sizeof(*instructions));
   instructions[instructions_size] = instruction;
   instructions_size = sz;
 
@@ -23,7 +24,7 @@ int add_instruction(struct instruction_t instruction) {
 
 int add_data(struct rawdata_t dataitem) {
   const size_t sz = dataitems_size + 1;
-  struct rawdata_t *newdataarr = realloc(dataitems, sz * sizeof(*dataitems));
+  struct rawdata_t *newdataarr = xrealloc(dataitems, sz * sizeof(*dataitems));
 
   if (newdataarr == NULL) {
     logger(ERROR, error_internal, 0,
@@ -68,11 +69,11 @@ int write_instruction(struct instruction_t instruction) {
     logger(ERROR, error_internal, "Received invalid bytecode");
     return 1;
   }
-  const size_t bytesize = bytecode.size * sizeof(*bytecode.data);
+  const size_t sz = (size_t)bytecode.size;
   size_t nwritten =
-      write_sectiondata((char *)bytecode.data, bytesize, instruction.position);
+      write_sectiondata((char *)bytecode.data, sz, instruction.position);
   free(bytecode.data);
-  if (nwritten != bytesize) {
+  if (nwritten != sz) {
     logger(CRITICAL, error_system, "Error writing bytes to output");
     return 1;
   }

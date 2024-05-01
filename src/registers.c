@@ -16,9 +16,7 @@ const char *reg_abi_map[BASE_REG_COUNT] = {
 #define FLOAT_REG_COUNT 1
 const char *float_reg_abi_map[FLOAT_REG_COUNT] = {0};
 
-int is_register(const char *arg) { return get_register_id(arg) != -1; }
-
-int get_register_id(const char *reg) {
+size_t get_register_id(const char *reg) {
   logger(DEBUG, no_error, "Searching for register (%s)", reg);
 
   /* limit the number of possible characters in the register */
@@ -29,13 +27,13 @@ int get_register_id(const char *reg) {
     return -1;
 
   if (*reg == 'x') {
-    unsigned int r = atoi(reg + 1);
+    size_t r = (size_t)atol(reg + 1);
     if (r >= 32)
-      return -1;
+      return (size_t)-1;
     return r;
   }
 
-  for (int i = 0; i < BASE_REG_COUNT; i++)
+  for (size_t i = 0; i < BASE_REG_COUNT; i++)
     if (!strcmp(reg, reg_abi_map[i]))
       return i;
 
@@ -43,10 +41,12 @@ int get_register_id(const char *reg) {
   if (!strcmp(reg, "fp"))
     return 8;
 
-  return -1;
+  logger(INFO, no_error, "unknown register (%s)", reg);
+
+  return (size_t)-1;
 }
 
-int get_float_register_id(const char *reg) {
+size_t get_float_register_id(const char *reg) {
   if (*reg != 'f')
     return -1;
 
@@ -74,7 +74,7 @@ int calc_digit(char digit) {
   return digit - '0';
 }
 
-int get_immediate(const char *imm, int *res) {
+size_t get_immediate(const char *imm, size_t *res) {
   int base = 10;
   if (!strncmp(imm, "0x", 2)) {
     base = 16;
@@ -84,7 +84,7 @@ int get_immediate(const char *imm, int *res) {
     imm += 2;
   }
 
-  *res = strtol(imm, NULL, base);
+  *res = (size_t)strtol(imm, NULL, base);
 
   /* We know strtol didn't fail */
   if (*res)

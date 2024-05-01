@@ -9,15 +9,17 @@
 
 size_t linenumber;
 
-const char *level_names[] = {
+const char *level_names[6] = {
     "debug", "info", "warning", "error", "critical", "none",
 };
-const char *level_colours[] = {
+const char *level_colours[6] = {
     "",        "\033[0;36;1m", "\033[0;35;1m", "\033[0;31;1m", "\033[1;31;1m",
     "\033[1m",
 };
+size_t level_instances[6] = {0};
 
 static enum loglvl_t minloglevel = INFO;
+static enum loglvl_t exitloglevel = ERROR;
 
 void set_min_loglevel(enum loglvl_t level) {
   minloglevel = level;
@@ -26,6 +28,7 @@ void set_min_loglevel(enum loglvl_t level) {
 }
 
 void logger(enum loglvl_t level, enum error_t id, const char *format, ...) {
+  level_instances[level]++;
   if (level < minloglevel)
     return;
 
@@ -43,4 +46,14 @@ void logger(enum loglvl_t level, enum error_t id, const char *format, ...) {
   va_end(format_params);
 
   putc('\n', out);
+
+  if (level >= exitloglevel)
+    exit(1);
+}
+
+int get_clean_exit(enum loglvl_t level) {
+  for (; level <= NODEBUG; level++)
+    if (level_instances[level])
+      return 1;
+  return 0;
 }

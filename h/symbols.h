@@ -12,7 +12,7 @@ struct symbol_t {
   enum symbol_types_e {
     symbol_unknown,
     symbol_label,
-    symbol_number,
+    symbol_value,
     symbol_other,
   } type;
 };

@@ -1,7 +1,6 @@
 
 #define __STDC_WANT_LIB_EXT1__ 1
 
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -79,7 +78,7 @@ void copy_files(FILE *dest, FILE *src) {
     fwrite(buffer, 1, BUFSIZ, dest);
     sz -= BUFSIZ;
   }
-  buffer = realloc(buffer, sz);
+  buffer = xrealloc(buffer, sz);
   fread(buffer, 1, sz, src);
   fwrite(buffer, 1, sz, dest);
   free(buffer);
@@ -96,4 +95,6 @@ int main(int argc, char *argv[]) {
   copy_files(outputfile, outputtempfile);
   logger(DEBUG, no_error, "Finished writing bytecode to output");
   closefiles();
+
+  return get_clean_exit(ERROR);
 }

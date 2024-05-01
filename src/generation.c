@@ -44,7 +44,7 @@ size_t getl(char **lineptr, size_t *n, FILE *stream) {
   while (c != EOF) {
     if ((size_t)(p - bufptr) > (size - 1)) {
       size = size + 128;
-      bufptr = realloc(bufptr, size);
+      bufptr = xrealloc(bufptr, size);
     }
     if (c == '\n')
       break;

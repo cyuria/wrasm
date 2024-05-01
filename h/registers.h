@@ -1,12 +1,11 @@
 #pragma once
 
+#include <stdlib.h>
+
 extern const char *reg_abi_map[];
 extern const char *float_reg_abi_map[];
 
-int is_register(const char *);
+size_t get_register_id(const char *);
+size_t get_float_register_id(const char *);
 
-int get_register_id(const char *);
-int get_float_register_id(const char *);
-
-int get_immediate(const char *, int *);
-
+size_t get_immediate(const char *, size_t *);

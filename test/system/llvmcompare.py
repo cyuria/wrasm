@@ -43,7 +43,7 @@ def execute(wrasmexe: Path, asmfile: Path, id: str):
     subprocess.run([
         'clang',
         '-target', 'riscv64-unknown-elf',
-        '-march=rv64i',
+        '-march=rv64g',
         '-c', asmfile,
         '-o', llvmobj
     ], check=True)

@@ -33,7 +33,7 @@ struct symbol_t *create_symbol(const char *name, enum symbol_types_e type) {
   const int index = symbols[hash].count;
 
   symbols[hash].count++;
-  symbols[hash].data = realloc(
+  symbols[hash].data = xrealloc(
       symbols[hash].data, symbols[hash].count * sizeof(*symbols[hash].data));
 
   const size_t n_sz = strlen(name) + 1;
@@ -42,6 +42,7 @@ struct symbol_t *create_symbol(const char *name, enum symbol_types_e type) {
   symbols[hash].data[index].name = n;
   symbols[hash].data[index].name_sz = n_sz;
   symbols[hash].data[index].type = type;
+  symbols[hash].data[index].binding = 0;
 
   logger(DEBUG, no_error, "Created symbol named \"%s\"", n);
 
