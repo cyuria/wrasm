@@ -42,12 +42,13 @@ def cleanup(id: str):
     delete_file(Path(f'{id}'))
 
 if __name__ == "__main__":
-    if len(argv) != 3:
+    if len(argv) != 4:
         print("Incorrect number of arguments")
         exit(99)
 
-    wrasm = Path(argv[1])
-    input = Path(argv[2])
+    qemu = Path(argv[1])
+    wrasm = Path(argv[2])
+    input = Path(argv[3])
     id = f'{os.getpid()}_{input.name}'
     qemu = which('qemu-riscv64')
 

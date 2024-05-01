@@ -52,7 +52,7 @@ jobs:
       run: pip install meson ninja
 
     - name: Install qemu
-      run: sudo apt install qemu-user-static
+      run: sudo apt install qemu-user
 
     - name: Configure
       run: meson setup build
