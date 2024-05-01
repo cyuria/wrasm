@@ -3,8 +3,8 @@ tests = [
   'helloworld',
 ]
 
-python = find_program(['python3', 'python', 'py'])
-qemu = find_program(['qemu-riscv64', 'qemu-riscv64-static'])
+python = find_program('python3', 'python', 'py')
+qemu = find_program('qemu-riscv64', 'qemu-riscv64-static', required : false)
 compareoutput = find_program('compareoutput.py')
 
 foreach test : tests

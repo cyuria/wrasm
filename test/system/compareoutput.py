@@ -4,9 +4,16 @@ from difflib import Differ
 import errno
 import os
 from pathlib import Path
+from platform import system
 from shutil import which
 from subprocess import run
 from sys import argv
+
+linkers = {
+    'Windows': 'lld-link',
+    'Darwin': 'ld64.lld',
+    'Linux': 'ld.lld',
+}
 
 def delete_file(file: Path):
     try:
@@ -21,7 +28,7 @@ def compile(asm: Path, id: str) -> str:
     exe = Path(f'{id}').resolve()
 
     run([ wrasm, asm, '-o', obj ], check=True)
-    run([ 'ld.lld', obj, '-o', exe ], check=True)
+    run([ linker, obj, '-o', exe ], check=True)
     result = run([ qemu, exe ], capture_output=True, text=True, check=True)
 
     return result.stdout
@@ -42,18 +49,23 @@ def cleanup(id: str):
     delete_file(Path(f'{id}'))
 
 if __name__ == "__main__":
-    if len(argv) != 4:
+    if len(argv) != 5:
         print("Incorrect number of arguments")
         exit(99)
 
     qemu = Path(argv[1])
     wrasm = Path(argv[2])
-    input = Path(argv[3])
+    input = Path(argv[4])
     id = f'{os.getpid()}_{input.name}'
     qemu = which('qemu-riscv64')
+    linker = which(linkers[system()])
 
     if qemu is None:
         print("`qemu-riscv64` user space executable not found")
+        exit(77)
+
+    if linker is None:
+        print(f"linker `{linkers[system()]}` was not found for `{system()}`")
         exit(77)
 
     with open(input.with_suffix('.txt'), 'r') as f:

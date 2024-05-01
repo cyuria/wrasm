@@ -51,8 +51,8 @@ jobs:
     - name: Install Meson
       run: pip install meson ninja
 
-    - name: Install qemu
-      run: sudo apt install qemu-user
+    - name: Install qemu and lld
+      run: sudo apt install qemu-user lld
 
     - name: Configure
       run: meson setup build
@@ -62,3 +62,10 @@ jobs:
 
     - name: Test
       run: meson test -C build
+
+    - uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: logs-qemu
+        path: build/meson-logs/
+        retention-days: 5
