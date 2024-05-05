@@ -1,16 +1,34 @@
 #!/usr/bin/python3
+# *_* coding: utf-8 *_*
+
+"""
+System Testing Python Script for Wrasm
+
+This script requires la built copy of Wrasm, the llvm linker (lld) and the
+userspace qemu riscv64 emulation binaries.
+
+Each of these can be manually specified using the following environment
+variables or found automatically.
+
+wrasm: the "WRASM" environment variable
+lld: the "LLD" environment variable
+qemu: the "QEMU_RISCV64" environment variable
+
+The wrasm binaries are located by recursively searching for a file named
+"wrasm", starting with the project root directory
+"""
 
 from difflib import Differ
-import errno
+from errno import ENOENT
 from json import load
-import os
+from os import environ, getpid, remove
 from pathlib import Path
 from platform import system
 from shutil import which
-from subprocess import run, DEVNULL
+from subprocess import run
 from sys import argv
 
-dir = Path(__file__).resolve().parent
+script = Path(__file__).resolve()
 
 linkers = {
     'Windows': 'lld-link',
@@ -19,45 +37,80 @@ linkers = {
 }
 
 def find_qemu() -> Path:
+    if environ.get('QEMU_RISCV64'):
+        qemu = Path(environ['wrasm']).resolve()
+        print(f"qemu binary found (environment): {qemu}")
+        return qemu
+
     binaries = [ 'qemu-riscv64', 'qemu-riscv64-static' ]
     try:
-        return next(
+        qemu = next(
             Path(exe) for exe in map(which, binaries)
             if exe is not None
         )
+        print(f"qemu binary found (automatic): {qemu}")
+        return qemu
     except StopIteration:
         raise Exception(
             "Unable to find qemu riscv64 userspace emulation binaries on path"
         )
 
-def find_wrasm():
-    if len(argv) == 2:
-        return Path(argv[1]).resolve()
+def find_wrasm() -> Path:
+    if environ.get('WRASM'):
+        wrasm = Path(environ['wrasm']).resolve()
+        print(f"wrasm binary found (environment): {wrasm}")
+        return wrasm
 
-    for f in Path('../../').rglob('wrasm'):
+    try:
+        project_root = next(
+            d for d in script.parents
+            if (d / '.git').is_dir()
+        )
+    except StopIteration:
+        raise Exception("Unable to find root project directory,"
+            "try specifying the location of the wrasm executable"
+            "manually via the \"WRASM\" environment variable")
+
+    for f in Path(project_root).rglob('wrasm'):
         if not f.is_file():
             continue
         if not f.stat().st_mode & 0o100:
             continue
-        return f
+        wrasm = f.resolve()
+        print(f"wrasm binary found (automatic): {wrasm}")
+        return wrasm
+
     raise Exception(
         "Unable to find compiled wrasm binary"
     )
 
+def find_lld() -> Path:
+    if environ.get('LLD'):
+        lld = Path(environ['LLD']).resolve()
+        print(f"lld binary found (environment): {lld}")
+        return lld
+
+    lld = which(linkers[system()])
+    if lld is None:
+        raise Exception("Unable to find lld (the llvm linker) binaries on path")
+    lld = Path(lld)
+    print(f"lld binary found (automatic): {lld}")
+    return lld
+
 def delete_file(file: Path):
     try:
-        os.remove(file)
+        remove(file)
     except OSError as e:
-        if e.errno == errno.ENOENT:
+        if e.errno == ENOENT:
             return
         raise
 
-def compile(asm: Path, id: str) -> str:
+def compile(wrasm: Path, lld: Path, qemu: Path, asm: Path, id: str) -> str:
     obj = Path(f'{id}.o').resolve()
     exe = Path(f'{id}').resolve()
 
     run([ wrasm, asm, '-o', obj ], check=True)
-    run([ linker, obj, '-o', exe ], check=True)
+    run([ lld, obj, '-o', exe ], check=True)
     result = run([ qemu, exe ], capture_output=True, text=True, check=True)
 
     return result.stdout
@@ -77,33 +130,44 @@ def cleanup(id: str):
     delete_file(Path(f'{id}.o'))
     delete_file(Path(f'{id}'))
 
-def test(id: str, t: dict[str, str]):
+def test(wrasm: Path, lld: Path, qemu: Path, id: str, t: dict[str, str]):
 
-    efpath = dir / t['expected']
+    efpath = script.parent / t['expected']
 
     with open(efpath, 'r') as f:
         expected = f.read()
 
     try:
-        output = compile(dir / t['asm'], id)
+        output = compile(wrasm, lld, qemu, script.parent / t['asm'], id)
         compare(expected, output)
+        print(f"Test completed | {t['name']} ({t['asm']})")
     finally:
         cleanup(id)
 
 def testall():
-    index = (dir / 'tests.json').resolve()
+    wrasm = find_wrasm()
+    lld = find_lld()
+    qemu = find_qemu()
+
+    index = (script.parent / 'tests.json').resolve()
     with open(index) as f:
         tests = load(f)
 
-    pid = os.getpid()
+    pid = getpid()
+    print("Tests Loaded")
+    print()
 
+    print("Testing...")
     for tid, t in enumerate(tests):
         id = f"{pid}_{tid}_{t['name']}"
-        test(id, t)
+        test(wrasm, lld, qemu, id, t)
+
+def main(args=[]):
+    if any(cmd in args for cmd in ['help', '--help', '-h']):
+        print(__doc__)
+        return
+    testall()
 
 if __name__ == "__main__":
-    qemu = find_qemu()
-    wrasm = find_wrasm()
-    linker = which(linkers[system()])
-    testall()
+    main(argv[1:])
 
