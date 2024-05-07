@@ -6,17 +6,17 @@
 #include "parsers.h"
 
 struct instruction_t {
-  struct parser_t parser;
-  struct args_t args;
-  struct sectionpos_t position;
-  size_t line;
+	struct parser_t parser;
+	struct args_t args;
+	struct sectionpos_t position;
+	size_t line;
 };
 
 struct rawdata_t {
-  void *data;
-  size_t size;
-  struct sectionpos_t position;
-  size_t line;
+	void *data;
+	size_t size;
+	struct sectionpos_t position;
+	size_t line;
 };
 
 int add_instruction(struct instruction_t);

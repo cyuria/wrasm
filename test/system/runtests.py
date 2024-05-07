@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-# *_* coding: utf-8 *_*
 
 """
 System Testing Python Script for Wrasm
@@ -161,6 +160,8 @@ def testall():
     for tid, t in enumerate(tests):
         id = f"{pid}_{tid}_{t['name']}"
         test(wrasm, lld, qemu, id, t)
+
+    print("All tests successfully completed")
 
 def main(args=[]):
     if any(cmd in args for cmd in ['help', '--help', '-h']):

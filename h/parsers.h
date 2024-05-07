@@ -25,32 +25,32 @@
 #define RV64Z_SIZE 4
 
 enum argtype_e {
-  arg_none,
-  arg_immediate,
-  arg_register,
-  arg_symbol,
+	arg_none,
+	arg_immediate,
+	arg_register,
+	arg_symbol,
 };
 
 struct args_t {
-  enum argtype_e type[3];
-  size_t arg[3];
+	enum argtype_e type[3];
+	size_t arg[3];
 };
 
 struct bytecode_t {
-  size_t size;
-  unsigned char *data;
+	size_t size;
+	unsigned char *data;
 };
 
 struct parser_t;
 typedef struct bytecode_t(parser)(struct parser_t, struct args_t, size_t);
 
 struct parser_t {
-  const char *name;
-  size_t isize;
-  parser *handler;
-  uint8_t opcode;
-  uint8_t funct1;
-  uint16_t funct2;
+	const char *name;
+	size_t isize;
+	parser *handler;
+	uint8_t opcode;
+	uint8_t funct1;
+	uint16_t funct2;
 };
 
 extern const struct bytecode_t error_bytecode;

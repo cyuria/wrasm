@@ -4,23 +4,23 @@
 #include "elf/output.h"
 
 struct symbol_t {
-  size_t name_sz;
-  char *name;
-  enum sections_e section;
-  long value;
-  unsigned char binding;
-  enum symbol_types_e {
-    symbol_unknown,
-    symbol_label,
-    symbol_value,
-    symbol_other,
-  } type;
+	size_t name_sz;
+	char *name;
+	enum sections_e section;
+	long value;
+	unsigned char binding;
+	enum symbol_types_e {
+		symbol_unknown,
+		symbol_label,
+		symbol_value,
+		symbol_other,
+	} type;
 };
 
 #define SYMBOLMAP_ENTRIES 256
 struct symbolmap_t {
-  int count;
-  struct symbol_t *data;
+	int count;
+	struct symbol_t *data;
 };
 extern struct symbolmap_t symbols[SYMBOLMAP_ENTRIES];
 

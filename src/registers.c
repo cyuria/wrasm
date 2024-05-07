@@ -7,97 +7,101 @@
 
 #define BASE_REG_COUNT 32
 const char *reg_abi_map[BASE_REG_COUNT] = {
-    "zero", "ra", "sp", "gp", "tp",  "t0",  "t1", "t2", "s0", "s1", "a0",
-    "a1",   "a2", "a3", "a4", "a5",  "a6",  "a7", "s2", "s3", "s4", "s5",
-    "s6",   "s7", "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6",
+	"zero", "ra", "sp", "gp", "tp",	 "t0",	"t1", "t2", "s0", "s1", "a0",
+	"a1",	"a2", "a3", "a4", "a5",	 "a6",	"a7", "s2", "s3", "s4", "s5",
+	"s6",	"s7", "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6",
 };
 
 /* TODO: implement w/ float extension */
 #define FLOAT_REG_COUNT 1
-const char *float_reg_abi_map[FLOAT_REG_COUNT] = {0};
+const char *float_reg_abi_map[FLOAT_REG_COUNT] = { 0 };
 
-size_t get_register_id(const char *reg) {
-  logger(DEBUG, no_error, "Searching for register (%s)", reg);
+size_t get_register_id(const char *reg)
+{
+	logger(DEBUG, no_error, "Searching for register (%s)", reg);
 
-  /* limit the number of possible characters in the register */
-  int l = 0;
-  while (reg[l] && reg[l] != ' ')
-    l++;
-  if (l > 4)
-    return -1;
+	/* limit the number of possible characters in the register */
+	int l = 0;
+	while (reg[l] && reg[l] != ' ')
+		l++;
+	if (l > 4)
+		return -1;
 
-  if (*reg == 'x') {
-    size_t r = (size_t)atol(reg + 1);
-    if (r >= 32)
-      return (size_t)-1;
-    return r;
-  }
+	if (*reg == 'x') {
+		size_t r = (size_t)atol(reg + 1);
+		if (r >= 32)
+			return (size_t)-1;
+		return r;
+	}
 
-  for (size_t i = 0; i < BASE_REG_COUNT; i++)
-    if (!strcmp(reg, reg_abi_map[i]))
-      return i;
+	for (size_t i = 0; i < BASE_REG_COUNT; i++)
+		if (!strcmp(reg, reg_abi_map[i]))
+			return i;
 
-  /* Check for "fp" alias of register "s0"/"x8" */
-  if (!strcmp(reg, "fp"))
-    return 8;
+	/* Check for "fp" alias of register "s0"/"x8" */
+	if (!strcmp(reg, "fp"))
+		return 8;
 
-  logger(INFO, no_error, "unknown register (%s)", reg);
+	logger(INFO, no_error, "unknown register (%s)", reg);
 
-  return (size_t)-1;
+	return (size_t)-1;
 }
 
-size_t get_float_register_id(const char *reg) {
-  if (*reg != 'f')
-    return -1;
+size_t get_float_register_id(const char *reg)
+{
+	if (*reg != 'f')
+		return -1;
 
-  if (reg[1] >= '0' && reg[1] <= '9')
-    return atoi(reg + 1);
+	if (reg[1] >= '0' && reg[1] <= '9')
+		return atoi(reg + 1);
 
-  for (int i = 0; i < FLOAT_REG_COUNT; i++)
-    if (!strcmp(reg, float_reg_abi_map[i]))
-      return i;
+	for (int i = 0; i < FLOAT_REG_COUNT; i++)
+		if (!strcmp(reg, float_reg_abi_map[i]))
+			return i;
 
-  return -1;
+	return -1;
 }
 
-int calc_digit(char digit) {
-  if (digit > 'z')
-    return -1;
-  if (digit >= 'a')
-    return digit - 'a' + 10;
-  if (digit > 'Z')
-    return -1;
-  if (digit >= 'A')
-    return digit - 'A' + 10;
-  if (digit > '9')
-    return -1;
-  return digit - '0';
+int calc_digit(char digit)
+{
+	if (digit > 'z')
+		return -1;
+	if (digit >= 'a')
+		return digit - 'a' + 10;
+	if (digit > 'Z')
+		return -1;
+	if (digit >= 'A')
+		return digit - 'A' + 10;
+	if (digit > '9')
+		return -1;
+	return digit - '0';
 }
 
-size_t get_immediate(const char *imm, size_t *res) {
-  int base = 10;
-  if (!strncmp(imm, "0x", 2)) {
-    base = 16;
-    imm += 2;
-  } else if (!strncmp(imm, "0b", 2)) {
-    base = 2;
-    imm += 2;
-  }
+size_t get_immediate(const char *imm, size_t *res)
+{
+	int base = 10;
+	if (!strncmp(imm, "0x", 2)) {
+		base = 16;
+		imm += 2;
+	} else if (!strncmp(imm, "0b", 2)) {
+		base = 2;
+		imm += 2;
+	}
 
-  *res = (size_t)strtol(imm, NULL, base);
+	*res = (size_t)strtol(imm, NULL, base);
 
-  /* We know strtol didn't fail */
-  if (*res)
-    return 0;
+	/* We know strtol didn't fail */
+	if (*res)
+		return 0;
 
-  /* check for anything that could've caused a failure
+	/* check for anything that could've caused a failure
    * NOTE: immediate negative zero ("-0") will cause a fail */
-  while (*imm) {
-    int digit = calc_digit(*imm);
-    if (digit >= base || digit < 0)
-      return 1;
-    imm++;
-  }
+	while (*imm) {
+		int digit = calc_digit(*imm);
+		if (digit >= base || digit < 0)
+			return 1;
+		imm++;
+	}
 
-  return 0;
+	return 0;
 }

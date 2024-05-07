@@ -1,6 +1,7 @@
 
 [ ] - Set global/local symbol binding
-[ ] - fix inline comment
+[ ] - Fix inline comment
+[ ] - Fix system testing to run all tests & parallel tests
 
 [ ] - Add more directives
       - https://ftp.gnu.org/old-gnu/Manuals/gas-2.9.1/html_chapter/as_7.html

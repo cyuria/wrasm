@@ -16,24 +16,24 @@ extern size_t linenumber;
  */
 extern const char *error_ids[];
 enum error_t {
-  no_error,
-  error_invalid_instruction,
-  error_instruction_other,
-  error_not_implemented,
-  error_invalid_syntax,
-  error_internal,
-  error_system,
-  error_unknown,
-  error_other,
+	no_error,
+	error_invalid_instruction,
+	error_instruction_other,
+	error_not_implemented,
+	error_invalid_syntax,
+	error_internal,
+	error_system,
+	error_unknown,
+	error_other,
 };
 
 enum loglvl_t {
-  DEBUG,
-  INFO,
-  WARN,
-  ERROR,
-  CRITICAL,
-  NODEBUG,
+	DEBUG,
+	INFO,
+	WARN,
+	ERROR,
+	CRITICAL,
+	NODEBUG,
 };
 
 void set_min_loglevel(enum loglvl_t);
