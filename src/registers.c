@@ -77,7 +77,7 @@ int calc_digit(char digit)
 	return digit - '0';
 }
 
-size_t get_immediate(const char *imm, size_t *res)
+int get_immediate(const char *imm, size_t *res)
 {
 	int base = 10;
 	if (!strncmp(imm, "0x", 2)) {

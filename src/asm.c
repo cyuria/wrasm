@@ -99,7 +99,7 @@ static int parse_arg(const char *str, enum argtype_e *type, size_t *arg)
 		*arg = (size_t)sym;
 		return 0;
 	}
-	const size_t status = get_immediate(str, arg);
+	const int status = get_immediate(str, arg);
 	if (!status) {
 		*type = arg_immediate;
 		return 0;
