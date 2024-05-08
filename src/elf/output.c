@@ -132,7 +132,7 @@ void calc_symtab(void)
 		sz += symbols[hash].count;
 	outputsections[section_symtab].size =
 		(sz + 1) * sizeof(struct elf64sym_t);
-	sectiondata[section_symtab].info = sz;
+	sectiondata[section_symtab].info = (uint32_t)sz;
 }
 
 /* TODO: implement symbol table */
@@ -162,7 +162,7 @@ int fill_symtab(void)
 					.section = section_symtab,
 					.offset = count *
 						  sizeof(struct elf64sym_t) });
-			strtab_addr += sym->name_sz;
+			strtab_addr += (uint32_t)sym->name_sz;
 			count++;
 		}
 	}

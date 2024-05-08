@@ -148,9 +148,9 @@ struct bytecode_t gen_rtype(struct parser_t parser, struct args_t args,
 				  .data = xmalloc(RV64I_SIZE) };
 
 	*(uint32_t *)&(res.data) =
-		(parser.opcode | (args.arg[0] << 7) | (args.arg[1] << 15) |
-		 (args.arg[2] << 20) | (parser.funct1 << 12) |
-		 (parser.funct2 << 25));
+		(parser.opcode | ((uint32_t)args.arg[0] << 7) |
+		 ((uint32_t)args.arg[1] << 15) | ((uint32_t)args.arg[2] << 20) |
+		 (parser.funct1 << 12) | (parser.funct2 << 25));
 	return res;
 }
 
@@ -165,10 +165,11 @@ struct bytecode_t gen_itype(struct parser_t parser, struct args_t args,
 	struct bytecode_t res = { .size = RV64I_SIZE,
 				  .data = xmalloc(RV64I_SIZE) };
 
-	*(uint32_t *)res.data =
-		(parser.opcode & 0x7F) | ((args.arg[0] & 0x1F) << 7) |
-		((parser.funct1 & 0x7) << 12) | ((args.arg[1] & 0x1F) << 15) |
-		((args.arg[2] & 0xFFF) << 20);
+	*(uint32_t *)res.data = (parser.opcode & 0x7F) |
+				(((uint32_t)args.arg[0] & 0x1F) << 7) |
+				((parser.funct1 & 0x7) << 12) |
+				(((uint32_t)args.arg[1] & 0x1F) << 15) |
+				(((uint32_t)args.arg[2] & 0xFFF) << 20);
 
 	logger(DEBUG, no_error, " | Machine Code: %.08x",
 	       *(uint32_t *)res.data);
@@ -195,9 +196,10 @@ struct bytecode_t gen_stype(struct parser_t parser, struct args_t args,
 				  .data = xmalloc(RV64I_SIZE) };
 
 	*(uint32_t *)res.data =
-		(parser.opcode | (args.arg[0] << 15) | (args.arg[1] << 20) |
-		 (parser.funct1 << 12) | ((args.arg[2] & 0x1F) << 7) |
-		 ((args.arg[2] & 0xFE0) << 21));
+		(parser.opcode | (args.arg[0] << 15) |
+		 ((uint32_t)args.arg[1] << 20) | (parser.funct1 << 12) |
+		 (((uint32_t)args.arg[2] & 0x1F) << 7) |
+		 (((uint32_t)args.arg[2] & 0xFE0) << 21));
 	return res;
 }
 
@@ -206,7 +208,7 @@ struct bytecode_t gen_btype(struct parser_t parser, struct args_t args,
 {
 	logger(DEBUG, no_error, "Generating B type parser (%s)", parser.name);
 
-	const uint32_t dup = args.arg[2] >> 1;
+	const uint32_t dup = (uint32_t)args.arg[2] >> 1;
 	args.arg[2] &= 0x7FE;
 	args.arg[2] |= (dup >> 10) & 0x1;
 	args.arg[2] |= dup & 0x800;
@@ -224,8 +226,8 @@ struct bytecode_t gen_utype(struct parser_t parser, struct args_t args,
 	struct bytecode_t res = { .size = RV64I_SIZE,
 				  .data = xmalloc(RV64I_SIZE) };
 
-	*(uint32_t *)res.data = (parser.opcode | (args.arg[0] << 7) |
-				 (args.arg[1] & 0xFFFFF000));
+	*(uint32_t *)res.data = (parser.opcode | ((uint32_t)args.arg[0] << 7) |
+				 ((uint32_t)args.arg[1] & 0xFFFFF000));
 	return res;
 }
 
@@ -235,7 +237,7 @@ struct bytecode_t gen_jtype(struct parser_t parser, struct args_t args,
 	logger(DEBUG, no_error, "Generating J type parser (%s)", parser.name);
 	CHECK_REQUIRED(arg_register, arg_immediate, arg_none)
 
-	int offset = args.arg[2];
+	int offset = (uint32_t)args.arg[2];
 	offset -= (int)position;
 	logger(DEBUG, no_error, "Offset of J type parser is 0x%x", offset);
 
@@ -303,7 +305,7 @@ struct bytecode_t gen_load_short(struct parser_t parser, struct args_t args,
 	CHECK_REQUIRED(arg_register, parser.opcode ? arg_symbol : arg_immediate,
 		       arg_none)
 
-	uint32_t rd = args.arg[0];
+	uint32_t rd = (uint32_t)args.arg[0];
 	logger(DEBUG, no_error, " | register: x%d", rd);
 	uint32_t value = (uint32_t)args.arg[1];
 	if (parser.opcode)
@@ -351,7 +353,7 @@ struct bytecode_t gen_math(struct parser_t parser, struct args_t args,
 				 args, position);
 	case math_not: // xori rd, rs, -1
 		args.type[2] = arg_immediate;
-		args.arg[2] = -1;
+		args.arg[2] = (uint32_t)-1;
 		// { "xori", RV64I_SIZE, &gen_itype, OP_OPI, 0x4, 0 },
 		return gen_itype((struct parser_t){ "xori", RV64I_SIZE, NULL,
 						    OP_OPI, 0x4, 0 },
@@ -368,7 +370,7 @@ struct bytecode_t gen_math(struct parser_t parser, struct args_t args,
 #ifdef __GNUC__
 	__builtin_unreachable();
 #elif defined(_MSC_VER)
-	__assume(false);
+	__assume(0);
 #else
 #warning "compiler does not define __GNUC__ and is not MSVC"
 #endif

@@ -25,7 +25,7 @@ size_t get_register_id(const char *reg)
 	while (reg[l] && reg[l] != ' ')
 		l++;
 	if (l > 4)
-		return -1;
+		return (size_t)-1;
 
 	if (*reg == 'x') {
 		size_t r = (size_t)atol(reg + 1);
@@ -50,7 +50,7 @@ size_t get_register_id(const char *reg)
 size_t get_float_register_id(const char *reg)
 {
 	if (*reg != 'f')
-		return -1;
+		return (size_t)-1;
 
 	if (reg[1] >= '0' && reg[1] <= '9')
 		return atoi(reg + 1);
@@ -59,7 +59,7 @@ size_t get_float_register_id(const char *reg)
 		if (!strcmp(reg, float_reg_abi_map[i]))
 			return i;
 
-	return -1;
+	return (size_t)-1;
 }
 
 int calc_digit(char digit)
