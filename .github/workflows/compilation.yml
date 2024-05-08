@@ -11,6 +11,10 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
+        compiler: [ 'gcc', 'clang' ]
+        include:
+          - os: windows-latest
+            compiler: msvc
 
     runs-on: ${{ matrix.os }}
 
@@ -20,9 +24,44 @@ jobs:
       with:
         python-version: '3.x'
 
+    - name: Set compiler
+      uses: seanmiddleditch/gha-setup-vsdevenv@v4
+      if: ${{ matrix.compiler }} == 'msvc'
+
+    - name: Set compiler
+      run: echo "CC=$(which ${{ matrix.compiler }})" >> $GITHUB_ENV
+      if: ${{ matrix.compiler }} != 'msvc'
+
     - name: Install Meson
       run: pip install meson ninja
 
+    - name: Configure
+      run: CC=${{ matrix.compiler }} meson setup build
+
+    - name: Build
+      run: meson compile -C build
+
+    - name: Test
+      run: meson test -C build
+
+    - uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: logs-${{ matrix.os }}
+        path: build/meson-logs/
+        retention-days: 5
+
+  msvc:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Install Meson
+      run: pip install meson ninja
+              
     - name: Configure
       run: meson setup build
 
