@@ -1,5 +1,6 @@
 #include "args.h"
 #include "debug.h"
+#include "macros.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -69,5 +70,5 @@ void parse_cmdargs(int argc, char *argv[])
 
 static void free_argtable(void)
 {
-	arg_freetable(argtable, sizeof(argtable) / sizeof(*argtable));
+	arg_freetable(argtable, ARRAY_LENGTH(argtable));
 }

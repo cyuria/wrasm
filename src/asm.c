@@ -7,6 +7,7 @@
 #include "debug.h"
 #include "elf/output.h"
 #include "instructions.h"
+#include "macros.h"
 #include "parsers.h"
 #include "registers.h"
 #include "stringutil.h"
@@ -70,7 +71,7 @@ static int parse_parser(char *parserstr, struct parser_t *parser)
 		rv64s,
 		rv64i,
 	};
-	for (size_t i = 0; i < 2; i++) {
+	for (size_t i = 0; i < ARRAY_LENGTH(sets); i++) {
 		while (sets[i]->name) {
 			if (!strcmp(parserstr, sets[i]->name)) {
 				*parser = *sets[i];

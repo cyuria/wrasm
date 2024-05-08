@@ -7,6 +7,7 @@
 #include "debug.h"
 #include "elf/output.h"
 #include "instructions.h"
+#include "macros.h"
 #include "stringutil.h"
 #include "symbols.h"
 #include "xmalloc.h"
@@ -20,7 +21,6 @@ struct directive_t directive_map[] = {
 	{ ".ascii", parse_ascii },  { ".section", parse_section },
 	{ ".globl", parse_global },
 };
-#define DIRECTIVE_COUNT (sizeof(directive_map) / sizeof(*directive_map))
 struct {
 	const char *name;
 	enum sections_e section;
@@ -28,11 +28,10 @@ struct {
 	{ ".text", section_text },
 	{ ".data", section_data },
 };
-#define SELECTABLE_SECTION_COUNT (sizeof(section_map) / sizeof(*section_map))
 
-static struct directive_t get_parser(const char *name)
+static struct directive_t get_directive(const char *name)
 {
-	for (unsigned long i = 0; i < DIRECTIVE_COUNT; i++)
+	for (unsigned long i = 0; i < ARRAY_LENGTH(directive_map); i++)
 		if (!strcmp(name, directive_map[i].name))
 			return directive_map[i];
 	logger(ERROR, error_invalid_instruction,
@@ -48,7 +47,7 @@ int parse_directive(char *line)
 	if (*line)
 		*(line++) = '\0';
 
-	struct directive_t directive = get_parser(directivename);
+	struct directive_t directive = get_directive(directivename);
 
 	if (directive.parser == NULL)
 		return 1;
@@ -153,7 +152,7 @@ int parse_ascii(const char *str)
 int parse_section(const char *str)
 {
 	logger(DEBUG, no_error, "Selecting Section \"%s\"", str);
-	for (unsigned long i = 0; i < SELECTABLE_SECTION_COUNT; i++) {
+	for (unsigned long i = 0; i < ARRAY_LENGTH(section_map); i++) {
 		if (!strcmp(str, section_map[i].name)) {
 			change_output(section_map[i].section);
 			return 0;

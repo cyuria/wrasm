@@ -28,7 +28,7 @@ const struct parser_t rv64s[] = {
 	{ "not", 4, &gen_math, math_not, 0, 0 },
 	{ "neg", 4, &gen_math, math_neg, 0, 0 },
 	{ "negw", 4, &gen_math, math_negw, 0, 0 },
-	{ "sext.w", 4, &gen_math, 0x4, 0, 0 },
+	{ "sext.w", 4, &gen_math, math_sextw, 0, 0 },
 	{ "seqz", 4, &gen_setif, 0x0, 0, 0 },
 	{ "snez", 4, &gen_setif, 0x1, 0, 0 },
 	{ "sltz", 4, &gen_setif, 0x2, 0, 0 },
