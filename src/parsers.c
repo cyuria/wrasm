@@ -196,7 +196,7 @@ struct bytecode_t gen_stype(struct parser_t parser, struct args_t args,
 				  .data = xmalloc(RV64I_SIZE) };
 
 	*(uint32_t *)res.data =
-		(parser.opcode | (args.arg[0] << 15) |
+		(parser.opcode | ((uint32_t)args.arg[0] << 15) |
 		 ((uint32_t)args.arg[1] << 20) | (parser.funct1 << 12) |
 		 (((uint32_t)args.arg[2] & 0x1F) << 7) |
 		 (((uint32_t)args.arg[2] & 0xFE0) << 21));

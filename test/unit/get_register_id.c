@@ -3,7 +3,7 @@
 
 struct {
 	const char *symbol;
-	const int value;
+	const size_t value;
 } tests[] = {
 	{ "x0", 0 },	       { "x1", 1 },   { "x10", 10 }, { "x20", 20 },
 	{ "x30", 30 },	       { "x31", 31 }, { "x32", -1 }, { "x3000", -1 },
@@ -16,7 +16,7 @@ int main(void)
 {
 	int errors = 0;
 	for (size_t i = 0; i < ARRAY_LENGTH(tests); i++) {
-		int imm = get_register_id(tests[i].symbol);
+		size_t imm = get_register_id(tests[i].symbol);
 		if (imm != tests[i].value) {
 			logger(ERROR, error_internal,
 			       "Test Failed, expected \"%s\" to equal %d but was given %d",
