@@ -1,7 +1,6 @@
 
 #include "parsers.h"
 
-#include <err.h>
 #include <stdio.h>
 #include <string.h>
 
