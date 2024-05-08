@@ -24,7 +24,7 @@ jobs:
       with:
         python-version: '3.x'
 
-    - uses: seanmiddleditch/gha-setup-vsdevenv@v4
+    - uses: ilammy/msvc-dev-cmd@v1
       if: ${{ matrix.compiler == 'msvc' }}
 
     - run: echo "CC=$(which ${{ matrix.compiler }})" >> $GITHUB_ENV
