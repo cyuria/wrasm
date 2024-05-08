@@ -340,9 +340,9 @@ struct bytecode_t gen_math(struct parser_t parser, struct args_t args,
 			   size_t position)
 {
 	(void)args;
-	(void)position;
+	const enum math_shortcuts type = parser.opcode;
 	// op rd, rd1 =>
-	switch ((enum math_shortcuts)parser.opcode) {
+	switch (type) {
 	case math_mv:
 		// addi rd, rs, 0
 		args.type[2] = arg_immediate;
@@ -364,6 +364,16 @@ struct bytecode_t gen_math(struct parser_t parser, struct args_t args,
 	case math_sextw: // addiw rd, rs, 1
 		return error_bytecode;
 	}
+	/* Clang can correctly optimise here */
+#ifndef __clang__
+#ifdef __GNUC__
+	__builtin_unreachable();
+#elif defined(_MSC_VER)
+	__assume(false);
+#else
+#warning "compiler does not define __GNUC__ and is not MSVC"
+#endif
+#endif
 }
 
 /* TODO: implement setif parser */
