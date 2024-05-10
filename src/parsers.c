@@ -389,7 +389,6 @@ struct bytecode_t gen_math(struct parser_t parser, struct args_t args,
 		return gen_rtype((struct parser_t){ "negw (subw)", RV64I_SIZE,
 						    NULL, OP_OP32, 0x0, 0x20 },
 				 args, position);
-		return error_bytecode;
 	case math_sextw: // addiw rd, rs, 1
 		args.type[2] = arg_immediate;
 		args.arg[2] = 1;
