@@ -9,7 +9,10 @@ _start:
     addi a7, zero, 64 // 64 => write syscall
     ecall
 
-    li a0, 0
+    nop
+    li a0, 1
+    neg a0, a0
+    addi a0, a0, 1
     li a7, 93
     ecall
 
