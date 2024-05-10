@@ -92,6 +92,7 @@ static size_t find_base(const char **imm)
 	case 'b':
 		return 2;
 	default:
+		*imm -= 2;
 		return 10;
 	}
 }
