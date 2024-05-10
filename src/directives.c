@@ -101,7 +101,7 @@ static inline size_t parse_nulltermstr(char *dest, const char *str)
 	if (*str != '"')
 		return (size_t)-1;
 	str++;
-	int size = 0;
+	size_t size = 0;
 	while (*str != '"') {
 		register char val = *str;
 		if (!val) {

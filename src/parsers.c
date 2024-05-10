@@ -130,7 +130,7 @@ static int check_required(const char *name, enum argtype_e types[3],
 static int32_t get_relative_address(struct symbol_t *sym, size_t position)
 {
 	const size_t labelpos = calc_fileoffset((struct sectionpos_t){
-		.section = sym->section, .offset = sym->value });
+		.section = sym->section, .offset = (size_t)sym->value });
 	return (int32_t)(labelpos - position);
 }
 
@@ -155,7 +155,8 @@ struct bytecode_t gen_rtype(struct parser_t parser, struct args_t args,
 	*(uint32_t *)(res.data) =
 		(parser.opcode | ((uint32_t)args.arg[0] << 7) |
 		 ((uint32_t)args.arg[1] << 15) | ((uint32_t)args.arg[2] << 20) |
-		 (parser.funct1 << 12) | (parser.funct2 << 25));
+		 ((uint32_t)parser.funct1 << 12) |
+		 ((uint32_t)parser.funct2 << 25));
 	return res;
 }
 
@@ -174,7 +175,7 @@ struct bytecode_t gen_itype(struct parser_t parser, struct args_t args,
 
 	*(uint32_t *)res.data = (parser.opcode & 0x7F) |
 				(((uint32_t)args.arg[0] & 0x1F) << 7) |
-				((parser.funct1 & 0x7) << 12) |
+				(((uint32_t)parser.funct1 & 0x7) << 12) |
 				(((uint32_t)args.arg[1] & 0x1F) << 15) |
 				(((uint32_t)args.arg[2] & 0xFFF) << 20);
 
@@ -205,11 +206,11 @@ struct bytecode_t gen_stype(struct parser_t parser, struct args_t args,
 	struct bytecode_t res = { .size = RV64I_SIZE,
 				  .data = xmalloc(RV64I_SIZE) };
 
-	*(uint32_t *)res.data =
-		(parser.opcode | ((uint32_t)args.arg[0] << 15) |
-		 ((uint32_t)args.arg[1] << 20) | (parser.funct1 << 12) |
-		 (((uint32_t)args.arg[2] & 0x1F) << 7) |
-		 (((uint32_t)args.arg[2] & 0xFE0) << 21));
+	*(uint32_t *)res.data = (parser.opcode | ((uint32_t)args.arg[0] << 15) |
+				 ((uint32_t)args.arg[1] << 20) |
+				 ((uint32_t)parser.funct1 << 12) |
+				 (((uint32_t)args.arg[2] & 0x1F) << 7) |
+				 (((uint32_t)args.arg[2] & 0xFE0) << 21));
 	return res;
 }
 
@@ -252,8 +253,8 @@ struct bytecode_t gen_jtype(struct parser_t parser, struct args_t args,
 	check_required(parser.name, args.type, arg_register, arg_immediate,
 		       arg_none);
 
-	int offset = (uint32_t)args.arg[2];
-	offset -= (int)position;
+	uint32_t offset = (uint32_t)args.arg[2];
+	offset -= position;
 	logger(DEBUG, no_error, "Offset of J type instruction is 0x%x", offset);
 
 	const uint32_t a = (offset & 0x0007FE) << 20;
@@ -277,7 +278,8 @@ struct bytecode_t gen_syscall(struct parser_t parser, struct args_t args,
 				  .data = xmalloc(RV64I_SIZE) };
 
 	*(uint32_t *)res.data =
-		(parser.opcode | (parser.funct1 << 12) | (parser.funct2 << 20));
+		((uint32_t)parser.opcode | ((uint32_t)parser.funct1 << 12) |
+		 ((uint32_t)parser.funct2 << 20));
 	return res;
 }
 
@@ -293,8 +295,9 @@ struct bytecode_t gen_fence(struct parser_t parser, struct args_t args,
 	struct bytecode_t res = { .size = RV64I_SIZE,
 				  .data = xmalloc(RV64I_SIZE) };
 
-	*(uint32_t *)res.data = (parser.opcode | (parser.funct1 << 12) |
-				 (((uint32_t)args.arg[0]) << 20));
+	*(uint32_t *)res.data =
+		((uint32_t)parser.opcode | ((uint32_t)parser.funct1 << 12) |
+		 (((uint32_t)args.arg[0]) << 20));
 	return res;
 }
 

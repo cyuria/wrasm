@@ -72,7 +72,7 @@ void copy_files(FILE *dest, FILE *src)
 {
 	const long pos = ftell(src);
 	fseek(src, 0L, SEEK_END);
-	size_t sz = ftell(outputtempfile);
+	size_t sz = (size_t)ftell(outputtempfile);
 	rewind(outputtempfile);
 
 	char *buffer = xmalloc(BUFSIZ);

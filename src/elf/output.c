@@ -144,15 +144,15 @@ int fill_symtab(void)
 	uint32_t strtab_addr = 1;
 	size_t count = 1;
 	for (size_t hash = 0; hash < SYMBOLMAP_ENTRIES; hash++) {
-		for (int index = 0; index < symbols[hash].count; index++) {
+		for (size_t index = 0; index < symbols[hash].count; index++) {
 			const struct symbol_t *sym = &symbols[hash].data[index];
 			struct elf64sym_t entry = (struct elf64sym_t){
 				.name = strtab_addr,
 				.info = sym->binding,
 				.other =
 					0, /* TODO: add other visibility attributes */
-				.shndx = sym->section,
-				.value = sym->value,
+				.shndx = (uint16_t)sym->section,
+				.value = (uint64_t)sym->value,
 				.size = 0, /* TODO: support for symbol sizes? */
 			};
 			write_sectiondata(

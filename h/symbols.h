@@ -19,7 +19,7 @@ struct symbol_t {
 
 #define SYMBOLMAP_ENTRIES 256
 struct symbolmap_t {
-	int count;
+	size_t count;
 	struct symbol_t *data;
 };
 extern struct symbolmap_t symbols[SYMBOLMAP_ENTRIES];

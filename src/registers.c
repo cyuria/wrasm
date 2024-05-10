@@ -52,7 +52,7 @@ size_t get_float_register_id(const char *reg)
 		return (size_t)-1;
 
 	if (reg[1] >= '0' && reg[1] <= '9')
-		return atoi(reg + 1);
+		return (size_t)atoi(reg + 1);
 
 	for (size_t i = 0; i < ARRAY_LENGTH(float_reg_abi_map); i++)
 		if (!strcmp(reg, float_reg_abi_map[i]))

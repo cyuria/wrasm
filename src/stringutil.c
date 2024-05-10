@@ -30,13 +30,13 @@ char *trim_whitespace(const char *str)
 	while (is_whitespace(*end) && end > start)
 		end--;
 
-	char *newstr = xmalloc(end - start + 1);
+	char *newstr = xmalloc((size_t)(end - start + 1));
 	if (newstr == NULL) {
 		logger(ERROR, error_internal,
 		       "Unable to allocate memory for stripped string");
 		return NULL;
 	}
-	memcpy(newstr, start, end - start);
+	memcpy(newstr, start, (size_t)(end - start));
 	newstr[end - start] = '\0';
 
 	return newstr;
