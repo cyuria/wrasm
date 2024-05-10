@@ -76,7 +76,7 @@ static int calc_digit(char digit)
 	return digit - '0';
 }
 
-static size_t find_base(const char **imm)
+static unsigned find_base(const char **imm)
 {
 	if ((*imm)[0] != '0')
 		return 10;
