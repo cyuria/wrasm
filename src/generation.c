@@ -13,9 +13,10 @@
 #include "symbols.h"
 #include "xmalloc.h"
 
-/* custom getline implementation for cross platform support */
-/* NOTE: removes newline at end of line and therefore not compatible with
- * GNU/POSIX getline */
+/*
+ * custom getline implementation for cross platform support removes newline at
+ * end of line and therefore not compatible with GNU/POSIX getline
+ */
 size_t getl(char **lineptr, size_t *n, FILE *stream)
 {
 	char *bufptr = NULL;

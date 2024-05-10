@@ -20,31 +20,31 @@ enum math_shortcuts {
 };
 /* TODO: Add HINT parser support */
 const struct parser_t rv64s[] = {
-	{ "nop", 4, &gen_nop, OP_OPI, 0, 0 },
-	{ "li", 8, &gen_load_short, 0x0, 0, 0 },
-	{ "la", 8, &gen_load_short, 0x1, 0, 0 },
-	{ "mv", 4, &gen_math, math_mv, 0, 0 },
-	{ "not", 4, &gen_math, math_not, 0, 0 },
-	{ "neg", 4, &gen_math, math_neg, 0, 0 },
-	{ "negw", 4, &gen_math, math_negw, 0, 0 },
-	{ "sext.w", 4, &gen_math, math_sextw, 0, 0 },
-	{ "seqz", 4, &gen_setif, 0x0, 0, 0 },
-	{ "snez", 4, &gen_setif, 0x1, 0, 0 },
-	{ "sltz", 4, &gen_setif, 0x2, 0, 0 },
-	{ "sgtz", 4, &gen_setif, 0x3, 0, 0 },
-	{ "beqz", 4, &gen_branchif, 0x0, 0, 0 },
-	{ "bnez", 4, &gen_branchif, 0x1, 0, 0 },
-	{ "blez", 4, &gen_branchif, 0x2, 0, 0 },
-	{ "bgez", 4, &gen_branchif, 0x3, 0, 0 },
-	{ "bltz", 4, &gen_branchif, 0x4, 0, 0 },
-	{ "bgtz", 4, &gen_branchif, 0x5, 0, 0 },
-	{ "bgt", 4, &gen_branchif, 0x8, 0, 0 },
-	{ "ble", 4, &gen_branchif, 0x9, 0, 0 },
-	{ "bgtu", 4, &gen_branchif, 0xA, 0, 0 },
-	{ "bleu", 4, &gen_branchif, 0xB, 0, 0 },
-	{ "j", 4, &gen_jump, 0x0, 0, 0 },
-	{ "jr", 4, &gen_jump, 0x1, 0, 0 },
-	{ "ret", 4, &gen_ret, 0, 0, 0 },
+	{ "nop", RV64I_SIZE, &gen_nop, OP_OPI, 0, 0 },
+	{ "li", 2 * RV64I_SIZE, &gen_load_short, 0x0, 0, 0 },
+	{ "la", 2 * RV64I_SIZE, &gen_load_short, 0x1, 0, 0 },
+	{ "mv", RV64I_SIZE, &gen_math, math_mv, 0, 0 },
+	{ "not", RV64I_SIZE, &gen_math, math_not, 0, 0 },
+	{ "neg", RV64I_SIZE, &gen_math, math_neg, 0, 0 },
+	{ "negw", RV64I_SIZE, &gen_math, math_negw, 0, 0 },
+	{ "sext.w", RV64I_SIZE, &gen_math, math_sextw, 0, 0 },
+	{ "seqz", RV64I_SIZE, &gen_setif, 0x0, 0, 0 },
+	{ "snez", RV64I_SIZE, &gen_setif, 0x1, 0, 0 },
+	{ "sltz", RV64I_SIZE, &gen_setif, 0x2, 0, 0 },
+	{ "sgtz", RV64I_SIZE, &gen_setif, 0x3, 0, 0 },
+	{ "beqz", RV64I_SIZE, &gen_branchif, 0x0, 0, 0 },
+	{ "bnez", RV64I_SIZE, &gen_branchif, 0x1, 0, 0 },
+	{ "blez", RV64I_SIZE, &gen_branchif, 0x2, 0, 0 },
+	{ "bgez", RV64I_SIZE, &gen_branchif, 0x3, 0, 0 },
+	{ "bltz", RV64I_SIZE, &gen_branchif, 0x4, 0, 0 },
+	{ "bgtz", RV64I_SIZE, &gen_branchif, 0x5, 0, 0 },
+	{ "bgt", RV64I_SIZE, &gen_branchif, 0x8, 0, 0 },
+	{ "ble", RV64I_SIZE, &gen_branchif, 0x9, 0, 0 },
+	{ "bgtu", RV64I_SIZE, &gen_branchif, 0xA, 0, 0 },
+	{ "bleu", RV64I_SIZE, &gen_branchif, 0xB, 0, 0 },
+	{ "j", RV64I_SIZE, &gen_jump, 0x0, 0, 0 },
+	{ "jr", RV64I_SIZE, &gen_jump, 0x1, 0, 0 },
+	{ "ret", RV64I_SIZE, &gen_ret, 0, 0, 0 },
 	{ NULL, 0, NULL, 0, 0, 0 },
 };
 
@@ -113,16 +113,19 @@ const struct parser_t rv64i[] = {
 	{ NULL, 0, NULL, 0, 0, 0 } /* Ending null terminator */
 };
 
-#define CHECK_REQUIRED(a, b, c)                                          \
-	{                                                                \
-		enum argtype_e required[] = { a, b, c };                 \
-		if (memcmp(args.type, required, sizeof(required))) {     \
-			logger(ERROR, error_invalid_syntax,              \
-			       "Incorrect arguments for instruction %s", \
-			       parser.name);                             \
-			return error_bytecode;                           \
-		}                                                        \
-	}
+static int check_required(const char *name, enum argtype_e types[3],
+			  enum argtype_e a, enum argtype_e b, enum argtype_e c)
+{
+	enum argtype_e required[] = { a, b, c };
+	if (!memcmp(types, required, sizeof(required)))
+		return 0;
+	logger(ERROR, error_invalid_syntax,
+	       "Incorrect argument types for instruction %s."
+	       " Expected %d, %d, %d but got %d, %d, %d",
+	       name, required[0], required[1], required[2], types[0], types[1],
+	       types[2]);
+	return 1;
+}
 
 static int32_t get_relative_address(struct symbol_t *sym, size_t position)
 {
@@ -141,13 +144,15 @@ struct bytecode_t gen_rtype(struct parser_t parser, struct args_t args,
 			    size_t position)
 {
 	(void)position;
-	logger(DEBUG, no_error, "Generating R type parser (%s)", parser.name);
-	CHECK_REQUIRED(arg_register, arg_register, arg_register);
+	logger(DEBUG, no_error, "Generating R type instruction %s",
+	       parser.name);
+	check_required(parser.name, args.type, arg_register, arg_register,
+		       arg_register);
 
 	struct bytecode_t res = { .size = RV64I_SIZE,
 				  .data = xmalloc(RV64I_SIZE) };
 
-	*(uint32_t *)&(res.data) =
+	*(uint32_t *)(res.data) =
 		(parser.opcode | ((uint32_t)args.arg[0] << 7) |
 		 ((uint32_t)args.arg[1] << 15) | ((uint32_t)args.arg[2] << 20) |
 		 (parser.funct1 << 12) | (parser.funct2 << 25));
@@ -158,9 +163,11 @@ struct bytecode_t gen_itype(struct parser_t parser, struct args_t args,
 			    size_t position)
 {
 	(void)position;
-	logger(DEBUG, no_error, "Generating I type parser (%s, x%d, x%d, %d)",
-	       parser.name, args.arg[0], args.arg[1], args.arg[2]);
-	CHECK_REQUIRED(arg_register, arg_register, arg_immediate);
+	logger(DEBUG, no_error,
+	       "Generating I type instruction %s, x%d, x%d, %d", parser.name,
+	       args.arg[0], args.arg[1], args.arg[2]);
+	check_required(parser.name, args.type, arg_register, arg_register,
+		       arg_immediate);
 
 	struct bytecode_t res = { .size = RV64I_SIZE,
 				  .data = xmalloc(RV64I_SIZE) };
@@ -180,7 +187,8 @@ struct bytecode_t gen_itype(struct parser_t parser, struct args_t args,
 struct bytecode_t gen_itype2(struct parser_t parser, struct args_t args,
 			     size_t position)
 {
-	logger(DEBUG, no_error, "Generating I type 2 parser (%s)", parser.name);
+	logger(DEBUG, no_error, "Generating I type 2 instruction %s",
+	       parser.name);
 	struct bytecode_t res = gen_itype(parser, args, position);
 	*(uint32_t *)res.data |= 0x40000000; /* set type 2 bit */
 	return res;
@@ -190,8 +198,10 @@ struct bytecode_t gen_stype(struct parser_t parser, struct args_t args,
 			    size_t position)
 {
 	(void)position;
-	logger(DEBUG, no_error, "Generating S type parser (%s)", parser.name);
-	CHECK_REQUIRED(arg_register, arg_register, arg_immediate)
+	logger(DEBUG, no_error, "Generating S type instruction %s",
+	       parser.name);
+	check_required(parser.name, args.type, arg_register, arg_register,
+		       arg_immediate);
 	struct bytecode_t res = { .size = RV64I_SIZE,
 				  .data = xmalloc(RV64I_SIZE) };
 
@@ -206,7 +216,8 @@ struct bytecode_t gen_stype(struct parser_t parser, struct args_t args,
 struct bytecode_t gen_btype(struct parser_t parser, struct args_t args,
 			    size_t position)
 {
-	logger(DEBUG, no_error, "Generating B type parser (%s)", parser.name);
+	logger(DEBUG, no_error, "Generating B type instruction %s",
+	       parser.name);
 
 	const uint32_t dup = (uint32_t)args.arg[2] >> 1;
 	args.arg[2] &= 0x7FE;
@@ -220,8 +231,10 @@ struct bytecode_t gen_utype(struct parser_t parser, struct args_t args,
 			    size_t position)
 {
 	(void)position;
-	logger(DEBUG, no_error, "Generating U type parser (%s)", parser.name);
-	CHECK_REQUIRED(arg_register, arg_immediate, arg_none)
+	logger(DEBUG, no_error, "Generating U type instruction %s",
+	       parser.name);
+	check_required(parser.name, args.type, arg_register, arg_immediate,
+		       arg_none);
 
 	struct bytecode_t res = { .size = RV64I_SIZE,
 				  .data = xmalloc(RV64I_SIZE) };
@@ -234,12 +247,14 @@ struct bytecode_t gen_utype(struct parser_t parser, struct args_t args,
 struct bytecode_t gen_jtype(struct parser_t parser, struct args_t args,
 			    size_t position)
 {
-	logger(DEBUG, no_error, "Generating J type parser (%s)", parser.name);
-	CHECK_REQUIRED(arg_register, arg_immediate, arg_none)
+	logger(DEBUG, no_error, "Generating J type instruction %s",
+	       parser.name);
+	check_required(parser.name, args.type, arg_register, arg_immediate,
+		       arg_none);
 
 	int offset = (uint32_t)args.arg[2];
 	offset -= (int)position;
-	logger(DEBUG, no_error, "Offset of J type parser is 0x%x", offset);
+	logger(DEBUG, no_error, "Offset of J type instruction is 0x%x", offset);
 
 	const uint32_t a = (offset & 0x0007FE) << 20;
 	const uint32_t b = (offset & 0x000800) << 9;
@@ -255,7 +270,8 @@ struct bytecode_t gen_syscall(struct parser_t parser, struct args_t args,
 {
 	(void)args;
 	(void)position;
-	CHECK_REQUIRED(arg_none, arg_none, arg_none)
+	logger(DEBUG, no_error, "Generating syscall %s", parser.name);
+	check_required(parser.name, args.type, arg_none, arg_none, arg_none);
 
 	struct bytecode_t res = { .size = RV64I_SIZE,
 				  .data = xmalloc(RV64I_SIZE) };
@@ -270,8 +286,9 @@ struct bytecode_t gen_fence(struct parser_t parser, struct args_t args,
 {
 	(void)position;
 	/* TODO: fix fence implementation w/ flags and stuff */
-	logger(DEBUG, no_error, "Generating FENCE parser (%s)", parser.name);
-	CHECK_REQUIRED(arg_immediate, arg_none, arg_none)
+	logger(DEBUG, no_error, "Generating fence instruction %s", parser.name);
+	check_required(parser.name, args.type, arg_immediate, arg_none,
+		       arg_none);
 
 	struct bytecode_t res = { .size = RV64I_SIZE,
 				  .data = xmalloc(RV64I_SIZE) };
@@ -286,8 +303,8 @@ struct bytecode_t gen_nop(struct parser_t parser, struct args_t args,
 {
 	(void)args;
 	(void)position;
-	logger(DEBUG, no_error, "Generating NOP instruction (%s)", parser.name);
-	CHECK_REQUIRED(arg_none, arg_none, arg_none)
+	logger(DEBUG, no_error, "Generating nop instruction %s", parser.name);
+	check_required(parser.name, args.type, arg_none, arg_none, arg_none);
 
 	return gen_itype(
 		parser,
@@ -300,18 +317,15 @@ struct bytecode_t gen_load_short(struct parser_t parser, struct args_t args,
 				 size_t position)
 {
 	(void)position;
-	logger(DEBUG, no_error, "Generating load instruction (%s)",
-	       parser.name);
-	CHECK_REQUIRED(arg_register, parser.opcode ? arg_symbol : arg_immediate,
-		       arg_none)
+	logger(DEBUG, no_error, "Generating load instruction %s", parser.name);
+	check_required(parser.name, args.type, arg_register,
+		       parser.opcode ? arg_symbol : arg_immediate, arg_none);
 
 	uint32_t rd = (uint32_t)args.arg[0];
-	logger(DEBUG, no_error, " | register: x%d", rd);
 	uint32_t value = (uint32_t)args.arg[1];
 	if (parser.opcode)
 		value = (uint32_t)get_relative_address((void *)args.arg[1],
 						       position);
-	logger(DEBUG, no_error, " | value: %.08x", value);
 
 	struct bytecode_t upper = gen_utype(
 		(struct parser_t){ "internal", RV64I_SIZE, NULL,
@@ -336,36 +350,58 @@ struct bytecode_t gen_load_short(struct parser_t parser, struct args_t args,
 	};
 }
 
-/* TODO: implement math shortcut parser */
 struct bytecode_t gen_math(struct parser_t parser, struct args_t args,
 			   size_t position)
 {
-	(void)args;
+	logger(DEBUG, no_error, "Generating math instruction %s", parser.name);
+	check_required(parser.name, args.type, arg_register, arg_register,
+		       arg_none);
 	const enum math_shortcuts type = parser.opcode;
 	// op rd, rd1 =>
 	switch (type) {
-	case math_mv:
-		// addi rd, rs, 0
+	case math_mv: // addi rd, rs, 0
 		args.type[2] = arg_immediate;
 		args.arg[2] = 0;
-		return gen_itype((struct parser_t){ "addi", RV64I_SIZE, NULL,
-						    OP_OPI, 0x0, 0 },
+		return gen_itype((struct parser_t){ "mv (addi)", RV64I_SIZE,
+						    NULL, OP_OPI, 0x0, 0 },
 				 args, position);
 	case math_not: // xori rd, rs, -1
 		args.type[2] = arg_immediate;
 		args.arg[2] = (uint32_t)-1;
 		// { "xori", RV64I_SIZE, &gen_itype, OP_OPI, 0x4, 0 },
-		return gen_itype((struct parser_t){ "xori", RV64I_SIZE, NULL,
-						    OP_OPI, 0x4, 0 },
+		return gen_itype((struct parser_t){ "not (xori)", RV64I_SIZE,
+						    NULL, OP_OPI, 0x4, 0 },
 				 args, position);
 	case math_neg: // sub rd, x0, rs
-		return error_bytecode;
+		args.type[2] = args.type[1];
+		args.arg[2] = args.arg[1];
+		args.type[1] = arg_register;
+		args.arg[1] = 0;
+		// { "sub", RV64I_SIZE, &gen_rtype, OP_OP, 0x0, 0x20 },
+		return gen_rtype((struct parser_t){ "neg (sub)", RV64I_SIZE,
+						    NULL, OP_OP, 0x0, 0x20 },
+				 args, position);
 	case math_negw: // subw rd, x0, rs
+		args.type[2] = args.type[1];
+		args.arg[2] = args.arg[1];
+		args.type[1] = arg_register;
+		args.arg[1] = 0;
+		return gen_rtype((struct parser_t){ "negw (subw)", RV64I_SIZE,
+						    NULL, OP_OP32, 0x0, 0x20 },
+				 args, position);
 		return error_bytecode;
 	case math_sextw: // addiw rd, rs, 1
-		return error_bytecode;
+		args.type[2] = arg_immediate;
+		args.arg[2] = 1;
+		return gen_itype((struct parser_t){ "sextw (addiw)", RV64I_SIZE,
+						    NULL, OP_OPI32, 0x0, 0 },
+				 args, position);
 	}
-	/* Clang can correctly optimise here */
+	/*
+	 * Clang can correctly optimise here and it is therefore better to let
+	 * it error if the math_shortcuts enum changes and this branch becomes
+	 * reachable
+	 */
 #ifndef __clang__
 #ifdef __GNUC__
 	__builtin_unreachable();

@@ -135,7 +135,6 @@ void calc_symtab(void)
 	sectiondata[section_symtab].info = (uint32_t)sz;
 }
 
-/* TODO: implement symbol table */
 int fill_symtab(void)
 {
 	const struct elf64sym_t blank = (struct elf64sym_t){ 0, 0, 0, 0, 0, 0 };
@@ -187,6 +186,8 @@ int alloc_output(void)
 size_t write_sectiondata(const void *bytes, size_t count,
 			 struct sectionpos_t position)
 {
+	logger(DEBUG, no_error, "writing %d bytes to section %s",
+	       position.section, sectionnames[position.section]);
 	if (position.offset + count > outputsections[position.section].size) {
 		logger(CRITICAL, error_internal,
 		       "Too many bytes for allowed size (requested end: %d, allocated: %d)",

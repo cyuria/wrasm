@@ -3,16 +3,16 @@
 
 .section .text
 _start:
-  addi a0, zero, 1
-  la a1, greeting
-  addi a2, zero, 6
-  addi a7, zero, 64 // write syscall
-  ecall
+    li a0, 1
+    la a1, greeting
+    li a2, 6
+    addi a7, zero, 64 // 64 => write syscall
+    ecall
 
-  addi a7, x0, 93
-  addi a0, x0, 0
-  ecall
+    li a0, 0
+    li a7, 93
+    ecall
 
 .section .data
-greeting: .asciz "hello\n"
+greeting: .ascii "hello\n"
 

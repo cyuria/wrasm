@@ -5,18 +5,17 @@
 
 #include "debug.h"
 
-#define ABORTFUNC(function)                                            \
-	{                                                              \
-		logger(CRITICAL, error_system,                         \
-		       "Call to stdlib function " function " failed"); \
-		abort();                                               \
-	}
+static void die(const char *function)
+{
+	logger(CRITICAL, error_system, "Call to %s failed", function);
+	exit(EXIT_FAILURE);
+}
 
 void *xmalloc(size_t sz)
 {
 	void *ptr = malloc(sz);
 	if (!ptr)
-		ABORTFUNC("malloc");
+		die("malloc");
 	return ptr;
 }
 
@@ -24,7 +23,7 @@ void *xcalloc(size_t nitems, size_t size)
 {
 	void *ptr = calloc(nitems, size);
 	if (!ptr)
-		ABORTFUNC("calloc");
+		die("calloc");
 	return ptr;
 }
 
@@ -32,6 +31,6 @@ void *xrealloc(void *ptr, size_t size)
 {
 	ptr = realloc(ptr, size);
 	if (!ptr)
-		ABORTFUNC("xrealloc");
+		die("xrealloc");
 	return ptr;
 }

@@ -71,7 +71,13 @@ int write_instruction(struct instruction_t instruction)
 	struct bytecode_t bytecode = instruction.parser.handler(
 		instruction.parser, instruction.args,
 		calc_fileoffset(instruction.position));
-	if (bytecode.size && !bytecode.data) {
+	logger(DEBUG, no_error, "Bytecode finished generating");
+	if (!bytecode.size) {
+		logger(WARN, no_error,
+		       "No bytecode generated from instruction");
+		return 0;
+	}
+	if (!bytecode.data) {
 		logger(ERROR, error_internal, "Received invalid bytecode");
 		return 1;
 	}

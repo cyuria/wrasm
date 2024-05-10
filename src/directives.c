@@ -96,7 +96,7 @@ static char get_escapedchar(const char **str)
 	return '\0';
 }
 
-static inline size_t parse_nullstr(char *dest, const char *str)
+static inline size_t parse_nulltermstr(char *dest, const char *str)
 {
 	if (*str != '"')
 		return (size_t)-1;
@@ -124,10 +124,10 @@ static inline size_t parse_nullstr(char *dest, const char *str)
 	return size;
 }
 
-static int parse_ascii_generic(const char *str, const bool nullterm)
+static int parse_ascii_generic(const char *str, bool nullterm)
 {
 	char *parsed = xmalloc(strlen(str) - 1);
-	const size_t size = parse_nullstr(parsed, str) - !nullterm;
+	const size_t size = parse_nulltermstr(parsed, str) - !nullterm;
 	if (size == (size_t)-1)
 		return 1;
 	char *data = xmalloc(size);

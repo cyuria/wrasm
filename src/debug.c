@@ -56,7 +56,7 @@ void logger(enum loglvl_t level, enum error_t id, const char *format, ...)
 	putc('\n', out);
 
 	if (level >= exitloglevel)
-		exit(1);
+		exit(EXIT_FAILURE);
 }
 
 int get_clean_exit(enum loglvl_t level)

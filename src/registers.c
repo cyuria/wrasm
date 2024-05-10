@@ -1,20 +1,19 @@
 
 #include "registers.h"
 #include "debug.h"
+#include "macros.h"
 
 #include <stdlib.h>
 #include <string.h>
 
-#define BASE_REG_COUNT 32
-const char *reg_abi_map[BASE_REG_COUNT] = {
+const char *reg_abi_map[] = {
 	"zero", "ra", "sp", "gp", "tp",	 "t0",	"t1", "t2", "s0", "s1", "a0",
 	"a1",	"a2", "a3", "a4", "a5",	 "a6",	"a7", "s2", "s3", "s4", "s5",
 	"s6",	"s7", "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6",
 };
 
 /* TODO: implement w/ float extension */
-#define FLOAT_REG_COUNT 1
-const char *float_reg_abi_map[FLOAT_REG_COUNT] = { 0 };
+const char *float_reg_abi_map[] = { 0 };
 
 size_t get_register_id(const char *reg)
 {
@@ -34,7 +33,7 @@ size_t get_register_id(const char *reg)
 		return r;
 	}
 
-	for (size_t i = 0; i < BASE_REG_COUNT; i++)
+	for (size_t i = 0; i < ARRAY_LENGTH(reg_abi_map); i++)
 		if (!strcmp(reg, reg_abi_map[i]))
 			return i;
 
@@ -55,14 +54,14 @@ size_t get_float_register_id(const char *reg)
 	if (reg[1] >= '0' && reg[1] <= '9')
 		return atoi(reg + 1);
 
-	for (int i = 0; i < FLOAT_REG_COUNT; i++)
+	for (size_t i = 0; i < ARRAY_LENGTH(float_reg_abi_map); i++)
 		if (!strcmp(reg, float_reg_abi_map[i]))
 			return i;
 
 	return (size_t)-1;
 }
 
-int calc_digit(char digit)
+static int calc_digit(char digit)
 {
 	if (digit > 'z')
 		return -1;
@@ -77,28 +76,43 @@ int calc_digit(char digit)
 	return digit - '0';
 }
 
+static size_t find_base(const char **imm)
+{
+	if ((*imm)[0] != '0')
+		return 10;
+
+	const char delim = (*imm)[1];
+	*imm += 2;
+
+	switch (delim) {
+	case 'x':
+		return 16;
+	case 'o':
+		return 8;
+	case 'b':
+		return 2;
+	default:
+		return 10;
+	}
+}
+
 int get_immediate(const char *imm, size_t *res)
 {
-	int base = 10;
-	if (!strncmp(imm, "0x", 2)) {
-		base = 16;
-		imm += 2;
-	} else if (!strncmp(imm, "0b", 2)) {
-		base = 2;
-		imm += 2;
-	}
+	const unsigned base = find_base(&imm);
 
-	*res = (size_t)strtol(imm, NULL, base);
+	*res = (size_t)strtoll(imm, NULL, (int)base);
 
 	/* We know strtol didn't fail */
 	if (*res)
 		return 0;
 
-	/* check for anything that could've caused a failure
-   * NOTE: immediate negative zero ("-0") will cause a fail */
+	/*
+	 * check for anything that could've caused a failure
+	 * the immediate negative zero "-0" will cause a fail
+	 */
 	while (*imm) {
 		int digit = calc_digit(*imm);
-		if (digit >= base || digit < 0)
+		if (digit >= (int)base || digit < 0)
 			return 1;
 		imm++;
 	}

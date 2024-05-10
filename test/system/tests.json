@@ -3,5 +3,10 @@
     "name": "helloworld",
     "asm": "asm/helloworld.S",
     "expected": "expected/helloworld.txt"
+  },
+  {
+    "name": "w1",
+    "asm": "asm/w1.S",
+    "expected": "expected/w1.txt"
   }
 ]
