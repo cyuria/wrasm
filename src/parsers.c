@@ -254,7 +254,7 @@ struct bytecode_t gen_jtype(struct parser_t parser, struct args_t args,
 		       arg_none);
 
 	uint32_t offset = (uint32_t)args.arg[2];
-	offset -= position;
+	offset -= (uint32_t)position;
 	logger(DEBUG, no_error, "Offset of J type instruction is 0x%x", offset);
 
 	const uint32_t a = (offset & 0x0007FE) << 20;
