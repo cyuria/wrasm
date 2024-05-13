@@ -26,7 +26,7 @@ from shutil import which
 from subprocess import run
 from sys import argv, exit
 
-class colours:
+class ansi:
     OK = "\033[92m"
     FAIL = "\033[91m"
     RESET = "\033[0m"
@@ -70,8 +70,8 @@ def find_wrasm() -> Path:
             if (d / '.git').is_dir()
         )
     except StopIteration:
-        raise Exception("Unable to find root project directory,"
-            "try specifying the location of the wrasm executable"
+        raise Exception("Not a git repository, "
+            "try specifying the location of the wrasm executable "
             "manually via the \"WRASM\" environment variable")
 
     for f in Path(project_root).rglob('wrasm'):
@@ -108,7 +108,7 @@ def delete_file(file: Path):
             return
         raise
 
-def compile(wrasm: Path, lld: Path, qemu: Path, asm: Path, id: str) -> str:
+def execute(asm: Path, id: str) -> str:
     obj = Path(f'{id}.o').resolve()
     exe = Path(f'{id}').resolve()
 
@@ -119,21 +119,18 @@ def compile(wrasm: Path, lld: Path, qemu: Path, asm: Path, id: str) -> str:
     return result.stdout
 
 def compare(expected: str, output: str):
-    d = Differ()
-
-    diff = list(filter(
-        lambda l: not l.startswith('  '),
-        d.compare(
+    diff = [
+        l for l in
+        Differ().compare(
             expected.split('\n'),
             output.split('\n')
         )
-    ))
+        if not l.startswith('  ')
+    ]
 
-    if not diff:
-        return
-
-    print('\n'.join(diff))
-    raise Exception("Unexpected Output")
+    if diff:
+        print('\n'.join(diff))
+        raise Exception("Unexpected Output")
 
 def cleanup(id: str):
     delete_file(Path(f'{id}.o'))
@@ -141,13 +138,11 @@ def cleanup(id: str):
 
 def test(id: str, t: dict[str, str]):
 
-    efpath = script.parent / t['expected']
-
-    with open(efpath, 'r') as f:
+    with open(script.parent / t['expected'], 'r') as f:
         expected = f.read()
 
     try:
-        output = compile(wrasm, lld, qemu, script.parent / t['asm'], id)
+        output = execute(script.parent / t['asm'], id)
         compare(expected, output)
     finally:
         cleanup(id)
@@ -159,10 +154,10 @@ def runtest(args) -> tuple[bool, str]:
         test(id, t)
     except Exception as e:
         result = False
-        status = f"{colours.FAIL}FAIL{colours.RESET} - {e}"
+        status = f"{ansi.FAIL}FAIL{ansi.RESET} - {e}"
     else:
         result = True
-        status = f"{colours.OK}OK{colours.RESET}"
+        status = f"{ansi.OK}OK{ansi.RESET}"
     return result, f" | {t['name']} | {status}"
 
 def testall() -> int:
@@ -178,9 +173,9 @@ def testall() -> int:
     passed = len(tests) - failed
 
     print(
-        f"{colours.FAIL if failed else colours.OK}"
+        f"{ansi.FAIL if failed else ansi.OK}"
         f"{passed}/{len(tests)} tests passed"
-        f"{colours.RESET}"
+        f"{ansi.RESET}"
     )
     return failed != 0
 
