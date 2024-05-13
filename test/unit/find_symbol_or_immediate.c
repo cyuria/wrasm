@@ -1,5 +1,10 @@
 
+#include <stdlib.h>
+
+#include "debug.h"
 #include "macros.h"
+#include "registers.h"
+
 struct {
 	const char *symbol;
 	const size_t value;
@@ -29,5 +34,5 @@ int main(void)
 	}
 	if (errors)
 		logger(CRITICAL, error_internal, "%d tests failed", errors);
-	return (bool)errors;
+	return errors != 0;
 }

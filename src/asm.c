@@ -14,9 +14,7 @@
 #include "symbols.h"
 #include "xmalloc.h"
 
-static int parse_parser(char *, struct parser_t *);
 static int parse_arg(const char *, enum argtype_e *, size_t *);
-static int parse_args(char *, struct args_t *);
 
 int parse_asm(const char *line, struct sectionpos_t position)
 {
@@ -62,7 +60,7 @@ int parse_asm(const char *line, struct sectionpos_t position)
 	return 0;
 }
 
-static int parse_parser(char *parserstr, struct parser_t *parser)
+int parse_parser(const char *parserstr, struct parser_t *parser)
 {
 	logger(DEBUG, no_error, "Getting parser for instruction (%s)",
 	       parserstr);
@@ -85,31 +83,7 @@ static int parse_parser(char *parserstr, struct parser_t *parser)
 	return 1;
 }
 
-static int parse_arg(const char *str, enum argtype_e *type, size_t *arg)
-{
-	size_t reg = get_register_id(str);
-	if (reg != (size_t)-1) {
-		*type = arg_register;
-		*arg = reg;
-		return 0;
-	}
-	struct symbol_t *sym = get_symbol(str);
-	if (sym) {
-		*type = arg_symbol;
-		*arg = (size_t)sym;
-		return 0;
-	}
-	const int status = get_immediate(str, arg);
-	if (!status) {
-		*type = arg_immediate;
-		return 0;
-	}
-	logger(ERROR, error_instruction_other,
-	       "Uknown argument (%s) encountered", str);
-	return 0;
-}
-
-static int parse_args(char *argstr, struct args_t *args)
+int parse_args(char *argstr, struct args_t *args)
 {
 	// TODO: reimplement
 	logger(DEBUG, no_error, "Parsing arguments for instruction (%s)",
@@ -145,5 +119,29 @@ static int parse_args(char *argstr, struct args_t *args)
 	       args->arg[0], args->type[1], args->arg[1], args->type[2],
 	       args->arg[2]);
 
+	return 0;
+}
+
+static int parse_arg(const char *str, enum argtype_e *type, size_t *arg)
+{
+	size_t reg = get_register_id(str);
+	if (reg != (size_t)-1) {
+		*type = arg_register;
+		*arg = reg;
+		return 0;
+	}
+	struct symbol_t *sym = get_symbol(str);
+	if (sym) {
+		*type = arg_symbol;
+		*arg = (size_t)sym;
+		return 0;
+	}
+	const int status = get_immediate(str, arg);
+	if (!status) {
+		*type = arg_immediate;
+		return 0;
+	}
+	logger(ERROR, error_instruction_other,
+	       "Uknown argument (%s) encountered", str);
 	return 0;
 }

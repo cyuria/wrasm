@@ -1,21 +1,52 @@
 
+#include <stdint.h>
+#include "asm.h"
+#include "debug.h"
+#include "macros.h"
+#include "parsers.h"
 /* TODO: add tests for math shortcut parsers */
+
+struct {
+	const char *instruction;
+	struct parser_t parser;
+	uint32_t bytecode;
+} cases[] = {
+	{ .instruction = "mv", .bytecode = 0x00010093 }, // mv x1, x2
+	{ .instruction = "not", .bytecode = 0xfff1c093 }, // not x1, x3
+	{ .instruction = "neg", .bytecode = 0x404000b3 }, // neg x1, x4
+	{ .instruction = "negw", .bytecode = 0x405000bb }, // negw x1, x5
+	{ .instruction = "sext.w", .bytecode = 0x0003009b }, // sext.w x1, x6
+};
 
 int main(void)
 {
-	struct parser_t mv;
-	struct parser_t not ;
-	struct parser_t neg;
-	struct parser_t negw;
-	struct parser_t sextw;
-	if (parse_parser("mv", &mv))
-		return 1;
-	if (parse_parser("not", &not ))
-		return 1;
-	if (parse_parser("neg", &neg))
-		return 1;
-	if (parse_parser("negw", &negw))
-		return 1;
-	if (parse_parser("sext.w", &sextw))
-		return 1;
+	set_exit_loglevel(NODEBUG);
+	for (size_t i = 0; i < ARRAY_LENGTH(cases); i++) {
+		if (parse_parser(cases[i].instruction, &cases[i].parser)) {
+			logger(ERROR, error_internal,
+			       "Unable to find parser for instruction %s",
+			       cases[i].instruction);
+			return 1;
+		}
+		const struct args_t args = {
+			.type = { arg_register, arg_register, arg_none },
+			.arg = { 1, i + 2, 0 },
+		};
+		struct bytecode_t result =
+			cases[i].parser.handler(cases[i].parser, args, 0);
+		if (result.size != sizeof(cases[i].bytecode)) {
+			logger(ERROR, error_internal,
+			       "invalid size generated for %s",
+			       cases[i].instruction);
+			return 1;
+		}
+		if (*(uint32_t *)result.data != cases[i].bytecode) {
+			logger(ERROR, error_internal,
+			       "Expected %.08x but got %.08x while generating %s instruction",
+			       cases[i].bytecode, *(uint32_t *)result.data,
+			       cases[i].instruction);
+			return 1;
+		}
+	}
+	return 0;
 }

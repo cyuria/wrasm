@@ -37,5 +37,6 @@ enum loglvl_t {
 };
 
 void set_min_loglevel(enum loglvl_t);
+void set_exit_loglevel(enum loglvl_t);
 void logger(enum loglvl_t, enum error_t, const char *, ...);
 int get_clean_exit(enum loglvl_t);

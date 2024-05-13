@@ -12,21 +12,16 @@ if (compiler.get_id() == 'msvc')
     includeflag = '/FI'
 endif
 
-srcincludeargs = []
-foreach file : sources
-    srcincludeargs += includeflag + file
-endforeach
-
 root = include_directories('../../')
 
 foreach test : tests
     e = executable(
         'test_' + test,
         test,
+        sources,
         include_directories: [headers, root],
         dependencies: [threads, argtable3_dep],
         c_args: [
-            srcincludeargs,
             '-D_CRT_SECURE_NO_WARNINGS',
         ],
     )

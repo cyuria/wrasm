@@ -28,9 +28,15 @@ static enum loglvl_t exitloglevel = ERROR;
 void set_min_loglevel(enum loglvl_t level)
 {
 	minloglevel = level;
-	printf("setting min log level to %s\n", level_names[minloglevel]);
 	logger(INFO, no_error, "Log level set to %s%s\033[0m",
 	       level_colours[minloglevel], level_names[minloglevel]);
+}
+
+void set_exit_loglevel(enum loglvl_t level)
+{
+	exitloglevel = level;
+	logger(INFO, no_error, "Exit log level set to %s%s\033[0m",
+	       level_colours[exitloglevel], level_names[exitloglevel]);
 }
 
 void logger(enum loglvl_t level, enum error_t id, const char *format, ...)

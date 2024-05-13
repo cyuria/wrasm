@@ -394,7 +394,7 @@ struct bytecode_t gen_math(struct parser_t parser, struct args_t args,
 				 args, position);
 	case math_sextw: // addiw rd, rs, 1
 		args.type[2] = arg_immediate;
-		args.arg[2] = 1;
+		args.arg[2] = 0;
 		return gen_itype((struct parser_t){ "sextw (addiw)", RV64I_SIZE,
 						    NULL, OP_OPI32, 0x0, 0 },
 				 args, position);
