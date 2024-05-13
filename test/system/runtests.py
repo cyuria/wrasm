@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
-"""
-System Testing Python Script for Wrasm
+"""System Testing Python Script for Wrasm
 
 This script requires la built copy of Wrasm, the llvm linker (lld) and the
 userspace qemu riscv64 emulation binaries.
@@ -14,18 +13,23 @@ lld: the "LLD" environment variable
 qemu: the "QEMU_RISCV64" environment variable
 
 The wrasm binaries are located by recursively searching for a file named
-"wrasm", starting with the project root directory
-"""
+"wrasm", starting with the project root directory"""
 
 from difflib import Differ
 from errno import ENOENT
 from json import load
+from multiprocessing import Pool
 from os import environ, getpid, remove
 from pathlib import Path
 from platform import system
 from shutil import which
 from subprocess import run
-from sys import argv
+from sys import argv, exit
+
+class colours:
+    OK = "\033[92m"
+    FAIL = "\033[91m"
+    RESET = "\033[0m"
 
 script = Path(__file__).resolve()
 
@@ -36,7 +40,7 @@ linkers = {
 }
 
 def find_qemu() -> Path:
-    if environ.get('QEMU_RISCV64'):
+    if 'QEMU_RISCV64' in environ:
         qemu = Path(environ['wrasm']).resolve()
         print(f"qemu binary found (environment): {qemu}")
         return qemu
@@ -55,8 +59,8 @@ def find_qemu() -> Path:
         )
 
 def find_wrasm() -> Path:
-    if environ.get('WRASM'):
-        wrasm = Path(environ['wrasm']).resolve()
+    if 'WRASM' in environ:
+        wrasm = Path(environ['WRASM']).resolve()
         print(f"wrasm binary found (environment): {wrasm}")
         return wrasm
 
@@ -84,7 +88,7 @@ def find_wrasm() -> Path:
     )
 
 def find_lld() -> Path:
-    if environ.get('LLD'):
+    if 'LLD' in environ:
         lld = Path(environ['LLD']).resolve()
         print(f"lld binary found (environment): {lld}")
         return lld
@@ -117,19 +121,25 @@ def compile(wrasm: Path, lld: Path, qemu: Path, asm: Path, id: str) -> str:
 def compare(expected: str, output: str):
     d = Differ()
 
-    diff = d.compare(expected.split('\n'), output.split('\n'))
+    diff = list(filter(
+        lambda l: not l.startswith('  '),
+        d.compare(
+            expected.split('\n'),
+            output.split('\n')
+        )
+    ))
 
-    if not list(filter(lambda l: not l.startswith('  '), diff)):
+    if not diff:
         return
 
     print('\n'.join(diff))
-    raise Exception("Difference in Resulting Files")
+    raise Exception("Unexpected Output")
 
 def cleanup(id: str):
     delete_file(Path(f'{id}.o'))
     delete_file(Path(f'{id}'))
 
-def test(wrasm: Path, lld: Path, qemu: Path, id: str, t: dict[str, str]):
+def test(id: str, t: dict[str, str]):
 
     efpath = script.parent / t['expected']
 
@@ -139,36 +149,52 @@ def test(wrasm: Path, lld: Path, qemu: Path, id: str, t: dict[str, str]):
     try:
         output = compile(wrasm, lld, qemu, script.parent / t['asm'], id)
         compare(expected, output)
-        print(f"Test completed | {t['name']} ({t['asm']})")
     finally:
         cleanup(id)
 
-def testall():
+def runtest(args) -> tuple[bool, str]:
+    i, t = args
+    id = f"{pid}_{i}_{t['name']}"
+    try:
+        test(id, t)
+    except Exception as e:
+        result = False
+        status = f"{colours.FAIL}FAIL{colours.RESET} - {e}"
+    else:
+        result = True
+        status = f"{colours.OK}OK{colours.RESET}"
+    return result, f" | {t['name']} | {status}"
+
+def testall() -> int:
+
+    with open((script.parent / 'tests.json').resolve()) as f:
+        tests = load(f)
+
+    with Pool() as pool:
+        results, statuses = zip(*pool.map(runtest, enumerate(tests)))
+
+    print(*statuses, sep='\n')
+    failed = results.count(False)
+    passed = len(tests) - failed
+
+    print(
+        f"{colours.FAIL if failed else colours.OK}"
+        f"{passed}/{len(tests)} tests passed"
+        f"{colours.RESET}"
+    )
+    return failed != 0
+
+def main(args=[]) -> int:
+    if any(cmd in args for cmd in ['help', '--help', '-h']):
+        print(__doc__)
+        return 0
+    global wrasm, lld, qemu, pid
     wrasm = find_wrasm()
     lld = find_lld()
     qemu = find_qemu()
-
-    index = (script.parent / 'tests.json').resolve()
-    with open(index) as f:
-        tests = load(f)
-
     pid = getpid()
-    print("Tests Loaded")
-    print()
-
-    print("Testing...")
-    for tid, t in enumerate(tests):
-        id = f"{pid}_{tid}_{t['name']}"
-        test(wrasm, lld, qemu, id, t)
-
-    print("All tests successfully completed")
-
-def main(args=[]):
-    if any(cmd in args for cmd in ['help', '--help', '-h']):
-        print(__doc__)
-        return
-    testall()
+    return testall()
 
 if __name__ == "__main__":
-    main(argv[1:])
+    exit(main(argv[1:]))
 
