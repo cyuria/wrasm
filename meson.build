@@ -40,7 +40,8 @@ sources = files(
 
 executable(
     'wrasm',
-    ['src/main.c', sources],
+    'src/main.c',
+    sources,
     include_directories: [headers],
     dependencies: [threads, argtable3_dep],
     c_args: [

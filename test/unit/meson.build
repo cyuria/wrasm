@@ -19,11 +19,13 @@ foreach test : tests
         'test_' + test,
         test,
         sources,
+        build_by_default: false,
         include_directories: [headers, root],
         dependencies: [threads, argtable3_dep],
         c_args: [
             '-D_CRT_SECURE_NO_WARNINGS',
         ],
+        native: not meson.can_run_host_binaries(),
     )
     test('c unit test ' + test, e)
 endforeach
