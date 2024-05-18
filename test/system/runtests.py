@@ -93,7 +93,7 @@ def find_lld() -> Path:
         print(f"lld binary found (environment): {lld}")
         return lld
 
-    lld = which(linkers[system()])
+    lld = which(linkers.get(system(), ""))
     if lld is None:
         raise Exception("Unable to find lld (the llvm linker) binaries on path")
     lld = Path(lld)
