@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "argtable3.h"
 #include "debug.h"
 #include "elf/output.h"
 #include "symbols.h"
@@ -18,6 +19,12 @@ enum math_shortcuts {
 	math_negw,
 	math_sextw,
 };
+enum setif_shortcuts {
+	setif_eqz,
+	setif_nez,
+	setif_ltz,
+	setif_gtz,
+};
 /* TODO: Add HINT parser support */
 const struct parser_t rv64s[] = {
 	{ "nop", RV64I_SIZE, &gen_nop, OP_OPI, 0, 0 },
@@ -28,10 +35,10 @@ const struct parser_t rv64s[] = {
 	{ "neg", RV64I_SIZE, &gen_math, math_neg, 0, 0 },
 	{ "negw", RV64I_SIZE, &gen_math, math_negw, 0, 0 },
 	{ "sext.w", RV64I_SIZE, &gen_math, math_sextw, 0, 0 },
-	{ "seqz", RV64I_SIZE, &gen_setif, 0x0, 0, 0 },
-	{ "snez", RV64I_SIZE, &gen_setif, 0x1, 0, 0 },
-	{ "sltz", RV64I_SIZE, &gen_setif, 0x2, 0, 0 },
-	{ "sgtz", RV64I_SIZE, &gen_setif, 0x3, 0, 0 },
+	{ "seqz", RV64I_SIZE, &gen_setif, setif_eqz, 0, 0 },
+	{ "snez", RV64I_SIZE, &gen_setif, setif_nez, 0, 0 },
+	{ "sltz", RV64I_SIZE, &gen_setif, setif_ltz, 0, 0 },
+	{ "sgtz", RV64I_SIZE, &gen_setif, setif_gtz, 0, 0 },
 	{ "beqz", RV64I_SIZE, &gen_branchif, 0x0, 0, 0 },
 	{ "bnez", RV64I_SIZE, &gen_branchif, 0x1, 0, 0 },
 	{ "blez", RV64I_SIZE, &gen_branchif, 0x2, 0, 0 },
@@ -360,7 +367,7 @@ struct bytecode_t gen_math(struct parser_t parser, struct args_t args,
 	check_required(parser.name, args.type, arg_register, arg_register,
 		       arg_none);
 	const enum math_shortcuts type = parser.opcode;
-	// op rd, rd1 =>
+	// op rd, rs1 =>
 	switch (type) {
 	case math_mv: // addi rd, rs, 0
 		args.type[2] = arg_immediate;
@@ -415,14 +422,57 @@ struct bytecode_t gen_math(struct parser_t parser, struct args_t args,
 #endif
 }
 
-/* TODO: implement setif parser */
 struct bytecode_t gen_setif(struct parser_t parser, struct args_t args,
 			    size_t position)
 {
-	(void)parser;
-	(void)args;
-	(void)position;
-	return error_bytecode;
+	logger(DEBUG, no_error, "Generating conditiona set intruction %s",
+	       parser.name);
+	check_required(parser.name, args.type, arg_register, arg_register,
+		       arg_none);
+	const enum setif_shortcuts type = parser.opcode;
+	// op rd, rs1 =>
+	switch (type) {
+	case setif_eqz: // sltiu rd, rs, 1
+		args.type[2] = arg_immediate;
+		args.arg[2] = 1;
+		return gen_itype((struct parser_t){ "sltiu (snez)", RV64I_SIZE,
+						    NULL, OP_OPI, 0x3, 0x00 },
+				 args, position);
+	case setif_nez: // sltu rd, x0, rs
+		args.type[2] = arg_register;
+		args.arg[2] = args.arg[1];
+		args.arg[1] = 0;
+		return gen_rtype((struct parser_t){ "sltu (snez)", RV64I_SIZE,
+						    NULL, OP_OP, 0x3, 0x00 },
+				 args, position);
+	case setif_ltz: // slt rd, rs, x0
+		args.type[2] = arg_register;
+		args.arg[2] = 0;
+		return gen_rtype((struct parser_t){ "slt (sltz)", RV64I_SIZE,
+						    NULL, OP_OP, 0x2, 0x00 },
+				 args, position);
+	case setif_gtz: // slt rd, x0, rs
+		args.type[2] = arg_register;
+		args.arg[2] = args.arg[1];
+		args.arg[1] = 0;
+		return gen_rtype((struct parser_t){ "slt (sgtz)", RV64I_SIZE,
+						    NULL, OP_OP, 0x2, 0x00 },
+				 args, position);
+	}
+	/*
+	 * Clang can correctly optimise here and it is therefore better to let
+	 * it error if the math_shortcuts enum changes and this branch becomes
+	 * reachable
+	 */
+#ifndef __clang__
+#ifdef __GNUC__
+	__builtin_unreachable();
+#elif defined(_MSC_VER)
+	__assume(0);
+#else
+#warning "compiler does not define __GNUC__ and is not MSVC"
+#endif
+#endif
 }
 
 /* TODO: implement branchif parser */
