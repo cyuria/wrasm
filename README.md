@@ -72,11 +72,11 @@ linker) and riscv64 QEMU Userspace emulation binaries installed[^2].
 For most people, after wrasm has been built, the script can simply be run as
 follows:
 ```sh
-test/system/runtests.py
-```
-or
-```sh
 python3 test/system/runtests.py
+```
+or even just
+```sh
+test/system/runtests.py
 ```
 
 Some people may encounter issues with the automatic detection of a program. In
