@@ -4,14 +4,34 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "argtable3.h"
 #include "debug.h"
 #include "elf/output.h"
 #include "symbols.h"
 #include "xmalloc.h"
 
+/*
+ * Clang can correctly optimise fully defined switches over enumerated values.
+ * For other compilers, we create an unreachable segment of code, however for
+ * clang we do nothing, as clang will raise an error if the switch is ever not
+ * fully defined.
+ */
+#ifdef __clang__
+#define FULLY_DEFINED_SWITCH()
+#elif defined(__GNUC__)
+#define FULLY_FULLY_DEFINED_SWITCH() __builtin_unreachable()
+#elif defined(_MSC_VER)
+#define FULLY_FULLY_DEFINED_SWITCH() __assume(0)
+#else
+#warning "compiler does not define __GNUC__ and is not MSVC"
+#define FULLY_DEFINED_SWITCH()
+#endif
+
 const struct bytecode_t error_bytecode = { .size = (size_t)-1, .data = NULL };
 
+enum load_shortcuts {
+	load_immediate,
+	load_address,
+};
 enum math_shortcuts {
 	math_mv,
 	math_not,
@@ -25,11 +45,29 @@ enum setif_shortcuts {
 	setif_ltz,
 	setif_gtz,
 };
+enum branchifz_shortcuts {
+	branchifz_eqz,
+	branchifz_nez,
+	branchifz_lez,
+	branchifz_gez,
+	branchifz_ltz,
+	branchifz_gtz,
+};
+enum branchifr_shortcuts {
+	branchifr_gt,
+	branchifr_le,
+	branchifr_gtu,
+	branchifr_leu,
+};
+enum jump_shortcuts {
+	jump_label,
+	jump_register,
+};
 /* TODO: Add HINT parser support */
 const struct parser_t rv64s[] = {
 	{ "nop", RV64I_SIZE, &gen_nop, OP_OPI, 0, 0 },
-	{ "li", 2 * RV64I_SIZE, &gen_load_short, 0x0, 0, 0 },
-	{ "la", 2 * RV64I_SIZE, &gen_load_short, 0x1, 0, 0 },
+	{ "li", 2 * RV64I_SIZE, &gen_load_short, load_immediate, 0, 0 },
+	{ "la", 2 * RV64I_SIZE, &gen_load_short, load_address, 0, 0 },
 	{ "mv", RV64I_SIZE, &gen_math, math_mv, 0, 0 },
 	{ "not", RV64I_SIZE, &gen_math, math_not, 0, 0 },
 	{ "neg", RV64I_SIZE, &gen_math, math_neg, 0, 0 },
@@ -39,18 +77,18 @@ const struct parser_t rv64s[] = {
 	{ "snez", RV64I_SIZE, &gen_setif, setif_nez, 0, 0 },
 	{ "sltz", RV64I_SIZE, &gen_setif, setif_ltz, 0, 0 },
 	{ "sgtz", RV64I_SIZE, &gen_setif, setif_gtz, 0, 0 },
-	{ "beqz", RV64I_SIZE, &gen_branchif, 0x0, 0, 0 },
-	{ "bnez", RV64I_SIZE, &gen_branchif, 0x1, 0, 0 },
-	{ "blez", RV64I_SIZE, &gen_branchif, 0x2, 0, 0 },
-	{ "bgez", RV64I_SIZE, &gen_branchif, 0x3, 0, 0 },
-	{ "bltz", RV64I_SIZE, &gen_branchif, 0x4, 0, 0 },
-	{ "bgtz", RV64I_SIZE, &gen_branchif, 0x5, 0, 0 },
-	{ "bgt", RV64I_SIZE, &gen_branchif, 0x8, 0, 0 },
-	{ "ble", RV64I_SIZE, &gen_branchif, 0x9, 0, 0 },
-	{ "bgtu", RV64I_SIZE, &gen_branchif, 0xA, 0, 0 },
-	{ "bleu", RV64I_SIZE, &gen_branchif, 0xB, 0, 0 },
-	{ "j", RV64I_SIZE, &gen_jump, 0x0, 0, 0 },
-	{ "jr", RV64I_SIZE, &gen_jump, 0x1, 0, 0 },
+	{ "beqz", RV64I_SIZE, &gen_branchifz, branchifz_eqz, 0, 0 },
+	{ "bnez", RV64I_SIZE, &gen_branchifz, branchifz_nez, 0, 0 },
+	{ "blez", RV64I_SIZE, &gen_branchifz, branchifz_lez, 0, 0 },
+	{ "bgez", RV64I_SIZE, &gen_branchifz, branchifz_gez, 0, 0 },
+	{ "bltz", RV64I_SIZE, &gen_branchifz, branchifz_ltz, 0, 0 },
+	{ "bgtz", RV64I_SIZE, &gen_branchifz, branchifz_gtz, 0, 0 },
+	{ "bgt", RV64I_SIZE, &gen_branchifr, branchifr_gt, 0, 0 },
+	{ "ble", RV64I_SIZE, &gen_branchifr, branchifr_le, 0, 0 },
+	{ "bgtu", RV64I_SIZE, &gen_branchifr, branchifr_gtu, 0, 0 },
+	{ "bleu", RV64I_SIZE, &gen_branchifr, branchifr_leu, 0, 0 },
+	{ "j", RV64I_SIZE, &gen_jump, jump_label, 0, 0 },
+	{ "jr", RV64I_SIZE, &gen_jump, jump_register, 0, 0 },
 	{ "ret", RV64I_SIZE, &gen_ret, 0, 0, 0 },
 	{ NULL, 0, NULL, 0, 0, 0 },
 };
@@ -226,11 +264,14 @@ struct bytecode_t gen_btype(struct parser_t parser, struct args_t args,
 {
 	logger(DEBUG, no_error, "Generating B type instruction %s",
 	       parser.name);
+	check_required(parser.name, args.type, arg_register, arg_register,
+		       arg_symbol);
 
 	const uint32_t dup = (uint32_t)args.arg[2] >> 1;
 	args.arg[2] &= 0x7FE;
 	args.arg[2] |= (dup >> 10) & 0x1;
 	args.arg[2] |= dup & 0x800;
+	args.type[2] = arg_immediate;
 
 	return gen_stype(parser, args, position);
 }
@@ -326,29 +367,30 @@ struct bytecode_t gen_nop(struct parser_t parser, struct args_t args,
 struct bytecode_t gen_load_short(struct parser_t parser, struct args_t args,
 				 size_t position)
 {
-	(void)position;
 	logger(DEBUG, no_error, "Generating load instruction %s", parser.name);
 	check_required(parser.name, args.type, arg_register,
 		       parser.opcode ? arg_symbol : arg_immediate, arg_none);
 
+	enum load_shortcuts type = parser.opcode;
 	uint32_t rd = (uint32_t)args.arg[0];
 	uint32_t value = (uint32_t)args.arg[1];
-	if (parser.opcode)
+	if (type == load_address)
 		value = (uint32_t)get_relative_address((void *)args.arg[1],
 						       position);
 
 	struct bytecode_t upper = gen_utype(
 		(struct parser_t){ "internal", RV64I_SIZE, NULL,
-				   parser.opcode ? OP_AUIPC : OP_LUI, 0, 0 },
+				   type == load_address ? OP_AUIPC : OP_LUI, 0,
+				   0 },
 		(struct args_t){ { arg_register, arg_immediate, arg_none },
 				 { rd, value & 0xFFFFF000, 0 } },
-		0);
+		position);
 	struct bytecode_t lower = gen_itype(
 		(struct parser_t){ "internal", RV64I_SIZE, NULL, OP_OPI, 0x0,
 				   0 },
 		(struct args_t){ { arg_register, arg_register, arg_immediate },
 				 { rd, rd, value & 0xFFF } },
-		0);
+		position + RV64I_SIZE);
 
 	unsigned char *data = malloc(upper.size + lower.size);
 	memcpy(data, upper.data, upper.size);
@@ -367,7 +409,7 @@ struct bytecode_t gen_math(struct parser_t parser, struct args_t args,
 	check_required(parser.name, args.type, arg_register, arg_register,
 		       arg_none);
 	const enum math_shortcuts type = parser.opcode;
-	// op rd, rs1 =>
+	// op rd, rs1
 	switch (type) {
 	case math_mv: // addi rd, rs, 0
 		args.type[2] = arg_immediate;
@@ -406,31 +448,18 @@ struct bytecode_t gen_math(struct parser_t parser, struct args_t args,
 						    NULL, OP_OPI32, 0x0, 0 },
 				 args, position);
 	}
-	/*
-	 * Clang can correctly optimise here and it is therefore better to let
-	 * it error if the math_shortcuts enum changes and this branch becomes
-	 * reachable
-	 */
-#ifndef __clang__
-#ifdef __GNUC__
-	__builtin_unreachable();
-#elif defined(_MSC_VER)
-	__assume(0);
-#else
-#warning "compiler does not define __GNUC__ and is not MSVC"
-#endif
-#endif
+	FULLY_DEFINED_SWITCH();
 }
 
 struct bytecode_t gen_setif(struct parser_t parser, struct args_t args,
 			    size_t position)
 {
-	logger(DEBUG, no_error, "Generating conditiona set intruction %s",
+	logger(DEBUG, no_error, "Generating conditional set intruction %s",
 	       parser.name);
 	check_required(parser.name, args.type, arg_register, arg_register,
 		       arg_none);
 	const enum setif_shortcuts type = parser.opcode;
-	// op rd, rs1 =>
+	// op rd, rs1
 	switch (type) {
 	case setif_eqz: // sltiu rd, rs, 1
 		args.type[2] = arg_immediate;
@@ -459,30 +488,77 @@ struct bytecode_t gen_setif(struct parser_t parser, struct args_t args,
 						    NULL, OP_OP, 0x2, 0x00 },
 				 args, position);
 	}
-	/*
-	 * Clang can correctly optimise here and it is therefore better to let
-	 * it error if the math_shortcuts enum changes and this branch becomes
-	 * reachable
-	 */
-#ifndef __clang__
-#ifdef __GNUC__
-	__builtin_unreachable();
-#elif defined(_MSC_VER)
-	__assume(0);
-#else
-#warning "compiler does not define __GNUC__ and is not MSVC"
-#endif
-#endif
+	FULLY_DEFINED_SWITCH();
 }
 
-/* TODO: implement branchif parser */
-struct bytecode_t gen_branchif(struct parser_t parser, struct args_t args,
-			       size_t position)
+struct bytecode_t gen_branchifz(struct parser_t parser, struct args_t args,
+				size_t position)
 {
-	(void)parser;
-	(void)args;
-	(void)position;
-	return error_bytecode;
+	logger(DEBUG, no_error, "Generating conditional branch intruction %s",
+	       parser.name);
+	check_required(parser.name, args.type, arg_register, arg_symbol,
+		       arg_none);
+	const enum branchifz_shortcuts type = parser.opcode;
+	args.type[1] = arg_register;
+	args.type[2] = arg_symbol;
+	args.arg[2] = args.arg[1];
+	// op rs1, offset
+	switch (type) {
+	case branchifz_eqz: // beq rs, x0, offset
+		args.arg[1] = 0;
+		return gen_btype((struct parser_t){ "beq (beqz)", RV64I_SIZE,
+						    NULL, OP_BRANCH, 0x0, 0 },
+				 args, position);
+	case branchifz_nez: // bne rs, x0, offset
+		args.arg[1] = 0;
+		return gen_btype((struct parser_t){ "bne (bnez)", RV64I_SIZE,
+						    NULL, OP_BRANCH, 0x1, 0 },
+				 args, position);
+	case branchifz_lez: // bge x0, rs, offset
+		args.arg[1] = args.arg[0];
+		args.arg[0] = 0;
+		return gen_btype((struct parser_t){ "bge (blez)", RV64I_SIZE,
+						    NULL, OP_BRANCH, 0x5, 0 },
+				 args, position);
+	case branchifz_gez: // bge rs, x0, offset
+		args.arg[1] = 0;
+		return gen_btype((struct parser_t){ "bge (blez)", RV64I_SIZE,
+						    NULL, OP_BRANCH, 0x5, 0 },
+				 args, position);
+	case branchifz_ltz: // blt rs, x0, offset
+		args.arg[1] = 0;
+		return gen_btype((struct parser_t){ "bge (blez)", RV64I_SIZE,
+						    NULL, OP_BRANCH, 0x4, 0 },
+				 args, position);
+	case branchifz_gtz: // blt x0, rs, offset
+		args.arg[1] = args.arg[0];
+		args.arg[0] = 0;
+		return gen_btype((struct parser_t){ "bge (blez)", RV64I_SIZE,
+						    NULL, OP_BRANCH, 0x4, 0 },
+				 args, position);
+	}
+	FULLY_DEFINED_SWITCH();
+}
+
+struct bytecode_t gen_branchifr(struct parser_t parser, struct args_t args,
+				size_t position)
+{
+	logger(DEBUG, no_error, "Generating conditional branch intruction %s",
+	       parser.name);
+	check_required(parser.name, args.type, arg_register, arg_register,
+		       arg_symbol);
+	const enum branchifr_shortcuts type = parser.opcode;
+
+	register size_t rs = args.arg[0];
+	args.arg[0] = args.arg[1];
+	args.arg[1] = rs;
+
+	const uint16_t funct1 = type + 0x4;
+	const char *names[] = { "blt (bgt)", "bge (ble)", "bltu (bgtu)",
+				"bgeu (bleu)" };
+	return gen_btype((struct parser_t){ names[type], RV64I_SIZE, NULL,
+					    OP_BRANCH, funct1, 0 },
+			 args, position);
 }
 
 /* TODO: implement jump parser */

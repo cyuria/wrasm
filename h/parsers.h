@@ -74,7 +74,8 @@ parser gen_math;
 parser gen_setif;
 parser gen_single; // implement with float extension
 parser gen_double; // ^^^
-parser gen_branchif;
+parser gen_branchifz;
+parser gen_branchifr;
 parser gen_jump;
 parser gen_ret;
 
