@@ -13,9 +13,9 @@ int compare_parsers(struct parser_t *a, struct parser_t *b)
 		return 0;
 	if (a->opcode != b->opcode)
 		return 0;
-	if (a->funct1 != b->funct1)
+	if (a->funct3 != b->funct3)
 		return 0;
-	if (a->funct2 != b->funct2)
+	if (a->funct7 != b->funct7)
 		return 0;
 	if (strcmp(a->name, b->name))
 		return 0;

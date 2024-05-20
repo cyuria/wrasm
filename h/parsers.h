@@ -49,8 +49,8 @@ struct parser_t {
 	size_t isize;
 	parser *handler;
 	uint8_t opcode;
-	uint8_t funct1;
-	uint16_t funct2;
+	uint8_t funct3;
+	uint16_t funct7;
 };
 
 extern const struct bytecode_t error_bytecode;

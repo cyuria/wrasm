@@ -194,14 +194,19 @@ struct bytecode_t gen_rtype(struct parser_t parser, struct args_t args,
 	check_required(parser.name, args.type, arg_register, arg_register,
 		       arg_register);
 
-	struct bytecode_t res = { .size = RV64I_SIZE,
-				  .data = xmalloc(RV64I_SIZE) };
+	const uint32_t opcode = parser.opcode;
+	const uint32_t rd = args.arg[0] & 0x1F;
+	const uint32_t funct3 = parser.funct3 & 0x7;
+	const uint32_t rs1 = args.arg[1] & 0x1F;
+	const uint32_t rs2 = args.arg[2] & 0x1F;
+	const uint32_t funct7 = parser.funct7 & 0x7F;
 
-	*(uint32_t *)(res.data) =
-		(parser.opcode | ((uint32_t)args.arg[0] << 7) |
-		 ((uint32_t)args.arg[1] << 15) | ((uint32_t)args.arg[2] << 20) |
-		 ((uint32_t)parser.funct1 << 12) |
-		 ((uint32_t)parser.funct2 << 25));
+	struct bytecode_t res = {
+		.size = RV64I_SIZE,
+		.data = xmalloc(RV64I_SIZE),
+	};
+	*(uint32_t *)res.data = opcode | (rd << 7) | (funct3 << 12) |
+				(rs1 << 15) | (rs2 << 20) | (funct7 << 25);
 	return res;
 }
 
@@ -215,18 +220,18 @@ struct bytecode_t gen_itype(struct parser_t parser, struct args_t args,
 	check_required(parser.name, args.type, arg_register, arg_register,
 		       arg_immediate);
 
-	struct bytecode_t res = { .size = RV64I_SIZE,
-				  .data = xmalloc(RV64I_SIZE) };
+	const uint32_t opcode = parser.opcode;
+	const uint32_t rd = args.arg[0] & 0x1F;
+	const uint32_t funct3 = parser.funct3;
+	const uint32_t rs1 = args.arg[1] & 0x1F;
+	const uint32_t imm_11_0 = args.arg[2] & 0xFFF;
 
-	*(uint32_t *)res.data = (parser.opcode & 0x7F) |
-				(((uint32_t)args.arg[0] & 0x1F) << 7) |
-				(((uint32_t)parser.funct1 & 0x7) << 12) |
-				(((uint32_t)args.arg[1] & 0x1F) << 15) |
-				(((uint32_t)args.arg[2] & 0xFFF) << 20);
-
-	logger(DEBUG, no_error, " | Machine Code: %.08x",
-	       *(uint32_t *)res.data);
-
+	struct bytecode_t res = {
+		.size = RV64I_SIZE,
+		.data = xmalloc(RV64I_SIZE),
+	};
+	*(uint32_t *)res.data = opcode | (rd << 7) | (funct3 << 12) |
+				(rs1 << 15) | (imm_11_0 << 20);
 	return res;
 }
 
@@ -248,32 +253,49 @@ struct bytecode_t gen_stype(struct parser_t parser, struct args_t args,
 	       parser.name);
 	check_required(parser.name, args.type, arg_register, arg_register,
 		       arg_immediate);
-	struct bytecode_t res = { .size = RV64I_SIZE,
-				  .data = xmalloc(RV64I_SIZE) };
 
-	*(uint32_t *)res.data = (parser.opcode | ((uint32_t)args.arg[0] << 15) |
-				 ((uint32_t)args.arg[1] << 20) |
-				 ((uint32_t)parser.funct1 << 12) |
-				 (((uint32_t)args.arg[2] & 0x1F) << 7) |
-				 (((uint32_t)args.arg[2] & 0xFE0) << 21));
+	const uint32_t opcode = parser.opcode;
+	const uint32_t imm_4_0 = args.arg[2] & 0x1F;
+	const uint32_t funct3 = parser.funct3;
+	const uint32_t rs1 = args.arg[1] & 0x1F;
+	const uint32_t rs2 = args.arg[2] & 0x1F;
+	const uint32_t imm_11_5 = (args.arg[2] >> 5) & 0x7F;
+
+	struct bytecode_t res = {
+		.size = RV64I_SIZE,
+		.data = xmalloc(RV64I_SIZE),
+	};
+	*(uint32_t *)res.data = opcode | (imm_4_0 << 7) | (funct3 << 12) |
+				(rs1 << 15) | (rs2 << 20) | (imm_11_5 << 25);
 	return res;
 }
 
 struct bytecode_t gen_btype(struct parser_t parser, struct args_t args,
 			    size_t position)
 {
+	(void)position;
 	logger(DEBUG, no_error, "Generating B type instruction %s",
 	       parser.name);
 	check_required(parser.name, args.type, arg_register, arg_register,
 		       arg_symbol);
 
-	const uint32_t dup = (uint32_t)args.arg[2] >> 1;
-	args.arg[2] &= 0x7FE;
-	args.arg[2] |= (dup >> 10) & 0x1;
-	args.arg[2] |= dup & 0x800;
-	args.type[2] = arg_immediate;
+	const uint32_t opcode = parser.opcode;
+	const uint32_t imm_11 = (args.arg[2] >> 11) & 0x1;
+	const uint32_t imm_4_1 = (args.arg[2] >> 1) & 0xF;
+	const uint32_t funct3 = parser.funct3 & 0x7;
+	const uint32_t rs1 = args.arg[0] & 0x1F;
+	const uint32_t rs2 = args.arg[1] & 0x1F;
+	const uint32_t imm_10_5 = (args.arg[2] >> 5) & 0x3F;
+	const uint32_t imm_12 = (args.arg[2] >> 12) & 0x1;
 
-	return gen_stype(parser, args, position);
+	struct bytecode_t res = {
+		.size = RV64I_SIZE,
+		.data = xmalloc(RV64I_SIZE),
+	};
+	*(uint32_t *)res.data = opcode | (imm_11 << 7) | (imm_4_1 << 8) |
+				(funct3 << 12) | (rs1 << 15) | (rs2 << 20) |
+				(imm_10_5 << 25) | (imm_12 << 31);
+	return res;
 }
 
 struct bytecode_t gen_utype(struct parser_t parser, struct args_t args,
@@ -285,11 +307,15 @@ struct bytecode_t gen_utype(struct parser_t parser, struct args_t args,
 	check_required(parser.name, args.type, arg_register, arg_immediate,
 		       arg_none);
 
-	struct bytecode_t res = { .size = RV64I_SIZE,
-				  .data = xmalloc(RV64I_SIZE) };
+	const uint32_t opcode = parser.opcode;
+	const uint32_t rd = args.arg[0] & 0x1F;
+	const uint32_t imm_12_31 = (args.arg[1] >> 12) & 0xFFFFF;
 
-	*(uint32_t *)res.data = (parser.opcode | ((uint32_t)args.arg[0] << 7) |
-				 ((uint32_t)args.arg[1] & 0xFFFFF000));
+	struct bytecode_t res = {
+		.size = RV64I_SIZE,
+		.data = xmalloc(RV64I_SIZE),
+	};
+	*(uint32_t *)res.data = opcode | (rd << 7) | (imm_12_31 << 12);
 	return res;
 }
 
@@ -301,17 +327,25 @@ struct bytecode_t gen_jtype(struct parser_t parser, struct args_t args,
 	check_required(parser.name, args.type, arg_register, arg_immediate,
 		       arg_none);
 
-	uint32_t offset = (uint32_t)args.arg[2];
-	offset -= (uint32_t)position;
+	int32_t offset = (int32_t)args.arg[1];
+	offset -= (int32_t)position;
 	logger(DEBUG, no_error, "Offset of J type instruction is 0x%x", offset);
 
-	const uint32_t a = (offset & 0x0007FE) << 20;
-	const uint32_t b = (offset & 0x000800) << 9;
-	const uint32_t c = (offset & 0x0FF000);
-	const uint32_t d = (offset & 0x100000) << 11;
+	const uint32_t opcode = parser.opcode;
+	const uint32_t rd = args.arg[0] & 0x1F;
+	const uint32_t imm_19_12 = (args.arg[1] >> 12) & 0xFF;
+	const uint32_t imm_11 = (args.arg[1] >> 11) & 0x1;
+	const uint32_t imm_10_1 = (args.arg[1] >> 1) & 0x3FF;
+	const uint32_t imm_20 = (args.arg[1] >> 20) & 0x1;
 
-	args.arg[2] = a | b | c | d;
-	return gen_utype(parser, args, position);
+	struct bytecode_t res = {
+		.size = RV64I_SIZE,
+		.data = xmalloc(RV64I_SIZE),
+	};
+	*(uint32_t *)res.data = opcode | (rd << 7) | (imm_19_12 << 12) |
+				(imm_11 << 20) | (imm_10_1 << 21) |
+				(imm_20 << 31);
+	return res;
 }
 
 struct bytecode_t gen_syscall(struct parser_t parser, struct args_t args,
@@ -322,20 +356,23 @@ struct bytecode_t gen_syscall(struct parser_t parser, struct args_t args,
 	logger(DEBUG, no_error, "Generating syscall %s", parser.name);
 	check_required(parser.name, args.type, arg_none, arg_none, arg_none);
 
-	struct bytecode_t res = { .size = RV64I_SIZE,
-				  .data = xmalloc(RV64I_SIZE) };
+	const uint32_t opcode = parser.opcode;
+	const uint32_t funct3 = parser.funct3;
+	const uint32_t funct7 = parser.funct7;
 
-	*(uint32_t *)res.data =
-		((uint32_t)parser.opcode | ((uint32_t)parser.funct1 << 12) |
-		 ((uint32_t)parser.funct2 << 20));
+	struct bytecode_t res = {
+		.size = RV64I_SIZE,
+		.data = xmalloc(RV64I_SIZE),
+	};
+	*(uint32_t *)res.data = opcode | (funct3 << 12) | (funct7 << 20);
 	return res;
 }
 
+/* TODO: implement fence instruction */
 struct bytecode_t gen_fence(struct parser_t parser, struct args_t args,
 			    size_t position)
 {
 	(void)position;
-	/* TODO: fix fence implementation w/ flags and stuff */
 	logger(DEBUG, no_error, "Generating fence instruction %s", parser.name);
 	check_required(parser.name, args.type, arg_immediate, arg_none,
 		       arg_none);
@@ -344,7 +381,7 @@ struct bytecode_t gen_fence(struct parser_t parser, struct args_t args,
 				  .data = xmalloc(RV64I_SIZE) };
 
 	*(uint32_t *)res.data =
-		((uint32_t)parser.opcode | ((uint32_t)parser.funct1 << 12) |
+		((uint32_t)parser.opcode | ((uint32_t)parser.funct3 << 12) |
 		 (((uint32_t)args.arg[0]) << 20));
 	return res;
 }
@@ -420,7 +457,6 @@ struct bytecode_t gen_math(struct parser_t parser, struct args_t args,
 	case math_not: // xori rd, rs, -1
 		args.type[2] = arg_immediate;
 		args.arg[2] = (uint32_t)-1;
-		// { "xori", RV64I_SIZE, &gen_itype, OP_OPI, 0x4, 0 },
 		return gen_itype((struct parser_t){ "not (xori)", RV64I_SIZE,
 						    NULL, OP_OPI, 0x4, 0 },
 				 args, position);
@@ -429,7 +465,6 @@ struct bytecode_t gen_math(struct parser_t parser, struct args_t args,
 		args.arg[2] = args.arg[1];
 		args.type[1] = arg_register;
 		args.arg[1] = 0;
-		// { "sub", RV64I_SIZE, &gen_rtype, OP_OP, 0x0, 0x20 },
 		return gen_rtype((struct parser_t){ "neg (sub)", RV64I_SIZE,
 						    NULL, OP_OP, 0x0, 0x20 },
 				 args, position);
