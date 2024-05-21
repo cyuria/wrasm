@@ -28,14 +28,15 @@ jobs:
       with: 
         compiler: ${{ matrix.compiler }}
 
-    - run: meson setup build
-
     - name: Build
       uses: BSFishy/meson-build@v1
       with:
         action: build
         directory: build
         options: --verbose
+
+    - run: find .
+      if: failure()
 
     - uses: actions/upload-artifact@v4
       if: failure()
