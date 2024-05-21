@@ -24,6 +24,8 @@ jobs:
       with:
         python-version: '3.x'
 
+    - run: pip install meson ninja
+
     - uses: ilammy/msvc-dev-cmd@v1
       if: ${{ matrix.compiler == 'msvc' }}
 
@@ -51,8 +53,8 @@ jobs:
       with:
         python-version: '3.x'
 
-    - name: Install qemu and lld
-      run: sudo apt install qemu-user lld
+    - run: sudo apt install qemu-user lld
+    - run: pip install meson ninja
 
     - run: echo "CC=$(which clang)" >> $GITHUB_ENV
 
