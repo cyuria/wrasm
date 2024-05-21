@@ -29,6 +29,8 @@ jobs:
         runs-on: ${{ matrix.os }}
         compiler: ${{ matrix.compiler }}
 
+    - run: meson setup build
+
     - name: Build
       uses: BSFishy/meson-build@v1
       with:

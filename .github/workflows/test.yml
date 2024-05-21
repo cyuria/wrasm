@@ -26,6 +26,8 @@ jobs:
         runs-on: ${{ matrix.os }}
         compiler: ${{ matrix.compiler }}
 
+    - run: meson setup build
+
     - name: Build
       uses: BSFishy/meson-build@v1
       with:
@@ -49,6 +51,8 @@ jobs:
 
     - run: sudo apt install qemu-user lld
     - run: pip install meson ninja
+
+    - run: meson setup build
 
     - name: Build
       uses: BSFishy/meson-build@v1
