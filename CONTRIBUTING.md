@@ -1,5 +1,10 @@
 # Contributing to wrasm
 
+## The RISC-V spec
+
+This can be found here https://riscv.org/technical/specifications/ or here
+https://github.com/riscv/riscv-isa-manual.
+
 ## Reporting Bugs
 
 If you've found a bug, please open an issue on GitHub.
