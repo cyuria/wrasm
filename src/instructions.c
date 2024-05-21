@@ -66,10 +66,10 @@ int write_instruction(struct instruction_t instruction)
 	linenumber = instruction.line;
 	logger(DEBUG, no_error,
 	       "Generating bytecode for %s instruction (offset: %zu)",
-	       instruction.parser.name, instruction.position.offset);
+	       instruction.formation.name, instruction.position.offset);
 	set_section(instruction.position.section);
-	struct bytecode_t bytecode = instruction.parser.handler(
-		instruction.parser, instruction.args,
+	struct bytecode_t bytecode = instruction.formation.handler(
+		instruction.formation, instruction.args,
 		calc_fileoffset(instruction.position));
 	logger(DEBUG, no_error, "Bytecode finished generating");
 	if (!bytecode.size) {

@@ -3,9 +3,9 @@
 
 #include "asm.h"
 #include "debug.h"
-#include "parsers.h"
+#include "formation.h"
 
-int compare_parsers(struct parser_t *a, struct parser_t *b)
+int compare_formations(struct formation_t *a, struct formation_t *b)
 {
 	if (a->isize != b->isize)
 		return 0;
@@ -23,19 +23,19 @@ int compare_parsers(struct parser_t *a, struct parser_t *b)
 	return 1;
 }
 
-int test_parser(struct parser_t parser)
+int test_parser(struct formation_t formation)
 {
-	struct parser_t found;
-	if (parse_parser(parser.name, &found)) {
+	struct formation_t found;
+	if (parse_form(formation.name, &found)) {
 		logger(ERROR, error_internal,
 		       "Test Failed, parse_parser returned error code with instruction %s",
-		       parser.name);
+		       formation.name);
 		return 1;
 	}
-	if (!compare_parsers(&parser, &found)) {
+	if (!compare_formations(&formation, &found)) {
 		logger(ERROR, error_internal,
 		       "Test Failed, parser for %s not correctly found",
-		       parser.name);
+		       formation.name);
 		return 1;
 	}
 	return 0;

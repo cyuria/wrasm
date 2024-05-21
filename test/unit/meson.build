@@ -1,8 +1,8 @@
 tests = [
     'find_symbol_or_immediate.c',
     'get_register_id.c',
-    'parse_parser.c',
-    'parsers.c',
+    'parse_form.c',
+    'form_handlers.c',
 ]
 
 compiler = meson.get_compiler('c')

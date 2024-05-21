@@ -8,7 +8,7 @@
 #include "elf/output.h"
 #include "instructions.h"
 #include "macros.h"
-#include "parsers.h"
+#include "formation.h"
 #include "registers.h"
 #include "stringutil.h"
 #include "symbols.h"
@@ -33,9 +33,9 @@ int parse_asm(const char *line, struct sectionpos_t position)
 	char *argstr = trim_whitespace(argstart);
 
 	struct args_t args;
-	struct parser_t parser;
+	struct formation_t formation;
 
-	if (parse_parser(linestr, &parser)) {
+	if (parse_form(linestr, &formation)) {
 		free(argstr);
 		free(linestr);
 		return 1;
@@ -52,36 +52,36 @@ int parse_asm(const char *line, struct sectionpos_t position)
 	add_instruction((struct instruction_t){
 		.args = args,
 		.line = linenumber,
-		.parser = parser,
+		.formation = formation,
 		.position = position,
 	});
-	inc_outputsize(position.section, parser.isize);
+	inc_outputsize(position.section, formation.isize);
 	logger(DEBUG, no_error, "Updated position to offset (%zu)",
 	       position.offset);
 
 	return 0;
 }
 
-int parse_parser(const char *parserstr, struct parser_t *parser)
+int parse_form(const char *instruction, struct formation_t *formation)
 {
-	logger(DEBUG, no_error, "Getting parser for instruction (%s)",
-	       parserstr);
+	logger(DEBUG, no_error, "Getting formation for instruction %s",
+	       instruction);
 
-	const struct parser_t *sets[] = {
+	const struct formation_t *sets[] = {
 		rv64s,
 		rv64i,
 	};
 	for (size_t i = 0; i < ARRAY_LENGTH(sets); i++) {
 		while (sets[i]->name) {
-			if (!strcmp(parserstr, sets[i]->name)) {
-				*parser = *sets[i];
+			if (!strcmp(instruction, sets[i]->name)) {
+				*formation = *sets[i];
 				return 0;
 			}
 			sets[i]++;
 		}
 	}
 	logger(ERROR, error_invalid_instruction,
-	       "Unknown assembly instruction - %s\n", parserstr);
+	       "Unknown assembly instruction - %s\n", instruction);
 	return 1;
 }
 
@@ -91,9 +91,9 @@ int parse_args(char *argstr, struct args_t *args)
 	logger(DEBUG, no_error, "Parsing arguments for instruction (%s)",
 	       argstr);
 
-	args->type[0] = arg_none;
-	args->type[1] = arg_none;
-	args->type[2] = arg_none;
+	args->a[0].type = arg_none;
+	args->a[1].type = arg_none;
+	args->a[2].type = arg_none;
 
 	char **arg_strs = NULL;
 	size_t arg_count = 0;
@@ -114,12 +114,12 @@ int parse_args(char *argstr, struct args_t *args)
 	}
 
 	for (size_t i = 0; i < arg_count; i++)
-		parse_arg(arg_strs[i], &args->type[i], &args->arg[i]);
+		parse_arg(arg_strs[i], &args->a[i].type, &args->a[i].arg);
 
 	logger(DEBUG, no_error,
-	       "Arguments parsed, (%d, %d), (%d, %d), (%d, %d)", args->type[0],
-	       args->arg[0], args->type[1], args->arg[1], args->type[2],
-	       args->arg[2]);
+	       "Arguments parsed, (%d, %d), (%d, %d), (%d, %d)",
+	       args->a[0].type, args->a[0].arg, args->a[1].type, args->a[1].arg,
+	       args->a[2].type, args->a[2].arg);
 
 	return 0;
 }

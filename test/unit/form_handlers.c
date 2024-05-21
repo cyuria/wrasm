@@ -3,12 +3,12 @@
 #include "asm.h"
 #include "debug.h"
 #include "macros.h"
-#include "parsers.h"
+#include "formation.h"
 #include "symbols.h"
 
 struct case_t {
 	const char *instruction;
-	struct parser_t parser;
+	struct formation_t formation;
 	uint32_t bytecode;
 };
 struct case_t cases_math[] = {
@@ -41,13 +41,14 @@ struct case_t cases_branchifr[] = {
 
 int test_case(struct case_t c, struct args_t args, size_t position)
 {
-	if (parse_parser(c.instruction, &c.parser)) {
+	if (parse_form(c.instruction, &c.formation)) {
 		logger(ERROR, error_internal,
-		       "Unable to find parser for instruction %s",
+		       "Unable to find formation for instruction %s",
 		       c.instruction);
 		return 1;
 	}
-	struct bytecode_t result = c.parser.handler(c.parser, args, position);
+	struct bytecode_t result =
+		c.formation.handler(c.formation, args, position);
 	if (result.size != sizeof(c.bytecode)) {
 		logger(ERROR, error_internal, "invalid size generated for %s",
 		       c.instruction);
@@ -73,36 +74,35 @@ int main(void)
 	};
 	for (size_t i = 0; i < ARRAY_LENGTH(cases_math); i++)
 		errors += test_case(cases_math[i],
-				    (struct args_t){
-					    .type = { arg_register,
-						      arg_register, arg_none },
-					    .arg = { 1, i + 2, 0 },
-				    },
+				    (struct args_t){ {
+					    { arg_register, 1 },
+					    { arg_register, i + 2 },
+					    { arg_none, 0 },
+				    } },
 				    0);
 	for (size_t i = 0; i < ARRAY_LENGTH(cases_setif); i++)
 		errors += test_case(cases_setif[i],
-				    (struct args_t){
-					    .type = { arg_register,
-						      arg_register, arg_none },
-					    .arg = { 1, i + 2, 0 },
-				    },
+				    (struct args_t){ {
+					    { arg_register, 1 },
+					    { arg_register, i + 2 },
+					    { arg_none, 0 },
+				    } },
 				    0);
 	for (size_t i = 0; i < ARRAY_LENGTH(cases_branchifz); i++)
-		errors += test_case(
-			cases_branchifz[i],
-			(struct args_t){
-				.type = { arg_register, arg_symbol, arg_none },
-				.arg = { i + 1, (size_t)&start, 0 },
-			},
-			i * RV64I_SIZE);
+		errors += test_case(cases_branchifz[i],
+				    (struct args_t){ {
+					    { arg_register, i + 1 },
+					    { arg_symbol, (size_t)&start },
+					    { arg_none, 0 },
+				    } },
+				    i * RV64I_SIZE);
 	for (size_t i = 0; i < ARRAY_LENGTH(cases_branchifr); i++)
-		errors += test_case(
-			cases_branchifr[i],
-			(struct args_t){
-				.type = { arg_register, arg_register,
-					  arg_symbol },
-				.arg = { i + 1, i + 5, (size_t)&start },
-			},
-			i * RV64I_SIZE);
+		errors += test_case(cases_branchifr[i],
+				    (struct args_t){ {
+					    { arg_register, i + 1 },
+					    { arg_register, i + 5 },
+					    { arg_symbol, (size_t)&start },
+				    } },
+				    i * RV64I_SIZE);
 	return errors != 0;
 }

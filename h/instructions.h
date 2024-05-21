@@ -3,10 +3,10 @@
 #include <stdbool.h>
 
 #include "elf/output.h"
-#include "parsers.h"
+#include "formation.h"
 
 struct instruction_t {
-	struct parser_t parser;
+	struct formation_t formation;
 	struct args_t args;
 	struct sectionpos_t position;
 	size_t line;
