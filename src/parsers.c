@@ -18,9 +18,9 @@
 #ifdef __clang__
 #define FULLY_DEFINED_SWITCH()
 #elif defined(__GNUC__)
-#define FULLY_FULLY_DEFINED_SWITCH() __builtin_unreachable()
+#define FULLY_DEFINED_SWITCH() __builtin_unreachable()
 #elif defined(_MSC_VER)
-#define FULLY_FULLY_DEFINED_SWITCH() __assume(0)
+#define FULLY_DEFINED_SWITCH() __assume(0)
 #else
 #warning "compiler does not define __GNUC__ and is not MSVC"
 #define FULLY_DEFINED_SWITCH()
