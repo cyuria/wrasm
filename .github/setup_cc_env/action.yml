@@ -18,13 +18,13 @@ runs:
       shell: bash
 
     - uses: ilammy/msvc-dev-cmd@v1
-      if: ${{ matrix.compiler == 'msvc' }}
+      if: ${{ inputs.compiler == 'msvc' }}
 
-    - run: echo "CC=$(which ${{ matrix.compiler }})" >> $GITHUB_ENV
-      if: ${{ matrix.compiler != 'msvc' }}
+    - run: echo "CC=$(which ${{ inputs.compiler }})" >> $GITHUB_ENV
+      if: ${{ inputs.compiler != 'msvc' }}
       shell: bash
 
     - run: echo "CC_LD=lld" >> $GITHUB_ENV
-      if: ${{ matrix.compiler == 'clang' && runner.os == 'Linux' }}
+      if: ${{ inputs.compiler == 'clang' && runner.os == 'Linux' }}
       shell: bash
 
