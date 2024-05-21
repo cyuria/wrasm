@@ -25,6 +25,6 @@ runs:
       shell: bash
 
     - run: echo "CC_LD=lld" >> $GITHUB_ENV
-      if: ${{ matrix.compiler == 'clang' && runner.os = 'Linux' }}
+      if: ${{ matrix.compiler == 'clang' && runner.os == 'Linux' }}
       shell: bash
 
