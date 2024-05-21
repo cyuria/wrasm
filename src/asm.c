@@ -49,10 +49,12 @@ int parse_asm(const char *line, struct sectionpos_t position)
 	free(argstr);
 	free(linestr);
 
-	add_instruction((struct instruction_t){ .args = args,
-						.line = linenumber,
-						.parser = parser,
-						.position = position });
+	add_instruction((struct instruction_t){
+		.args = args,
+		.line = linenumber,
+		.parser = parser,
+		.position = position,
+	});
 	inc_outputsize(position.section, parser.isize);
 	logger(DEBUG, no_error, "Updated position to offset (%zu)",
 	       position.offset);

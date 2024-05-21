@@ -279,14 +279,27 @@ struct bytecode_t gen_btype(struct parser_t parser, struct args_t args,
 	check_required(parser.name, args.type, arg_register, arg_register,
 		       arg_symbol);
 
+	const struct symbol_t symbol = *(struct symbol_t *)args.arg[2];
+	if (symbol.type != symbol_label)
+		logger(ERROR, error_invalid_syntax,
+		       "Incorrect argument types for instruction %s."
+		       " Expected label, but got a different symbol",
+		       symbol.name);
+
+	const uint32_t offset = calc_fileoffset((struct sectionpos_t){
+		.section = symbol.section,
+		.offset = symbol.value,
+	}) - position;
+	logger(DEBUG, no_error, "B type instruction has offset of 0x%.04X",
+	       (uint32_t)offset);
 	const uint32_t opcode = parser.opcode;
-	const uint32_t imm_11 = (args.arg[2] >> 11) & 0x1;
-	const uint32_t imm_4_1 = (args.arg[2] >> 1) & 0xF;
+	const uint32_t imm_11 = (offset >> 11) & 0x1;
+	const uint32_t imm_4_1 = (offset >> 1) & 0xF;
 	const uint32_t funct3 = parser.funct3 & 0x7;
 	const uint32_t rs1 = args.arg[0] & 0x1F;
 	const uint32_t rs2 = args.arg[1] & 0x1F;
-	const uint32_t imm_10_5 = (args.arg[2] >> 5) & 0x3F;
-	const uint32_t imm_12 = (args.arg[2] >> 12) & 0x1;
+	const uint32_t imm_10_5 = (offset >> 5) & 0x3F;
+	const uint32_t imm_12 = (offset >> 12) & 0x1;
 
 	struct bytecode_t res = {
 		.size = RV64I_SIZE,

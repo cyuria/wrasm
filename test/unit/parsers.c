@@ -4,6 +4,7 @@
 #include "debug.h"
 #include "macros.h"
 #include "parsers.h"
+#include "symbols.h"
 
 struct case_t {
 	const char *instruction;
@@ -32,7 +33,7 @@ struct case_t cases_branchifz[] = {
 	{ .instruction = "bgtz", .bytecode = 0xfe6046e3 },
 };
 
-int test_case(struct case_t c, struct args_t args)
+int test_case(struct case_t c, struct args_t args, size_t position)
 {
 	if (parse_parser(c.instruction, &c.parser)) {
 		logger(ERROR, error_internal,
@@ -40,7 +41,7 @@ int test_case(struct case_t c, struct args_t args)
 		       c.instruction);
 		return 1;
 	}
-	struct bytecode_t result = c.parser.handler(c.parser, args, 0);
+	struct bytecode_t result = c.parser.handler(c.parser, args, position);
 	if (result.size != sizeof(c.bytecode)) {
 		logger(ERROR, error_internal, "invalid size generated for %s",
 		       c.instruction);
@@ -59,26 +60,34 @@ int main(void)
 {
 	set_exit_loglevel(NODEBUG);
 	int errors = 0;
+	struct symbol_t start = {
+		.section = section_null,
+		.value = 0,
+		.type = symbol_label,
+	};
 	for (size_t i = 0; i < ARRAY_LENGTH(cases_math); i++)
 		errors += test_case(cases_math[i],
 				    (struct args_t){
 					    .type = { arg_register,
 						      arg_register, arg_none },
 					    .arg = { 1, i + 2, 0 },
-				    });
+				    },
+				    0);
 	for (size_t i = 0; i < ARRAY_LENGTH(cases_setif); i++)
 		errors += test_case(cases_setif[i],
 				    (struct args_t){
 					    .type = { arg_register,
 						      arg_register, arg_none },
 					    .arg = { 1, i + 2, 0 },
-				    });
+				    },
+				    0);
 	for (size_t i = 0; i < ARRAY_LENGTH(cases_branchifz); i++)
 		errors += test_case(
 			cases_branchifz[i],
 			(struct args_t){
 				.type = { arg_register, arg_symbol, arg_none },
-				.arg = { i + 1, 0x11158, 0 },
-			});
+				.arg = { i + 1, (size_t)&start, 0 },
+			},
+			i * RV64I_SIZE);
 	return errors != 0;
 }
