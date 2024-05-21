@@ -17,6 +17,10 @@ runs:
     - run: pip install meson ninja
       shell: bash
 
+    - run: brew install llvm
+      if: ${{ runner.os == 'macOS' }}
+      shell: bash
+
     - uses: ilammy/msvc-dev-cmd@v1
       if: ${{ matrix.compiler == 'msvc' }}
 
@@ -24,14 +28,6 @@ runs:
       if: ${{ matrix.compiler != 'msvc' }}
       shell: bash
 
-    - run: echo "CC_LD=ld.lld" >> $GITHUB_ENV
-      if: ${{ matrix.compiler == 'clang' && runner.os == 'Linux' }}
+    - run: echo "CC_LD=lld" >> $GITHUB_ENV
       shell: bash
 
-    - run: echo "CC_LD=lld-link" >> $GITHUB_ENV
-      if: ${{ matrix.compiler == 'clang' && runner.os == 'Windows' }}
-      shell: bash
-
-    - run: echo "CC_LD=ld64.lld" >> $GITHUB_ENV
-      if: ${{ matrix.compiler == 'clang' && runner.os == 'macOS' }}
-      shell: bash
