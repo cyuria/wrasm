@@ -32,6 +32,12 @@ struct case_t cases_branchifz[] = {
 	{ .instruction = "bltz", .bytecode = 0xfe02c8e3 },
 	{ .instruction = "bgtz", .bytecode = 0xfe6046e3 },
 };
+struct case_t cases_branchifr[] = {
+	{ .instruction = "bgt", .bytecode = 0x0012c063 },
+	{ .instruction = "ble", .bytecode = 0xfe235ee3 },
+	{ .instruction = "bgtu", .bytecode = 0xfe33ece3 },
+	{ .instruction = "bleu", .bytecode = 0xfe447ae3 },
+};
 
 int test_case(struct case_t c, struct args_t args, size_t position)
 {
@@ -87,6 +93,15 @@ int main(void)
 			(struct args_t){
 				.type = { arg_register, arg_symbol, arg_none },
 				.arg = { i + 1, (size_t)&start, 0 },
+			},
+			i * RV64I_SIZE);
+	for (size_t i = 0; i < ARRAY_LENGTH(cases_branchifr); i++)
+		errors += test_case(
+			cases_branchifr[i],
+			(struct args_t){
+				.type = { arg_register, arg_register,
+					  arg_symbol },
+				.arg = { i + 1, i + 5, (size_t)&start },
 			},
 			i * RV64I_SIZE);
 	return errors != 0;
