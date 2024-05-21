@@ -27,10 +27,7 @@ jobs:
 
     - run: meson setup build
 
-    - name: Build
-      uses: BSFishy/meson-build@v1
-      with:
-        action: test
+    - run: meson test -C build
 
     - uses: actions/upload-artifact@v4
       if: failure()
@@ -53,13 +50,9 @@ jobs:
 
     - run: meson setup build
 
-    - name: Build
-      uses: BSFishy/meson-build@v1
-      with:
-        action: build
+    - run: meson compile -C build
 
-    - name: Test
-      run: python3 test/system/runtests.py
+    - run: python3 test/system/runtests.py
 
     - uses: actions/upload-artifact@v4
       if: failure()

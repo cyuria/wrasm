@@ -28,15 +28,9 @@ jobs:
       with: 
         compiler: ${{ matrix.compiler }}
 
-    - name: Build
-      uses: BSFishy/meson-build@v1
-      with:
-        action: build
-        directory: build
-        options: --verbose
+    - run: meson setup build
 
-    - run: find .
-      if: failure()
+    - run: meson compile -C build
 
     - uses: actions/upload-artifact@v4
       if: failure()
