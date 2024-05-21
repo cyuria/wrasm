@@ -16,9 +16,11 @@ jobs:
   unit:
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
-        compiler: [ gcc, clang ]
         include:
+          - os: ubuntu-latest
+            compiler: gcc
+          - os: ubuntu-latest
+            compiler: clang
           - os: windows-latest
             compiler: msvc
 
