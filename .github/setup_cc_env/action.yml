@@ -24,6 +24,14 @@ runs:
       if: ${{ matrix.compiler != 'msvc' }}
       shell: bash
 
-    - run: echo "CC_LD=lld" >> $GITHUB_ENV
-      if: ${{ matrix.compiler == 'clang' }}
+    - run: echo "CC_LD=ld.lld" >> $GITHUB_ENV
+      if: ${{ matrix.compiler == 'clang' && runner.os == 'Linux' }}
+      shell: bash
+
+    - run: echo "CC_LD=lld-link" >> $GITHUB_ENV
+      if: ${{ matrix.compiler == 'clang' && runner.os == 'Windows' }}
+      shell: bash
+
+    - run: echo "CC_LD=ld64.lld" >> $GITHUB_ENV
+      if: ${{ matrix.compiler == 'clang' && runner.os == 'macOS' }}
       shell: bash
