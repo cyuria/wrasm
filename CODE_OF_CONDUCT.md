@@ -6,9 +6,9 @@
 > ```
 > Sorry, mb
 > ```
-
-These are the magic words. They can resolve every single argument on the
-internet. Please use them.
+>
+> These are the magic words. They can resolve every single argument on the
+> internet. Please use them.
 
 ## The Actual Code of Conduct
 
