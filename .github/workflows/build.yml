@@ -8,6 +8,9 @@ on:
       - '**/meson.build'
   pull_request:
     branches: [ "master" ]
+    paths:
+      - '*/**'
+      - '**/meson.build'
 
 jobs:
   compile:
