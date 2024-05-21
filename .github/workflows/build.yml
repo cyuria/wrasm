@@ -3,6 +3,9 @@ name: build
 on:
   push:
     branches: [ "master" ]
+    paths:
+      - '*/**'
+      - '**/meson.build'
   pull_request:
     branches: [ "master" ]
 
@@ -20,9 +23,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
-      with:
-        python-version: '3.x'
 
     - uses: ilammy/msvc-dev-cmd@v1
       if: ${{ matrix.compiler == 'msvc' }}
@@ -30,17 +30,10 @@ jobs:
     - run: echo "CC=$(which ${{ matrix.compiler }})" >> $GITHUB_ENV
       if: ${{ matrix.compiler != 'msvc' }}
 
-    - name: Install Meson
-      run: pip install meson ninja
-
-    - name: Configure
-      run: meson setup build
-
     - name: Build
-      run: meson compile -C build
-
-    - name: Test
-      run: meson test -C build
+      uses: BSFishy/meson-build@v1
+      with:
+        action: build
 
     - uses: actions/upload-artifact@v4
       if: failure()
