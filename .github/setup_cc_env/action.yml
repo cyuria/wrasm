@@ -21,8 +21,12 @@ runs:
       if: ${{ inputs.compiler == 'msvc' }}
 
     - run: echo "CC=$(which ${{ inputs.compiler }})" >> $GITHUB_ENV
-      if: ${{ inputs.compiler != 'msvc' }}
+      if: ${{ inputs.compiler != 'msvc' && runner.os != 'Windows' }}
       shell: bash
+
+    - run: echo "CC=$(which ${{ inputs.compiler }})" >> $GITHUB_ENV
+      if: ${{ inputs.compiler != 'msvc' && runner.os == 'Windows' }}
+      shell: pwsh
 
     - run: echo "CC_LD=lld" >> $GITHUB_ENV
       if: ${{ inputs.compiler == 'clang' && runner.os == 'Linux' }}
