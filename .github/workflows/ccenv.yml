@@ -1,0 +1,30 @@
+name: Compiler Environment Setup
+
+on:
+  workflow_call:
+    inputs:
+      runs-on:
+        required: true
+        type: string
+      compiler:
+        required: true
+        type: string
+
+jobs:
+  ccenv:
+    runs-on: ${{ inputs.runs-on }}
+    steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - run: pip install meson ninja
+
+    - uses: ilammy/msvc-dev-cmd@v1
+      if: ${{ matrix.compiler == 'msvc' }}
+
+    - run: echo "CC=$(which ${{ matrix.compiler }})" >> $GITHUB_ENV
+      if: ${{ matrix.compiler != 'msvc' }}
+
+    - run: echo "CC_LD=lld" >> $GITHUB_ENV
+      if: ${{ matrix.compiler == 'clang' }}

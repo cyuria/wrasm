@@ -20,17 +20,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
-      with:
-        python-version: '3.x'
 
-    - run: pip install meson ninja
-
-    - uses: ilammy/msvc-dev-cmd@v1
-      if: ${{ matrix.compiler == 'msvc' }}
-
-    - run: echo "CC=$(which ${{ matrix.compiler }})" >> $GITHUB_ENV
-      if: ${{ matrix.compiler != 'msvc' }}
+    - uses: ./.github/workflows/ccenv.yml
+      with: 
+        runs-on: ${{ matrix.os }}
+        compiler: ${{ matrix.compiler }}
 
     - name: Build
       uses: BSFishy/meson-build@v1
@@ -55,8 +49,6 @@ jobs:
 
     - run: sudo apt install qemu-user lld
     - run: pip install meson ninja
-
-    - run: echo "CC=$(which clang)" >> $GITHUB_ENV
 
     - name: Build
       uses: BSFishy/meson-build@v1
