@@ -1,6 +1,6 @@
 # The wrasm Assembler
 
-[![build CI badge](https://github.com/cyuria/wrasm/actions/workflows/build.yml/badge.svg)](https://github.com/cyuria/wrasm/actions.workflows/build.yml)
+[![build CI badge](https://github.com/cyuria/wrasm/actions/workflows/build.yml/badge.svg)](https://github.com/cyuria/wrasm/actions/workflows/build.yml)
 [![tests CI badge](https://github.com/cyuria/wrasm/actions/workflows/test.yml/badge.svg)](https://github.com/cyuria/wrasm/actions/workflows/test.yml)
 
 Wrasm is a RISC-V assembler, primarily targeting riscv64.
