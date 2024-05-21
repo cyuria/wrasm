@@ -1,0 +1,6 @@
+.git/
+.tags
+.clang-format
+.cache/
+subprojects/
+build/
