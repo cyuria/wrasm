@@ -47,3 +47,12 @@ contributing should be something along the lines of:
 1. Open an issue about it
 2. Figure out what to do next with a maintainer or whoever
 3. Pull Request?
+
+## Philosophy
+
+The wrasm codebase is designed to be as independent as possible, this means it should be compilable on any C compiler for any architecture on any operating system. In practice, this isn't really feasible to test, but some general guidelines are:
+1. Use only stdlib features defined in the C standard. I.e. no Linux specific headers.
+2. Avoid any UB (undefined behaviour). Even if it works, it's generally not best practices and could cause issues on another system.
+3. If any os/compiler/architecture specific code is absolutely necessary, ensure there is a fully functional, compilable alternative that should work on every system, even of it's not best practices (also see no. 2 above)
+
+The other main part of the philosophy is to give the end user the power to shoot themselves in the foot with a warning. In this vein, it is theoretically possible to compile wrasm on a C compiler that does not define `__clang__`, `__gnu_c__` or `_MSV_VER`. This will however raise a warning, which means removing the `-werror` flag is required to do so. What this effectively means is that any time you raise an error, by default wrasm will exit, however this is possible to change. Pretty much, even if an error occurs, try to make it work anyway, or at the very least don't break anything else.
