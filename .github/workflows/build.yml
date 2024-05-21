@@ -24,9 +24,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - uses: ./.github/workflows/ccenv.yml
+    - uses: ./.github/setup_cc_env
       with: 
-        runs-on: ${{ matrix.os }}
         compiler: ${{ matrix.compiler }}
 
     - run: meson setup build
