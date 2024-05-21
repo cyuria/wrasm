@@ -40,6 +40,12 @@ https://github.com/rails/rails/pull/13771#issuecomment-32746700. If you find
 this kind of problem, please either open an issue about it or mention it in one
 such existing issue.
 
+### A Note on Typos
+
+The above doesn't really apply to typos, so don't worry. Please use your own judgement as to whether the change is worth it or not. For docs, we don't want typos, so we'll most likely let the PR through. For code it depends on the code and the severity of the typo. If that portion of the code has a minor typo which doesn't impact its readability, just raise an issue and hopefully it will get fixed the next time that piece of code is updated. If the typo severely impacts the code's readability or makes it not perform as expected, that's a more serious bug, please submit a PR, or at least let us know with an issue.
+
+Notice how all the solutions start with raising an issue? That's because you can use the issue to gauge the importance of a corresponding PR. Isn't that convenient.
+
 ## Something Else?
 
 If there's anything that isn't covered here, the general process for
