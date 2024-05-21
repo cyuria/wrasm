@@ -1,0 +1,51 @@
+name: build
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        compiler: [ gcc, clang ]
+        include:
+          - os: windows-latest
+            compiler: msvc
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - uses: ilammy/msvc-dev-cmd@v1
+      if: ${{ matrix.compiler == 'msvc' }}
+
+    - run: echo "CC=$(which ${{ matrix.compiler }})" >> $GITHUB_ENV
+      if: ${{ matrix.compiler != 'msvc' }}
+
+    - name: Install Meson
+      run: pip install meson ninja
+
+    - name: Configure
+      run: meson setup build
+
+    - name: Build
+      run: meson compile -C build
+
+    - name: Test
+      run: meson test -C build
+
+    - uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: logs-${{ matrix.os }}
+        path: build/meson-logs/
+        retention-days: 5
+

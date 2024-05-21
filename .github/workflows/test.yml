@@ -1,4 +1,4 @@
-name: Compilation and Testing CI
+name: tests
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ "master" ]
 
 jobs:
-  build:
+  test:
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
@@ -35,9 +35,6 @@ jobs:
 
     - name: Configure
       run: meson setup build
-
-    - name: Build
-      run: meson compile -C build
 
     - name: Test
       run: meson test -C build
