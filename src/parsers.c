@@ -286,10 +286,12 @@ struct bytecode_t gen_btype(struct parser_t parser, struct args_t args,
 		       " Expected label, but got a different symbol",
 		       symbol.name);
 
-	const uint32_t offset = calc_fileoffset((struct sectionpos_t){
-		.section = symbol.section,
-		.offset = symbol.value,
-	}) - position;
+	const uint32_t offset =
+		(uint32_t)(calc_fileoffset((struct sectionpos_t){
+				   .section = symbol.section,
+				   .offset = symbol.value,
+			   }) -
+			   position);
 	logger(DEBUG, no_error, "B type instruction has offset of 0x%.04X",
 	       (uint32_t)offset);
 	const uint32_t opcode = parser.opcode;
@@ -601,11 +603,12 @@ struct bytecode_t gen_branchifr(struct parser_t parser, struct args_t args,
 	args.arg[0] = args.arg[1];
 	args.arg[1] = rs;
 
-	const uint16_t funct1 = type + 0x4;
+	/* Types happen to align correctly with the correct funct3 field for this trick to work */
+	const uint8_t funct3 = (uint8_t)(type + 0x4);
 	const char *names[] = { "blt (bgt)", "bge (ble)", "bltu (bgtu)",
 				"bgeu (bleu)" };
 	return gen_btype((struct parser_t){ names[type], RV64I_SIZE, NULL,
-					    OP_BRANCH, funct1, 0 },
+					    OP_BRANCH, funct3, 0 },
 			 args, position);
 }
 
