@@ -1,4 +1,6 @@
 .*
 !.git*
+.git
+!.clang-format
 
 build/*
