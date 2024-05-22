@@ -2,7 +2,7 @@ tests = [
     'find_symbol_or_immediate.c',
     'get_register_id.c',
     'parse_form.c',
-    'form_handlers.c',
+    'form_rv64i.c',
 ]
 
 compiler = meson.get_compiler('c')

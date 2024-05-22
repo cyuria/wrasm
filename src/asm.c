@@ -8,7 +8,7 @@
 #include "elf/output.h"
 #include "instructions.h"
 #include "macros.h"
-#include "formation.h"
+#include "form/generic.h"
 #include "registers.h"
 #include "stringutil.h"
 #include "symbols.h"
@@ -68,7 +68,6 @@ int parse_form(const char *instruction, struct formation_t *formation)
 	       instruction);
 
 	const struct formation_t *sets[] = {
-		rv64s,
 		rv64i,
 	};
 	for (size_t i = 0; i < ARRAY_LENGTH(sets); i++) {

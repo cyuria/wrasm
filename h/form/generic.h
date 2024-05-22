@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
-#include <stdlib.h>
+
+#include "symbols.h"
 
 #define OP_LOAD 0x03
 #define OP_STORE 0x23
@@ -59,36 +60,18 @@ struct formation_t {
 extern const struct bytecode_t error_bytecode;
 
 /* form handler sets */
-extern const struct formation_t rv64s[]; /* Shortcuts */
 extern const struct formation_t rv64i[];
 extern const struct formation_t rv64m[];
 extern const struct formation_t rv64a[];
 extern const struct formation_t rv64f[];
 extern const struct formation_t rv64d[];
 extern const struct formation_t rv64c[];
-extern const struct formation_t rv64z[]; /* zifencei and zicsr extensions */
+extern const struct formation_t rv64zicsr[];
+extern const struct formation_t rv64zifenci[];
 
+/* helper functions */
 struct bytecode_t form_empty_bytecode(void);
 
-/* shortcut instructions bytecode generation */
-form_handler form_nop;
-form_handler form_load_short;
-form_handler form_math;
-form_handler form_setif;
-form_handler form_single; // implement with float extension
-form_handler form_double; // ^^^
-form_handler form_branchifz;
-form_handler form_branchifr;
-form_handler form_jump;
-form_handler form_ret;
+int32_t calc_relative_address(struct symbol_t *, size_t);
 
-/* basic integer instruction type bytecode generation */
-form_handler form_rtype;
-form_handler form_itype;
-form_handler form_itype2;
-form_handler form_stype;
-form_handler form_btype;
-form_handler form_utype;
-form_handler form_jtype;
-form_handler form_syscall;
-form_handler form_fence;
+int check_args(const char *name, struct args_t args, struct args_t expected);

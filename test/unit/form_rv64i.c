@@ -3,7 +3,7 @@
 #include "asm.h"
 #include "debug.h"
 #include "macros.h"
-#include "formation.h"
+#include "form/generic.h"
 #include "symbols.h"
 
 struct case_t {
@@ -11,6 +11,7 @@ struct case_t {
 	struct formation_t formation;
 	uint32_t bytecode;
 };
+
 struct case_t cases_math[] = {
 	{ .instruction = "mv", .bytecode = 0x00010093 },
 	{ .instruction = "not", .bytecode = 0xfff1c093 },
@@ -37,6 +38,17 @@ struct case_t cases_branchifr[] = {
 	{ .instruction = "ble", .bytecode = 0xfe235ee3 },
 	{ .instruction = "bgtu", .bytecode = 0xfe33ece3 },
 	{ .instruction = "bleu", .bytecode = 0xfe447ae3 },
+};
+struct case_t cases_jump[] = {
+	{ .instruction = "j", .bytecode = 0x0000006f },
+	{ .instruction = "jal", .bytecode = 0xffdff0ef },
+};
+struct case_t cases_jump_register[] = {
+	{ .instruction = "jr", .bytecode = 0x00010067 },
+	{ .instruction = "jalr", .bytecode = 0x000180e7 },
+};
+struct case_t cases_ret[] = {
+	{ .instruction = "ret", .bytecode = 0x00008067 },
 };
 
 int test_case(struct case_t c, struct args_t args, size_t position)
@@ -66,12 +78,13 @@ int test_case(struct case_t c, struct args_t args, size_t position)
 int main(void)
 {
 	set_exit_loglevel(NODEBUG);
-	int errors = 0;
+	set_min_loglevel(DEBUG);
 	struct symbol_t start = {
 		.section = section_null,
 		.value = 0,
 		.type = symbol_label,
 	};
+	int errors = 0;
 	for (size_t i = 0; i < ARRAY_LENGTH(cases_math); i++)
 		errors += test_case(cases_math[i],
 				    (struct args_t){ {
@@ -104,5 +117,29 @@ int main(void)
 					    { arg_symbol, (size_t)&start },
 				    } },
 				    i * RV64I_SIZE);
-	return errors != 0;
+	for (size_t i = 0; i < ARRAY_LENGTH(cases_jump); i++)
+		errors += test_case(cases_jump[i],
+				    (struct args_t){ {
+					    { arg_symbol, (size_t)&start },
+					    { arg_none, 0 },
+					    { arg_none, 0 },
+				    } },
+				    i * RV64I_SIZE);
+	for (size_t i = 0; i < ARRAY_LENGTH(cases_jump_register); i++)
+		errors += test_case(cases_jump_register[i],
+				    (struct args_t){ {
+					    { arg_register, i + 2 },
+					    { arg_none, 0 },
+					    { arg_none, 0 },
+				    } },
+				    0);
+	for (size_t i = 0; i < ARRAY_LENGTH(cases_ret); i++)
+		errors += test_case(cases_ret[i],
+				    (struct args_t){ {
+					    { arg_none, 0 },
+					    { arg_none, 0 },
+					    { arg_none, 0 },
+				    } },
+				    0);
+	return errors != 0 || get_clean_exit(ERROR);
 }

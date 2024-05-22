@@ -3,7 +3,7 @@
 #include <stdbool.h>
 
 #include "elf/output.h"
-#include "formation.h"
+#include "form/generic.h"
 
 struct instruction_t {
 	struct formation_t formation;

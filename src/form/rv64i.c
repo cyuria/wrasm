@@ -1,11 +1,11 @@
 
-#include "formation.h"
+#include "form/rv64i.h"
 
-#include <stdio.h>
 #include <string.h>
 
 #include "debug.h"
 #include "elf/output.h"
+#include "form/generic.h"
 #include "symbols.h"
 #include "xmalloc.h"
 
@@ -26,26 +26,24 @@
 #define FULLY_DEFINED_SWITCH() return error_bytecode
 #endif
 
-const struct bytecode_t error_bytecode = { .size = (size_t)-1, .data = NULL };
-
-enum load_shortcuts {
+enum load_pseudo {
 	load_immediate,
 	load_address,
 };
-enum math_shortcuts {
+enum math_pseudo {
 	math_mv,
 	math_not,
 	math_neg,
 	math_negw,
 	math_sextw,
 };
-enum setif_shortcuts {
+enum setif_pseudo {
 	setif_eqz,
 	setif_nez,
 	setif_ltz,
 	setif_gtz,
 };
-enum branchifz_shortcuts {
+enum branchifz_pseudo {
 	branchifz_eqz,
 	branchifz_nez,
 	branchifz_lez,
@@ -53,29 +51,31 @@ enum branchifz_shortcuts {
 	branchifz_ltz,
 	branchifz_gtz,
 };
-enum branchifr_shortcuts {
+enum branchifr_pseudo {
 	branchifr_gt,
 	branchifr_le,
 	branchifr_gtu,
 	branchifr_leu,
 };
-enum jump_shortcuts {
-	jump_label,
-	jump_register,
-};
-const struct formation_t rv64s[] = {
+
+/* TODO: Add HINT instruction support */
+const struct formation_t rv64i[] = {
 	{ "nop", RV64I_SIZE, &form_nop, OP_OPI, 0, 0 },
+
 	{ "li", 2 * RV64I_SIZE, &form_load_short, load_immediate, 0, 0 },
 	{ "la", 2 * RV64I_SIZE, &form_load_short, load_address, 0, 0 },
+
 	{ "mv", RV64I_SIZE, &form_math, math_mv, 0, 0 },
 	{ "not", RV64I_SIZE, &form_math, math_not, 0, 0 },
 	{ "neg", RV64I_SIZE, &form_math, math_neg, 0, 0 },
 	{ "negw", RV64I_SIZE, &form_math, math_negw, 0, 0 },
 	{ "sext.w", RV64I_SIZE, &form_math, math_sextw, 0, 0 },
+
 	{ "seqz", RV64I_SIZE, &form_setif, setif_eqz, 0, 0 },
 	{ "snez", RV64I_SIZE, &form_setif, setif_nez, 0, 0 },
 	{ "sltz", RV64I_SIZE, &form_setif, setif_ltz, 0, 0 },
 	{ "sgtz", RV64I_SIZE, &form_setif, setif_gtz, 0, 0 },
+
 	{ "beqz", RV64I_SIZE, &form_branchifz, branchifz_eqz, 0, 0 },
 	{ "bnez", RV64I_SIZE, &form_branchifz, branchifz_nez, 0, 0 },
 	{ "blez", RV64I_SIZE, &form_branchifz, branchifz_lez, 0, 0 },
@@ -86,14 +86,13 @@ const struct formation_t rv64s[] = {
 	{ "ble", RV64I_SIZE, &form_branchifr, branchifr_le, 0, 0 },
 	{ "bgtu", RV64I_SIZE, &form_branchifr, branchifr_gtu, 0, 0 },
 	{ "bleu", RV64I_SIZE, &form_branchifr, branchifr_leu, 0, 0 },
-	{ "j", RV64I_SIZE, &form_jump, jump_label, 0, 0 },
-	{ "jr", RV64I_SIZE, &form_jump, jump_register, 0, 0 },
-	{ "ret", RV64I_SIZE, &form_ret, 0, 0, 0 },
-	{ NULL, 0, NULL, 0, 0, 0 },
-};
 
-/* TODO: Add HINT instruction support */
-const struct formation_t rv64i[] = {
+	{ "j", RV64I_SIZE, &form_jump, 0x0, 0, 0 },
+	{ "jal", RV64I_SIZE, &form_jal, 0, 0, 0 },
+	{ "jr", RV64I_SIZE, &form_jr, 0x0, 0, 0 },
+	{ "jalr", RV64I_SIZE, &form_jalr, 0, 0, 0 },
+	{ "ret", RV64I_SIZE, &form_ret, 0, 0, 0 },
+
 	{ "add", RV64I_SIZE, &form_rtype, OP_OP, 0x0, 0x00 },
 	{ "addi", RV64I_SIZE, &form_itype, OP_OPI, 0x0, 0 },
 	{ "addw", RV64I_SIZE, &form_rtype, OP_OP32, 0x0, 0x00 },
@@ -129,8 +128,6 @@ const struct formation_t rv64i[] = {
 	{ "bgeu", RV64I_SIZE, &form_btype, OP_BRANCH, 0x7, 0 },
 	{ "blt", RV64I_SIZE, &form_btype, OP_BRANCH, 0x4, 0 },
 	{ "bltu", RV64I_SIZE, &form_btype, OP_BRANCH, 0x6, 0 },
-	{ "jal", RV64I_SIZE, &form_jtype, OP_JAL, 0, 0 },
-	{ "jalr", RV64I_SIZE, &form_itype, OP_JALR, 0x0, 0 },
 
 	{ "ecall", RV64I_SIZE, &form_syscall, OP_SYSTEM, 0x0, 0x000 },
 	{ "ebreak", RV64I_SIZE, &form_syscall, OP_SYSTEM, 0x0, 0x001 },
@@ -152,40 +149,9 @@ const struct formation_t rv64i[] = {
 	{ "auipc", RV64I_SIZE, &form_utype, OP_AUIPC, 0, 0 },
 
 	{ "fence", RV64I_SIZE, &form_fence, OP_MISC_MEM, 0x0, 0 },
-	/* zifencei standard extension */
-	// { "FENCEI", RV64I_SIZE, &form_ifence, OP_MISC_MEM, 0b001 },
 
 	{ NULL, 0, NULL, 0, 0, 0 } /* Ending null terminator */
 };
-
-static inline int check_required(const char *name, struct args_t args,
-				 struct args_t required)
-{
-	const int a = args.a[0].type == required.a[0].type;
-	const int b = args.a[1].type == required.a[1].type;
-	const int c = args.a[2].type == required.a[2].type;
-	if (a && b && c)
-		return 0;
-	logger(ERROR, error_invalid_syntax,
-	       "Incorrect argument types for instruction %s."
-	       " Expected %d, %d, %d but got %d, %d, %d",
-	       name, required.a[0].type, required.a[1].type, required.a[2].type,
-	       args.a[0].type, args.a[1].type, args.a[2].type);
-	return 1;
-}
-
-static int32_t get_relative_address(struct symbol_t *sym, size_t position)
-{
-	const size_t labelpos = calc_fileoffset((struct sectionpos_t){
-		.section = sym->section, .offset = (size_t)sym->value });
-	return (int32_t)(labelpos - position);
-}
-
-struct bytecode_t form_empty_bytecode(void)
-{
-	logger(DEBUG, no_error, "Generating empty bytecode");
-	return (struct bytecode_t){ .size = 0, .data = NULL };
-}
 
 struct bytecode_t form_rtype(struct formation_t formation, struct args_t args,
 			     size_t position)
@@ -193,12 +159,12 @@ struct bytecode_t form_rtype(struct formation_t formation, struct args_t args,
 	(void)position;
 	logger(DEBUG, no_error, "Generating R type instruction %s",
 	       formation.name);
-	check_required(formation.name, args,
-		       (struct args_t){ {
-			       { .type = arg_register },
-			       { .type = arg_register },
-			       { .type = arg_register },
-		       } });
+	check_args(formation.name, args,
+		   (struct args_t){ {
+			   { .type = arg_register },
+			   { .type = arg_register },
+			   { .type = arg_register },
+		   } });
 
 	const uint32_t opcode = formation.opcode;
 	const uint32_t rd = args.a[0].arg & 0x1F;
@@ -223,12 +189,12 @@ struct bytecode_t form_itype(struct formation_t formation, struct args_t args,
 	logger(DEBUG, no_error,
 	       "Generating I type instruction %s, x%d, x%d, %d", formation.name,
 	       args.a[0].arg, args.a[1].arg, args.a[2].arg);
-	check_required(formation.name, args,
-		       (struct args_t){ {
-			       { .type = arg_register },
-			       { .type = arg_register },
-			       { .type = arg_immediate },
-		       } });
+	check_args(formation.name, args,
+		   (struct args_t){ {
+			   { .type = arg_register },
+			   { .type = arg_register },
+			   { .type = arg_immediate },
+		   } });
 
 	const uint32_t opcode = formation.opcode;
 	const uint32_t rd = args.a[0].arg & 0x1F;
@@ -261,12 +227,12 @@ struct bytecode_t form_stype(struct formation_t formation, struct args_t args,
 	(void)position;
 	logger(DEBUG, no_error, "Generating S type instruction %s",
 	       formation.name);
-	check_required(formation.name, args,
-		       (struct args_t){ {
-			       { .type = arg_register },
-			       { .type = arg_register },
-			       { .type = arg_immediate },
-		       } });
+	check_args(formation.name, args,
+		   (struct args_t){ {
+			   { .type = arg_register },
+			   { .type = arg_register },
+			   { .type = arg_immediate },
+		   } });
 
 	const uint32_t opcode = formation.opcode;
 	const uint32_t imm_4_0 = args.a[2].arg & 0x1F;
@@ -290,12 +256,12 @@ struct bytecode_t form_btype(struct formation_t formation, struct args_t args,
 	(void)position;
 	logger(DEBUG, no_error, "Generating B type instruction %s",
 	       formation.name);
-	check_required(formation.name, args,
-		       (struct args_t){ {
-			       { .type = arg_register },
-			       { .type = arg_register },
-			       { .type = arg_symbol },
-		       } });
+	check_args(formation.name, args,
+		   (struct args_t){ {
+			   { .type = arg_register },
+			   { .type = arg_register },
+			   { .type = arg_symbol },
+		   } });
 
 	const struct symbol_t symbol = *(struct symbol_t *)args.a[2].arg;
 	if (symbol.type != symbol_label)
@@ -337,12 +303,12 @@ struct bytecode_t form_utype(struct formation_t formation, struct args_t args,
 	(void)position;
 	logger(DEBUG, no_error, "Generating U type instruction %s",
 	       formation.name);
-	check_required(formation.name, args,
-		       (struct args_t){ {
-			       { .type = arg_register },
-			       { .type = arg_immediate },
-			       { .type = arg_none },
-		       } });
+	check_args(formation.name, args,
+		   (struct args_t){ {
+			   { .type = arg_register },
+			   { .type = arg_immediate },
+			   { .type = arg_none },
+		   } });
 
 	const uint32_t opcode = formation.opcode;
 	const uint32_t rd = args.a[0].arg & 0x1F;
@@ -359,25 +325,25 @@ struct bytecode_t form_utype(struct formation_t formation, struct args_t args,
 struct bytecode_t form_jtype(struct formation_t formation, struct args_t args,
 			     size_t position)
 {
+	(void)position;
 	logger(DEBUG, no_error, "Generating J type instruction %s",
 	       formation.name);
-	check_required(formation.name, args,
-		       (struct args_t){ {
-			       { .type = arg_register },
-			       { .type = arg_immediate },
-			       { .type = arg_none },
-		       } });
+	check_args(formation.name, args,
+		   (struct args_t){ {
+			   { .type = arg_register },
+			   { .type = arg_immediate },
+			   { .type = arg_none },
+		   } });
 
 	int32_t offset = (int32_t)args.a[1].arg;
-	offset -= (int32_t)position;
 	logger(DEBUG, no_error, "Offset of J type instruction is 0x%x", offset);
 
 	const uint32_t opcode = formation.opcode;
 	const uint32_t rd = args.a[0].arg & 0x1F;
-	const uint32_t imm_19_12 = (args.a[1].arg >> 12) & 0xFF;
-	const uint32_t imm_11 = (args.a[1].arg >> 11) & 0x1;
-	const uint32_t imm_10_1 = (args.a[1].arg >> 1) & 0x3FF;
-	const uint32_t imm_20 = (args.a[1].arg >> 20) & 0x1;
+	const uint32_t imm_19_12 = (offset >> 12) & 0xFF;
+	const uint32_t imm_11 = (offset >> 11) & 0x1;
+	const uint32_t imm_10_1 = (offset >> 1) & 0x3FF;
+	const uint32_t imm_20 = (offset >> 20) & 0x1;
 
 	struct bytecode_t res = {
 		.size = RV64I_SIZE,
@@ -395,12 +361,12 @@ struct bytecode_t form_syscall(struct formation_t formation, struct args_t args,
 	(void)args;
 	(void)position;
 	logger(DEBUG, no_error, "Generating syscall %s", formation.name);
-	check_required(formation.name, args,
-		       (struct args_t){ {
-			       { .type = arg_none },
-			       { .type = arg_none },
-			       { .type = arg_none },
-		       } });
+	check_args(formation.name, args,
+		   (struct args_t){ {
+			   { .type = arg_none },
+			   { .type = arg_none },
+			   { .type = arg_none },
+		   } });
 
 	const uint32_t opcode = formation.opcode;
 	const uint32_t funct3 = formation.funct3;
@@ -421,12 +387,12 @@ struct bytecode_t form_fence(struct formation_t formation, struct args_t args,
 	(void)position;
 	logger(DEBUG, no_error, "Generating fence instruction %s",
 	       formation.name);
-	check_required(formation.name, args,
-		       (struct args_t){ {
-			       { .type = arg_immediate },
-			       { .type = arg_none },
-			       { .type = arg_none },
-		       } });
+	check_args(formation.name, args,
+		   (struct args_t){ {
+			   { .type = arg_immediate },
+			   { .type = arg_none },
+			   { .type = arg_none },
+		   } });
 
 	struct bytecode_t res = { .size = RV64I_SIZE,
 				  .data = xmalloc(RV64I_SIZE) };
@@ -444,12 +410,12 @@ struct bytecode_t form_nop(struct formation_t formation, struct args_t args,
 	(void)position;
 	logger(DEBUG, no_error, "Generating nop instruction %s",
 	       formation.name);
-	check_required(formation.name, args,
-		       (struct args_t){ {
-			       { .type = arg_none },
-			       { .type = arg_none },
-			       { .type = arg_none },
-		       } });
+	check_args(formation.name, args,
+		   (struct args_t){ {
+			   { .type = arg_none },
+			   { .type = arg_none },
+			   { .type = arg_none },
+		   } });
 
 	return form_itype(formation,
 			  (struct args_t){
@@ -465,20 +431,20 @@ struct bytecode_t form_load_short(struct formation_t formation,
 {
 	logger(DEBUG, no_error, "Generating load instruction %s",
 	       formation.name);
-	check_required(formation.name, args,
-		       (struct args_t){ {
-			       { .type = arg_register },
-			       { .type = formation.opcode ? arg_symbol :
-							    arg_immediate },
-			       { .type = arg_none },
-		       } });
+	check_args(formation.name, args,
+		   (struct args_t){ {
+			   { .type = arg_register },
+			   { .type = formation.opcode ? arg_symbol :
+							arg_immediate },
+			   { .type = arg_none },
+		   } });
 
-	enum load_shortcuts type = formation.opcode;
+	enum load_pseudo type = formation.opcode;
 	uint32_t rd = (uint32_t)args.a[0].arg;
 	uint32_t value = (uint32_t)args.a[1].arg;
 	if (type == load_address)
-		value = (uint32_t)get_relative_address((void *)args.a[1].arg,
-						       position);
+		value = (uint32_t)calc_relative_address((void *)args.a[1].arg,
+							position);
 
 	struct bytecode_t upper = form_utype(
 		(struct formation_t){ "internal", RV64I_SIZE, NULL,
@@ -515,13 +481,13 @@ struct bytecode_t form_math(struct formation_t formation, struct args_t args,
 {
 	logger(DEBUG, no_error, "Generating math instruction %s",
 	       formation.name);
-	check_required(formation.name, args,
-		       (struct args_t){ {
-			       { .type = arg_register },
-			       { .type = arg_register },
-			       { .type = arg_none },
-		       } });
-	const enum math_shortcuts type = formation.opcode;
+	check_args(formation.name, args,
+		   (struct args_t){ {
+			   { .type = arg_register },
+			   { .type = arg_register },
+			   { .type = arg_none },
+		   } });
+	const enum math_pseudo type = formation.opcode;
 
 	// op rd, rs1
 	switch (type) {
@@ -570,13 +536,13 @@ struct bytecode_t form_setif(struct formation_t formation, struct args_t args,
 {
 	logger(DEBUG, no_error, "Generating conditional set intruction %s",
 	       formation.name);
-	check_required(formation.name, args,
-		       (struct args_t){ {
-			       { .type = arg_register },
-			       { .type = arg_register },
-			       { .type = arg_none },
-		       } });
-	const enum setif_shortcuts type = formation.opcode;
+	check_args(formation.name, args,
+		   (struct args_t){ {
+			   { .type = arg_register },
+			   { .type = arg_register },
+			   { .type = arg_none },
+		   } });
+	const enum setif_pseudo type = formation.opcode;
 	// op rd, rs1
 	switch (type) {
 	case setif_eqz: // sltiu rd, rs, 1
@@ -618,13 +584,13 @@ struct bytecode_t form_branchifz(struct formation_t formation,
 {
 	logger(DEBUG, no_error, "Generating conditional branch intruction %s",
 	       formation.name);
-	check_required(formation.name, args,
-		       (struct args_t){ {
-			       { .type = arg_register },
-			       { .type = arg_symbol },
-			       { .type = arg_none },
-		       } });
-	const enum branchifz_shortcuts type = formation.opcode;
+	check_args(formation.name, args,
+		   (struct args_t){ {
+			   { .type = arg_register },
+			   { .type = arg_symbol },
+			   { .type = arg_none },
+		   } });
+	const enum branchifz_pseudo type = formation.opcode;
 	args.a[1].type = arg_register;
 	args.a[2].type = arg_symbol;
 	args.a[2].arg = args.a[1].arg;
@@ -677,13 +643,13 @@ struct bytecode_t form_branchifr(struct formation_t formation,
 {
 	logger(DEBUG, no_error, "Generating conditional branch intruction %s",
 	       formation.name);
-	check_required(formation.name, args,
-		       (struct args_t){ {
-			       { .type = arg_register },
-			       { .type = arg_register },
-			       { .type = arg_symbol },
-		       } });
-	const enum branchifr_shortcuts type = formation.opcode;
+	check_args(formation.name, args,
+		   (struct args_t){ {
+			   { .type = arg_register },
+			   { .type = arg_register },
+			   { .type = arg_symbol },
+		   } });
+	const enum branchifr_pseudo type = formation.opcode;
 
 	register size_t rs = args.a[0].arg;
 	args.a[0].arg = args.a[1].arg;
@@ -698,22 +664,120 @@ struct bytecode_t form_branchifr(struct formation_t formation,
 			  args, position);
 }
 
-/* TODO: implement jump formation handler */
 struct bytecode_t form_jump(struct formation_t formation, struct args_t args,
 			    size_t position)
 {
-	(void)formation;
-	(void)args;
-	(void)position;
-	return error_bytecode;
+	logger(DEBUG, no_error, "Generating unconditional jump intruction %s",
+	       formation.name);
+	check_args(formation.name, args,
+		   (struct args_t){ {
+			   { .type = arg_symbol },
+			   { .type = arg_none },
+			   { .type = arg_none },
+		   } });
+
+	const char *names[] = {
+		"jal (j)",
+		"jal",
+	};
+
+	args.a[0].type = arg_register;
+	args.a[1].type = arg_immediate;
+
+	args.a[1].arg = (size_t)calc_relative_address(
+		(struct symbol_t *)args.a[0].arg, position);
+	args.a[0].arg = formation.opcode;
+
+	return form_jtype((struct formation_t){ names[formation.opcode],
+						RV64I_SIZE, NULL, OP_JAL, 0,
+						0 },
+			  args, position);
 }
 
-/* TODO: implement return formation handler */
+struct bytecode_t form_jr(struct formation_t formation, struct args_t args,
+			  size_t position)
+{
+	logger(DEBUG, no_error, "Generating jump register intruction %s",
+	       formation.name);
+	check_args(formation.name, args,
+		   (struct args_t){ {
+			   { .type = arg_register },
+			   { .type = arg_none },
+			   { .type = arg_none },
+		   } });
+
+	const char *names[] = {
+		"jalr (jr)",
+		"jalr",
+	};
+
+	return form_itype((struct formation_t){ names[formation.opcode],
+						RV64I_SIZE, NULL, OP_JALR, 0,
+						0 },
+			  (struct args_t){ {
+				  { arg_register, formation.opcode },
+				  { arg_register, args.a[0].arg },
+				  { arg_immediate, 0 },
+			  } },
+			  position);
+}
+
 struct bytecode_t form_ret(struct formation_t formation, struct args_t args,
 			   size_t position)
 {
-	(void)formation;
-	(void)args;
-	(void)position;
-	return error_bytecode;
+	logger(DEBUG, no_error, "Generating return intruction %s",
+	       formation.name);
+	check_args(formation.name, args,
+		   (struct args_t){ {
+			   { .type = arg_none },
+			   { .type = arg_none },
+			   { .type = arg_none },
+		   } });
+
+	return form_itype((struct formation_t){ "jalr (ret)", RV64I_SIZE, NULL,
+						OP_JALR, 0x0, 0 },
+			  (struct args_t){ {
+				  { arg_register, 0x0 },
+				  { arg_register, 0x1 },
+				  { arg_immediate, 0 },
+			  } },
+			  position);
+}
+
+struct bytecode_t form_jal(struct formation_t f, struct args_t args, size_t p)
+{
+	switch (args.a[0].type) {
+	case arg_symbol:
+		f = (struct formation_t){ "jal", RV64I_SIZE, &form_jump,
+					  0x1,	 0,	     0 };
+		break;
+	case arg_register:
+		f = (struct formation_t){ "jal",  RV64I_SIZE, &form_jtype,
+					  OP_JAL, 0,	      0 };
+		break;
+	default:
+		logger(ERROR, error_invalid_syntax,
+		       "Invalid arguments for instruction jal");
+		return error_bytecode;
+	}
+	return f.handler(f, args, p);
+}
+
+struct bytecode_t form_jalr(struct formation_t f, struct args_t args, size_t p)
+{
+	switch (args.a[1].type) {
+	case arg_none:
+		f = (struct formation_t){ "jalr", RV64I_SIZE, &form_jr,
+					  0x1,	  0,	      0 };
+		break;
+	case arg_register:
+		f = (struct formation_t){ "jalr",  RV64I_SIZE, &form_itype,
+					  OP_JALR, 0x0,	       0 };
+		break;
+	default:
+		logger(ERROR, error_invalid_syntax,
+		       "Invalid arguments for instruction jalr");
+		return error_bytecode;
+	}
+	return f.handler(f, args, p);
 }

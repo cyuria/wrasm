@@ -3,7 +3,7 @@
 
 #include "asm.h"
 #include "debug.h"
-#include "formation.h"
+#include "form/generic.h"
 
 int compare_formations(struct formation_t *a, struct formation_t *b)
 {
@@ -43,10 +43,10 @@ int test_parser(struct formation_t formation)
 
 int main(void)
 {
+	set_exit_loglevel(NODEBUG);
+	set_min_loglevel(DEBUG);
 	int errors = 0;
-	for (size_t i = 0; rv64s[i].name; i++)
-		errors += test_parser(rv64s[i]);
 	for (size_t i = 0; rv64i[i].name; i++)
 		errors += test_parser(rv64i[i]);
-	return errors != 0;
+	return errors != 0 || get_clean_exit(ERROR);
 }

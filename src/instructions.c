@@ -6,6 +6,7 @@
 
 #include "debug.h"
 #include "elf/output.h"
+#include "form/generic.h"
 #include "xmalloc.h"
 
 static struct instruction_t *instructions = NULL;

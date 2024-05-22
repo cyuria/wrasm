@@ -33,6 +33,8 @@ struct {
 
 int main(void)
 {
+	set_exit_loglevel(NODEBUG);
+	set_min_loglevel(DEBUG);
 	int errors = 0;
 	for (size_t i = 0; i < ARRAY_LENGTH(tests); i++) {
 		size_t imm = get_register_id(tests[i].symbol);
@@ -45,5 +47,5 @@ int main(void)
 	}
 	if (errors)
 		logger(CRITICAL, error_internal, "%d tests failed", errors);
-	return errors != 0;
+	return errors != 0 || get_clean_exit(ERROR);
 }
