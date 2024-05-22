@@ -1,21 +1,23 @@
 
 #include <string.h>
 
-#include "asm.h"
+#include "form/instructions.h"
+#include "form/rv64i.h"
 #include "debug.h"
-#include "form/generic.h"
 
 int compare_formations(struct formation_t *a, struct formation_t *b)
 {
-	if (a->isize != b->isize)
+	if (a->arg_handler != b->arg_handler)
 		return 0;
-	if (a->handler != b->handler)
+	if (a->form_handler != b->form_handler)
 		return 0;
-	if (a->opcode != b->opcode)
+	if (a->idata.sz != b->idata.sz)
 		return 0;
-	if (a->funct3 != b->funct3)
+	if (a->idata.opcode != b->idata.opcode)
 		return 0;
-	if (a->funct7 != b->funct7)
+	if (a->idata.funct3 != b->idata.funct3)
+		return 0;
+	if (a->idata.funct7 != b->idata.funct7)
 		return 0;
 	if (strcmp(a->name, b->name))
 		return 0;
@@ -25,8 +27,8 @@ int compare_formations(struct formation_t *a, struct formation_t *b)
 
 int test_parser(struct formation_t formation)
 {
-	struct formation_t found;
-	if (parse_form(formation.name, &found)) {
+	struct formation_t found = parse_form(formation.name);
+	if (!found.name) {
 		logger(ERROR, error_internal,
 		       "Test Failed, parse_parser returned error code with instruction %s",
 		       formation.name);

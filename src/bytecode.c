@@ -1,5 +1,5 @@
 
-#include "instructions.h"
+#include "bytecode.h"
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -62,16 +62,16 @@ int write_all_instructions(void)
 	return 0;
 }
 
-int write_instruction(struct instruction_t instruction)
+int write_instruction(struct instruction_t i)
 {
-	linenumber = instruction.line;
+	linenumber = i.line;
 	logger(DEBUG, no_error,
 	       "Generating bytecode for %s instruction (offset: %zu)",
-	       instruction.formation.name, instruction.position.offset);
-	set_section(instruction.position.section);
-	struct bytecode_t bytecode = instruction.formation.handler(
-		instruction.formation, instruction.args,
-		calc_fileoffset(instruction.position));
+	       i.formation.name, i.position.offset);
+	set_section(i.position.section);
+	struct bytecode_t bytecode =
+		i.formation.form_handler(i.formation.name, i.formation.idata,
+					 i.args, calc_fileoffset(i.position));
 	logger(DEBUG, no_error, "Bytecode finished generating");
 	if (!bytecode.size) {
 		logger(WARN, no_error,
@@ -83,8 +83,8 @@ int write_instruction(struct instruction_t instruction)
 		return 1;
 	}
 	const size_t sz = (size_t)bytecode.size;
-	size_t nwritten = write_sectiondata((char *)bytecode.data, sz,
-					    instruction.position);
+	size_t nwritten =
+		write_sectiondata((char *)bytecode.data, sz, i.position);
 	free(bytecode.data);
 	if (nwritten != sz) {
 		logger(CRITICAL, error_system, "Error writing bytes to output");

@@ -4,11 +4,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "asm.h"
+#include "bytecode.h"
 #include "debug.h"
 #include "directives.h"
 #include "elf/output.h"
-#include "instructions.h"
+#include "parse.h"
 #include "stringutil.h"
 #include "symbols.h"
 #include "xmalloc.h"

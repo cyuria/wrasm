@@ -1,7 +1,7 @@
 
 #include <stdint.h>
-#include "asm.h"
 #include "debug.h"
+#include "form/instructions.h"
 #include "macros.h"
 #include "form/generic.h"
 #include "symbols.h"
@@ -47,20 +47,22 @@ struct case_t cases_jump_register[] = {
 	{ .instruction = "jr", .bytecode = 0x00010067 },
 	{ .instruction = "jalr", .bytecode = 0x000180e7 },
 };
-struct case_t cases_ret[] = {
-	{ .instruction = "ret", .bytecode = 0x00008067 },
+struct case_t case_ret = {
+	.instruction = "ret",
+	.bytecode = 0x00008067,
 };
 
 int test_case(struct case_t c, struct args_t args, size_t position)
 {
-	if (parse_form(c.instruction, &c.formation)) {
+	c.formation = parse_form(c.instruction);
+	if (!c.formation.name) {
 		logger(ERROR, error_internal,
 		       "Unable to find formation for instruction %s",
 		       c.instruction);
 		return 1;
 	}
-	struct bytecode_t result =
-		c.formation.handler(c.formation, args, position);
+	struct bytecode_t result = c.formation.form_handler(
+		c.formation.name, c.formation.idata, args, position);
 	if (result.size != sizeof(c.bytecode)) {
 		logger(ERROR, error_internal, "invalid size generated for %s",
 		       c.instruction);
@@ -79,67 +81,39 @@ int main(void)
 {
 	set_exit_loglevel(NODEBUG);
 	set_min_loglevel(DEBUG);
+
 	struct symbol_t start = {
 		.section = section_null,
 		.value = 0,
 		.type = symbol_label,
 	};
 	int errors = 0;
+
 	for (size_t i = 0; i < ARRAY_LENGTH(cases_math); i++)
 		errors += test_case(cases_math[i],
-				    (struct args_t){ {
-					    { arg_register, 1 },
-					    { arg_register, i + 2 },
-					    { arg_none, 0 },
-				    } },
+				    (struct args_t){ .rd = 1, .rs1 = i + 2 },
 				    0);
 	for (size_t i = 0; i < ARRAY_LENGTH(cases_setif); i++)
 		errors += test_case(cases_setif[i],
-				    (struct args_t){ {
-					    { arg_register, 1 },
-					    { arg_register, i + 2 },
-					    { arg_none, 0 },
-				    } },
+				    (struct args_t){ .rd = 1, .rs1 = i + 2 },
 				    0);
 	for (size_t i = 0; i < ARRAY_LENGTH(cases_branchifz); i++)
-		errors += test_case(cases_branchifz[i],
-				    (struct args_t){ {
-					    { arg_register, i + 1 },
-					    { arg_symbol, (size_t)&start },
-					    { arg_none, 0 },
-				    } },
-				    i * RV64I_SIZE);
+		errors += test_case(
+			cases_branchifz[i],
+			(struct args_t){ .rs1 = i + 1, .sym = &start }, i * 4);
 	for (size_t i = 0; i < ARRAY_LENGTH(cases_branchifr); i++)
 		errors += test_case(cases_branchifr[i],
-				    (struct args_t){ {
-					    { arg_register, i + 1 },
-					    { arg_register, i + 5 },
-					    { arg_symbol, (size_t)&start },
-				    } },
-				    i * RV64I_SIZE);
+				    (struct args_t){ .rs1 = i + 1,
+						     .rs2 = i + 5,
+						     .sym = &start },
+				    i * 4);
 	for (size_t i = 0; i < ARRAY_LENGTH(cases_jump); i++)
 		errors += test_case(cases_jump[i],
-				    (struct args_t){ {
-					    { arg_symbol, (size_t)&start },
-					    { arg_none, 0 },
-					    { arg_none, 0 },
-				    } },
-				    i * RV64I_SIZE);
+				    (struct args_t){ .sym = &start }, i * 4);
 	for (size_t i = 0; i < ARRAY_LENGTH(cases_jump_register); i++)
 		errors += test_case(cases_jump_register[i],
-				    (struct args_t){ {
-					    { arg_register, i + 2 },
-					    { arg_none, 0 },
-					    { arg_none, 0 },
-				    } },
-				    0);
-	for (size_t i = 0; i < ARRAY_LENGTH(cases_ret); i++)
-		errors += test_case(cases_ret[i],
-				    (struct args_t){ {
-					    { arg_none, 0 },
-					    { arg_none, 0 },
-					    { arg_none, 0 },
-				    } },
-				    0);
+				    (struct args_t){ .rs1 = i + 2 }, 0);
+	errors += test_case(case_ret, empty_args, 0);
+
 	return errors != 0 || get_clean_exit(ERROR);
 }
