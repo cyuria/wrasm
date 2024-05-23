@@ -386,11 +386,13 @@ struct bytecode_t form_load_short(const char *name, struct idata_t instruction,
 		break;
 	default:
 		UNREACHABLE();
+#ifdef NO_UNREACHABLE
 		/* ensure warnings aren't emitted if the UNREACHABLE hint
-		 * doesn't do anything */
+		 * can't be defined */
 		opcode = 0;
 		value = 0;
 		break;
+#endif
 	}
 
 	const char *uppernames[] = { "lui (li)", "auipc (la)" };

@@ -8,4 +8,5 @@
 #define UNREACHABLE() __assume(0)
 #else
 #define UNREACHABLE()
+#define NO_UNREACHABLE
 #endif
