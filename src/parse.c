@@ -237,7 +237,8 @@ struct args_t parse_jal(char *argstr)
 			       "Expected a second argument");
 	}
 
-	if (!(args.sym = get_symbol(sym)))
+	args.sym = get_symbol(sym);
+	if (!args.sym)
 		logger(ERROR, error_invalid_instruction, "Unkown symbol %s",
 		       sym);
 

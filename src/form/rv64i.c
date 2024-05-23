@@ -388,7 +388,8 @@ struct bytecode_t form_load_short(const char *name, struct idata_t instruction,
 		UNREACHABLE();
 		/* ensure warnings aren't emitted if the UNREACHABLE hint
 		 * doesn't do anything */
-		opcode = value = 0;
+		opcode = 0;
+		value = 0;
 		break;
 	}
 
