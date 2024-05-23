@@ -6,6 +6,7 @@
 #include "debug.h"
 #include "elf/output.h"
 #include "form/generic.h"
+#include "macros.h"
 #include "parse.h"
 #include "symbols.h"
 #include "xmalloc.h"
@@ -382,6 +383,12 @@ struct bytecode_t form_load_short(const char *name, struct idata_t instruction,
 	case load_addr:
 		opcode = OP_AUIPC;
 		value = (uint32_t)args.sym->value;
+		break;
+	default:
+		UNREACHABLE();
+		/* ensure warnings aren't emitted if the UNREACHABLE hint
+		 * doesn't do anything */
+		opcode = value = 0;
 		break;
 	}
 
