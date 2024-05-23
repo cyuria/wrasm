@@ -22,7 +22,7 @@ foreach test : tests
         sources,
         build_by_default: false,
         include_directories: [headers, root],
-        dependencies: [threads, argtable3_dep],
+        dependencies: [argtable3_dep],
         c_args: [
             '-D_CRT_SECURE_NO_WARNINGS',
         ],

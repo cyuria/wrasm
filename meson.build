@@ -10,7 +10,6 @@ project(
     version: '0.0.1-alpha',
 )
 
-threads = dependency('threads')
 argtable3 = subproject(
     'argtable3',
     default_options: [
@@ -44,7 +43,7 @@ executable(
     'src/main.c',
     sources,
     include_directories: [headers],
-    dependencies: [threads, argtable3_dep],
+    dependencies: [argtable3_dep],
     c_args: [
         '-D_CRT_SECURE_NO_WARNINGS',
     ],
