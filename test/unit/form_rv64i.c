@@ -109,10 +109,12 @@ int main(void)
 				    i * 4);
 	for (size_t i = 0; i < ARRAY_LENGTH(cases_jump); i++)
 		errors += test_case(cases_jump[i],
-				    (struct args_t){ .sym = &start }, i * 4);
+				    (struct args_t){ .rd = 1, .sym = &start },
+				    i * 4);
 	for (size_t i = 0; i < ARRAY_LENGTH(cases_jump_register); i++)
-		errors += test_case(cases_jump_register[i],
-				    (struct args_t){ .rs1 = i + 2 }, 0);
+		errors += test_case(
+			cases_jump_register[i],
+			(struct args_t){ .rd = 1, .rs1 = i + 2, .imm = 0 }, 0);
 	errors += test_case(case_ret, empty_args, 0);
 
 	return errors != 0 || get_clean_exit(ERROR);

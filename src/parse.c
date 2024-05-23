@@ -16,6 +16,23 @@
 
 const struct args_t empty_args;
 
+static char *trim_arg(char *s)
+{
+	const char *tok = strtok(s, ",");
+	if (!tok)
+		return NULL;
+	return trim_whitespace(tok);
+}
+
+static uint8_t expect_reg(char *arg)
+{
+	size_t reg = get_register_id(arg);
+	if (reg == (size_t)-1)
+		logger(ERROR, error_instruction_other,
+		       "Expected register but got %s", arg);
+	return (uint8_t)reg;
+}
+
 int parse_asm(const char *line, struct sectionpos_t position)
 {
 	logger(DEBUG, no_error, "Parsing assembly %s", line);
@@ -152,6 +169,7 @@ struct args_t parse_none(char *argstr)
 
 	return empty_args;
 }
+
 struct args_t parse_rtype(char *argstr)
 {
 	logger(DEBUG, no_error, "Parsing arguments for rtype instruction %s",
@@ -165,20 +183,19 @@ struct args_t parse_rtype(char *argstr)
 		&args.rs2,
 	};
 
-	char *raw = NULL;
+	char *arg = trim_arg(argstr);
 	for (size_t i = 0; i < ARRAY_LENGTH(registers); i++) {
-		raw = strtok(argstr, ",");
-		if (!raw) {
+		if (!arg) {
 			logger(ERROR, error_instruction_other,
 			       "Expected 3 arguments, got %d", i);
 			break;
 		}
 
-		char *arg = trim_whitespace(raw);
-		*registers[i] = get_register_id(arg);
+		*registers[i] = expect_reg(arg);
 		free(arg);
+		arg = trim_arg(argstr);
 	}
-	if (strtok(argstr, ","))
+	if (arg)
 		logger(ERROR, error_instruction_other,
 		       "Instruction has more than three arguments");
 
@@ -187,73 +204,75 @@ struct args_t parse_rtype(char *argstr)
 
 	return args;
 }
+
 struct args_t parse_jal(char *argstr)
 {
-	logger(DEBUG, no_error, "Parsing arguments for rtype instruction %s",
+	logger(DEBUG, no_error, "Parsing arguments for jal instruction %s",
 	       argstr);
 
-	struct args_t args;
+	struct args_t args = { .rd = 1 };
 
-	uint8_t *registers[] = {
-		&args.rd,
-		&args.rs1,
-		&args.rs2,
-	};
+	char *first = trim_arg(argstr);
+	char *second = trim_arg(NULL);
+	char *sym = first;
 
-	char *raw = NULL;
-	for (size_t i = 0; i < ARRAY_LENGTH(registers); i++) {
-		raw = strtok(argstr, ",");
-		if (!raw) {
-			logger(ERROR, error_instruction_other,
-			       "Expected 3 arguments, got %d", i);
-			break;
-		}
-
-		char *arg = trim_whitespace(raw);
-		*registers[i] = get_register_id(arg);
-		free(arg);
-	}
-	if (strtok(argstr, ","))
+	if (strtok(NULL, ","))
 		logger(ERROR, error_instruction_other,
-		       "Instruction has more than three arguments");
+		       "Instruction expects at most two arguments");
 
-	logger(DEBUG, no_error, "Registers parsed, x%d, x%d, x%d", args.rd,
-	       args.rs1, args.rs2);
+	if (!first)
+		logger(ERROR, error_invalid_instruction,
+		       "Instruction expects at least one argument");
+
+	if (second) {
+		args.rd = expect_reg(first);
+		free(first);
+		sym = second;
+		if (!sym)
+			logger(ERROR, error_invalid_instruction,
+			       "Expected a second argument");
+	}
+
+	if (!(args.sym = get_symbol(sym)))
+		logger(ERROR, error_invalid_instruction, "Unkown symbol %s",
+		       sym);
+
+	free(sym);
+
+	logger(DEBUG, no_error, "Registers parsed, x%d, %s", args.rd,
+	       args.sym->name);
 
 	return args;
 }
+
 struct args_t parse_jalr(char *argstr)
 {
-	logger(DEBUG, no_error, "Parsing arguments for rtype instruction %s",
+	logger(DEBUG, no_error, "Parsing arguments for jalr instruction %s",
 	       argstr);
 
-	struct args_t args;
+	char *first = trim_arg(argstr);
+	char *second = trim_arg(NULL);
+	char *third = trim_arg(NULL);
 
-	uint8_t *registers[] = {
-		&args.rd,
-		&args.rs1,
-		&args.rs2,
-	};
+	if (!first)
+		logger(DEBUG, error_instruction_other,
+		       "Instruction expects at least one argument");
 
-	char *raw = NULL;
-	for (size_t i = 0; i < ARRAY_LENGTH(registers); i++) {
-		raw = strtok(argstr, ",");
-		if (!raw) {
-			logger(ERROR, error_instruction_other,
-			       "Expected 3 arguments, got %d", i);
-			break;
-		}
+	uint8_t rd = expect_reg(first);
 
-		char *arg = trim_whitespace(raw);
-		*registers[i] = get_register_id(arg);
-		free(arg);
-	}
-	if (strtok(argstr, ","))
+	if (!second)
+		return (struct args_t){
+			.rd = 0x1,
+			.rs1 = rd,
+			.imm = 0,
+		};
+
+	const uint8_t rs1 = expect_reg(second);
+
+	size_t imm;
+	if (get_immediate(third, &imm))
 		logger(ERROR, error_instruction_other,
-		       "Instruction has more than three arguments");
+		       "Expected immediate but got `%s`", third);
 
-	logger(DEBUG, no_error, "Registers parsed, x%d, x%d, x%d", args.rd,
-	       args.rs1, args.rs2);
-
-	return args;
+	return (struct args_t){ .rd = rd, .rs1 = rs1, .imm = (uint32_t)imm };
 }

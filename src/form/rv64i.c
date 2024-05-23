@@ -298,7 +298,7 @@ struct bytecode_t form_jtype(const char *name, struct idata_t instruction,
 	(void)position;
 	logger(DEBUG, no_error, "Generating J type instruction %s", name);
 
-	int32_t offset = (int32_t)args.imm;
+	int32_t offset = calc_relative_address(args.sym, position);
 	logger(DEBUG, no_error, "Offset of J type instruction is 0x%x", offset);
 
 	const uint32_t opcode = instruction.opcode;
@@ -444,8 +444,8 @@ struct bytecode_t form_math(const char *name, struct idata_t instruction,
 		return form_rtype("neg (sub)",
 				  (struct idata_t){ 4, OP_OP32, 0x0, 0x20 },
 				  args, position);
-	case math_sextw: // addiw rd, rs, 1
-		args.imm = 1;
+	case math_sextw: // addiw rd, rs, 0
+		args.imm = 0;
 		return form_itype("sextw (addiw)",
 				  (struct idata_t){ 4, OP_OPI32, 0x0, 0 }, args,
 				  position);
@@ -538,11 +538,15 @@ struct bytecode_t form_branchifr(const char *name, struct idata_t instruction,
 	       name);
 	const enum branchifr_pseudo type = instruction.opcode;
 
-	const uint8_t rd = args.rd;
-	args.rd = args.rs1;
-	args.rs1 = rd;
+	const uint8_t rs1 = args.rs1;
+	args.rs1 = args.rs2;
+	args.rs2 = rs1;
 
 	/* Types happen to align correctly with the correct funct3 field for this trick to work */
+	/* { "blt",  &form_btype, &parse_rtype, { 4, OP_BRANCH, 0x4, 0 } }, */
+	/* { "bge",  &form_btype, &parse_rtype, { 4, OP_BRANCH, 0x5, 0 } }, */
+	/* { "bltu", &form_btype, &parse_rtype, { 4, OP_BRANCH, 0x6, 0 } }, */
+	/* { "bgeu", &form_btype, &parse_rtype, { 4, OP_BRANCH, 0x7, 0 } }, */
 	const uint8_t funct3 = (uint8_t)(type + 0x4);
 	const char *names[] = { "blt (bgt)", "bge (ble)", "bltu (bgtu)",
 				"bgeu (bleu)" };
@@ -560,7 +564,6 @@ struct bytecode_t form_jump(const char *name, struct idata_t instruction,
 	switch (type) {
 	case jump_j:
 		args.rd = 0;
-		args.imm = (size_t)calc_relative_address(args.sym, position);
 		return form_jtype("jal (j)",
 				  (struct idata_t){ 4, OP_JAL, 0, 0 }, args,
 				  position);
