@@ -14,7 +14,11 @@
 #include "symbols.h"
 #include "xmalloc.h"
 
-const struct args_t empty_args;
+const struct args_t empty_args = { .rd = 0,
+				   .rs1 = 0,
+				   .rs2 = 0,
+				   .imm = 0,
+				   .sym = NULL };
 
 static char *trim_arg(char *s)
 {
