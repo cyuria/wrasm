@@ -569,6 +569,7 @@ struct bytecode_t form_jump(const char *name, struct idata_t instruction,
 				  position);
 	case jump_ret:
 		args.rs1 = 1;
+		// fall through
 	case jump_jr:
 		args.rd = 0;
 		args.imm = 0;
