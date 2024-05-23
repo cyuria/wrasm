@@ -4,8 +4,6 @@
 #include <string.h>
 
 #include "debug.h"
-#include "form/rv64i.h"
-#include "macros.h"
 #include "symbols.h"
 
 const struct bytecode_t error_bytecode = { .size = (size_t)-1, .data = NULL };
