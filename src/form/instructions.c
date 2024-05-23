@@ -27,5 +27,5 @@ struct formation_t parse_form(const char *instruction)
 
 	logger(ERROR, error_invalid_instruction,
 	       "Unknown assembly instruction - %s\n", instruction);
-	return END_FORMATION;
+	return (struct formation_t)END_FORMATION;
 }

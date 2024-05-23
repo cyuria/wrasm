@@ -19,7 +19,6 @@
 #define OP_AUIPC 0x17
 
 #define END_FORMATION              \
-	(struct formation_t)       \
 	{                          \
 		NULL, NULL, NULL,  \
 		{                  \
