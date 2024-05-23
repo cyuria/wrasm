@@ -90,21 +90,22 @@ int main(void)
 	int errors = 0;
 
 	for (size_t i = 0; i < ARRAY_LENGTH(cases_math); i++)
-		errors += test_case(cases_math[i],
-				    (struct args_t){ .rd = 1, .rs1 = i + 2 },
-				    0);
-	for (size_t i = 0; i < ARRAY_LENGTH(cases_setif); i++)
-		errors += test_case(cases_setif[i],
-				    (struct args_t){ .rd = 1, .rs1 = i + 2 },
-				    0);
-	for (size_t i = 0; i < ARRAY_LENGTH(cases_branchifz); i++)
 		errors += test_case(
-			cases_branchifz[i],
-			(struct args_t){ .rs1 = i + 1, .sym = &start }, i * 4);
+			cases_math[i],
+			(struct args_t){ .rd = 1, .rs1 = (uint8_t)i + 2 }, 0);
+	for (size_t i = 0; i < ARRAY_LENGTH(cases_setif); i++)
+		errors += test_case(
+			cases_setif[i],
+			(struct args_t){ .rd = 1, .rs1 = (uint8_t)i + 2 }, 0);
+	for (size_t i = 0; i < ARRAY_LENGTH(cases_branchifz); i++)
+		errors += test_case(cases_branchifz[i],
+				    (struct args_t){ .rs1 = (uint8_t)i + 1,
+						     .sym = &start },
+				    i * 4);
 	for (size_t i = 0; i < ARRAY_LENGTH(cases_branchifr); i++)
 		errors += test_case(cases_branchifr[i],
-				    (struct args_t){ .rs1 = i + 1,
-						     .rs2 = i + 5,
+				    (struct args_t){ .rs1 = (uint8_t)i + 1,
+						     .rs2 = (uint8_t)i + 5,
 						     .sym = &start },
 				    i * 4);
 	for (size_t i = 0; i < ARRAY_LENGTH(cases_jump); i++)
@@ -112,9 +113,11 @@ int main(void)
 				    (struct args_t){ .rd = 1, .sym = &start },
 				    i * 4);
 	for (size_t i = 0; i < ARRAY_LENGTH(cases_jump_register); i++)
-		errors += test_case(
-			cases_jump_register[i],
-			(struct args_t){ .rd = 1, .rs1 = i + 2, .imm = 0 }, 0);
+		errors += test_case(cases_jump_register[i],
+				    (struct args_t){ .rd = 1,
+						     .rs1 = (uint8_t)i + 2,
+						     .imm = 0 },
+				    0);
 	errors += test_case(case_ret, empty_args, 0);
 
 	return errors != 0 || get_clean_exit(ERROR);
