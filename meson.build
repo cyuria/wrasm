@@ -4,7 +4,6 @@ project(
     default_options: [
         'c_std=c17',
         'warning_level=3',
-        'werror=true',
         'b_lto=true',
     ],
     version: '0.0.1-alpha',

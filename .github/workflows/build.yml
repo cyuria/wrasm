@@ -31,7 +31,7 @@ jobs:
       with: 
         compiler: ${{ matrix.compiler }}
 
-    - run: meson setup build
+    - run: meson setup build --werror
 
     - run: meson compile -C build
 
