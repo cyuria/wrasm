@@ -1,10 +1,5 @@
 # Contributing to wrasm
 
-## The RISC-V spec
-
-This can be found here https://riscv.org/technical/specifications/ or here
-https://github.com/riscv/riscv-isa-manual.
-
 ## Reporting Bugs
 
 If you've found a bug, please open an issue on GitHub.
@@ -37,6 +32,11 @@ sort through PRs.
 If you have already submitted a PR, don't worry, we won't block anyone's pull
 request just because it doesn't have an associated issue. (Also, it's not too
 late to create an issue :).)
+
+## The RISC-V spec
+
+This can be found here https://riscv.org/technical/specifications/.
+Also have a look through here https://github.com/riscv/riscv-isa-manual.
 
 ## Whitespace fixes, code style changes, etc
 
@@ -97,7 +97,7 @@ guidelines are:
 The other main part of the philosophy is to give the end user the power to
 shoot themselves in the foot with a warning. In this vein, it is theoretically
 possible to compile wrasm on a C compiler that does not define `__clang__`,
-`__gnu_c__` or `_MSV_VER`. This will however raise a warning, which means
+`__GNUC__` or `_MSC_VER`. This will however raise a warning, which means
 removing the `-werror` flag is required to do so. What this effectively means
 is that any time you raise an error, by default wrasm will exit, however this
 is possible to change. Pretty much, even if an error occurs, try to make it
