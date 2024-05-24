@@ -574,3 +574,36 @@ struct args_t parse_la(char *argstr)
 
 	return args;
 }
+
+struct args_t parse_li(char *argstr)
+{
+	logger(DEBUG, no_error, "Parsing arguments %s for li instruction",
+	       argstr);
+
+	char *first = trim_arg(argstr);
+	char *second = trim_arg(NULL);
+
+	if (strtok(NULL, ","))
+		logger(ERROR, error_instruction_other,
+		       "Instruction has more than three arguments");
+
+	if (!first) {
+		logger(ERROR, error_instruction_other,
+		       "Expected two arguments but got none");
+		return empty_args;
+	}
+	if (!second) {
+		logger(ERROR, error_instruction_other,
+		       "Expected two arguments but got one");
+		return empty_args;
+	}
+
+	struct args_t args = {
+		.rd = expect_reg(first),
+		.imm = expect_imm(second),
+	};
+
+	logger(DEBUG, no_error, "Registers parsed x%d, x%d", args.rd, args.rs1);
+
+	return args;
+}

@@ -18,6 +18,7 @@ arg_parser parse_none;
 arg_parser parse_jal;
 arg_parser parse_jalr;
 arg_parser parse_ret;
+arg_parser parse_li;
 arg_parser parse_la;
 
 int parse_asm(const char *, struct sectionpos_t);

@@ -1,6 +1,7 @@
 
 #include "form/rv64i.h"
 
+#include <assert.h>
 #include <string.h>
 
 #include "debug.h"
@@ -69,8 +70,8 @@ enum jump_pseudo {
 const struct formation_t rv64i[] = {
 	{ "nop", &form_nop, &parse_none, { 4, OP_OPI, 0, 0 } },
 
-	{ "li", &form_load_short, &parse_pseudo, { 8, load_imm, 0, 0 } },
-	{ "la", &form_load_short, &parse_la, { 8, load_addr, 0, 0 } },
+	{ "li", &form_load_pseudo, &parse_li, { 8, load_imm, 0, 0 } },
+	{ "la", &form_load_pseudo, &parse_la, { 8, load_addr, 0, 0 } },
 
 	{ "mv", &form_math, &parse_pseudo, { 4, math_mv, 0, 0 } },
 	{ "not", &form_math, &parse_pseudo, { 4, math_not, 0, 0 } },
@@ -161,6 +162,15 @@ const struct formation_t rv64i[] = {
 	END_FORMATION
 };
 
+static int32_t calc_symbol_offset(const struct symbol_t *sym, size_t position)
+{
+	const size_t sympos = calc_fileoffset((struct sectionpos_t){
+		.section = sym->section,
+		.offset = sym->value,
+	});
+	return (int32_t)(sympos - position);
+}
+
 struct bytecode_t form_rtype(const char *name, struct idata_t instruction,
 			     struct args_t args, size_t position)
 {
@@ -173,6 +183,8 @@ struct bytecode_t form_rtype(const char *name, struct idata_t instruction,
 	const uint32_t rs1 = args.rs1;
 	const uint32_t rs2 = args.rs2;
 	const uint32_t funct7 = instruction.funct7;
+
+	assert(instruction.sz == 4);
 
 	struct bytecode_t res = {
 		.size = 4,
@@ -194,6 +206,8 @@ struct bytecode_t form_itype(const char *name, struct idata_t instruction,
 	const uint32_t funct3 = instruction.funct3;
 	const uint32_t rs1 = args.rs1;
 	const uint32_t imm_11_0 = args.imm & 0xFFF;
+
+	assert(instruction.sz == 4);
 
 	struct bytecode_t res = {
 		.size = 4,
@@ -226,6 +240,8 @@ struct bytecode_t form_stype(const char *name, struct idata_t instruction,
 	const uint32_t rs2 = args.rs2;
 	const uint32_t imm_11_5 = (args.imm >> 5) & 0x7F;
 
+	assert(instruction.sz == 4);
+
 	struct bytecode_t res = {
 		.size = 4,
 		.data = xmalloc(4),
@@ -241,21 +257,14 @@ struct bytecode_t form_btype(const char *name, struct idata_t instruction,
 	(void)position;
 	logger(DEBUG, no_error, "Generating B type instruction %s", name);
 
-	const struct symbol_t symbol = *args.sym;
-	if (symbol.type != symbol_label)
+	if (args.sym->type != symbol_label)
 		logger(ERROR, error_invalid_syntax,
 		       "Incorrect argument types for instruction %s."
 		       " Expected label, but got a different symbol",
-		       symbol.name);
+		       args.sym->name);
 
 	const uint32_t offset =
-		(uint32_t)(calc_fileoffset((struct sectionpos_t){
-				   .section = symbol.section,
-				   .offset = symbol.value,
-			   }) -
-			   position);
-	logger(DEBUG, no_error, "B type instruction has offset of 0x%.04X",
-	       (uint32_t)offset);
+		(uint32_t)calc_symbol_offset(args.sym, position);
 	const uint32_t opcode = instruction.opcode;
 	const uint32_t imm_11 = (offset >> 11) & 0x1;
 	const uint32_t imm_4_1 = (offset >> 1) & 0xF;
@@ -264,6 +273,11 @@ struct bytecode_t form_btype(const char *name, struct idata_t instruction,
 	const uint32_t rs2 = args.rs2;
 	const uint32_t imm_10_5 = (offset >> 5) & 0x3F;
 	const uint32_t imm_12 = (offset >> 12) & 0x1;
+
+	logger(DEBUG, no_error, "B type instruction has offset of 0x%.04X",
+	       offset);
+
+	assert(instruction.sz == 4);
 
 	struct bytecode_t res = {
 		.size = 4,
@@ -284,6 +298,8 @@ struct bytecode_t form_utype(const char *name, struct idata_t instruction,
 	const uint32_t opcode = instruction.opcode;
 	const uint32_t rd = args.rd & 0x1F;
 	const uint32_t imm_12_31 = (args.imm >> 12) & 0xFFFFF;
+
+	assert(instruction.sz == 4);
 
 	struct bytecode_t res = {
 		.size = 4,
@@ -309,6 +325,8 @@ struct bytecode_t form_jtype(const char *name, struct idata_t instruction,
 	const uint32_t imm_10_1 = (offset >> 1) & 0x3FF;
 	const uint32_t imm_20 = (offset >> 20) & 0x1;
 
+	assert(instruction.sz == 4);
+
 	struct bytecode_t res = {
 		.size = 4,
 		.data = xmalloc(4),
@@ -330,6 +348,8 @@ struct bytecode_t form_syscall(const char *name, struct idata_t instruction,
 	const uint32_t funct3 = instruction.funct3;
 	const uint32_t funct7 = instruction.funct7;
 
+	assert(instruction.sz == 4);
+
 	struct bytecode_t res = {
 		.size = 4,
 		.data = xmalloc(4),
@@ -344,6 +364,8 @@ struct bytecode_t form_fence(const char *name, struct idata_t instruction,
 {
 	(void)position;
 	logger(DEBUG, no_error, "Generating fence instruction %s", name);
+
+	assert(instruction.sz == 4);
 
 	struct bytecode_t res = { .size = 4, .data = xmalloc(4) };
 
@@ -365,8 +387,8 @@ struct bytecode_t form_nop(const char *name, struct idata_t instruction,
 			  position);
 }
 
-struct bytecode_t form_load_short(const char *name, struct idata_t instruction,
-				  struct args_t args, size_t position)
+struct bytecode_t form_load_pseudo(const char *name, struct idata_t instruction,
+				   struct args_t args, size_t position)
 {
 	logger(DEBUG, no_error, "Generating load instruction %s", name);
 
@@ -382,7 +404,7 @@ struct bytecode_t form_load_short(const char *name, struct idata_t instruction,
 		break;
 	case load_addr:
 		opcode = OP_AUIPC;
-		value = (uint32_t)args.sym->value;
+		value = (uint32_t)calc_symbol_offset(args.sym, position);
 		break;
 	default:
 		UNREACHABLE();
@@ -394,6 +416,8 @@ struct bytecode_t form_load_short(const char *name, struct idata_t instruction,
 		break;
 #endif
 	}
+
+	logger(DEBUG, no_error, "Load psuedoinstruction has value %d", value);
 
 	const char *uppernames[] = { "lui (li)", "auipc (la)" };
 	const char *lowernames[] = { "addi (li)", "addi (la)" };
