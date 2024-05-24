@@ -6,6 +6,7 @@
 
 #include "debug.h"
 #include "form/generic.h"
+#include "form/rv32i.h"
 #include "form/rv64i.h"
 #include "macros.h"
 
@@ -15,6 +16,7 @@ struct formation_t parse_form(const char *instruction)
 	       instruction);
 
 	const struct formation_t *sets[] = {
+		rv32i,
 		rv64i,
 	};
 	for (size_t i = 0; i < ARRAY_LENGTH(sets); i++) {

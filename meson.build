@@ -29,6 +29,7 @@ sources = files(
     'src/elf/output.c',
     'src/form/generic.c',
     'src/form/instructions.c',
+    'src/form/rv32i.c',
     'src/form/rv64i.c',
     'src/generation.c',
     'src/parse.c',
