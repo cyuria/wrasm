@@ -3,7 +3,7 @@ tests = [
     'get_register_id.c',
     'parse_form.c',
     'parse_args.c',
-    'form_rv64i.c',
+    'form_rv32i.c',
 ]
 
 compiler = meson.get_compiler('c')
