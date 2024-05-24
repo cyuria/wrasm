@@ -36,7 +36,7 @@ static uint8_t expect_reg(char *arg)
 	return (uint8_t)reg;
 }
 
-static uint8_t expect_imm(char *arg)
+static uint32_t expect_imm(char *arg)
 {
 	size_t imm;
 	if (get_immediate(arg, &imm))
