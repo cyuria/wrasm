@@ -22,4 +22,5 @@
 [ ] - Multiple output format options
 
 [ ] - Use hashmap to store symbols
+[ ] - Fix unsynchronised error output of test/system/runtests.py
 
