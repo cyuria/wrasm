@@ -174,6 +174,9 @@ struct args_t parse_none(char *argstr)
 	logger(DEBUG, no_error,
 	       "Parsing arguments for no argument instruction");
 
+	if (!argstr)
+		return empty_args;
+
 	for (char *c = argstr; *c; c++)
 		if (*c == ',')
 			logger(ERROR, error_instruction_other,
