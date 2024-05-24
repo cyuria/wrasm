@@ -18,10 +18,17 @@ struct case_t cases_rtype[] = {
 	{ "x2, x25, x12", { .rd = 2, .rs1 = 25, .rs2 = 12 } },
 	{ "sp, zero, t1", { .rd = 2, .rs1 = 0, .rs2 = 6 } },
 };
-
 struct case_t cases_itype[] = {
 	{ "x2, x25, 5", { .rd = 2, .rs1 = 25, .imm = 5 } },
 	{ "sp, zero, -2024", { .rd = 2, .rs1 = 0, .imm = (uint32_t)-2024 } },
+};
+struct case_t cases_stype[] = {
+	{ "x6, s7, 65", { .rs1 = 6, .rs2 = 23, .imm = 65 } },
+	{ "t4, sp, 16", { .rs1 = 29, .rs2 = 2, .imm = 16 } },
+};
+struct case_t cases_utype[] = {
+	{ "x6, 40000", { .rd = 6, .imm = 40000 } },
+	{ "s0, 16", { .rd = 8, .imm = 16 } },
 };
 
 int test_rtype(char *argstr, struct args_t expected)
@@ -53,6 +60,41 @@ int test_itype(char *argstr, struct args_t expected)
 		       args.rd, args.rs1, args.imm);
 		logger(INFO, error_internal, "expected x%d, x%d, %d",
 		       expected.rd, expected.rs1, expected.imm);
+		return 1;
+	}
+	return 0;
+}
+
+int test_stype(char *argstr, struct args_t expected)
+{
+	const struct args_t args = parse_itype(argstr);
+	const int rs1 = args.rs1 == expected.rs1;
+	const int rs2 = args.rs2 == expected.rs2;
+	const int imm = args.imm == expected.imm;
+
+	if (!rs1 || !rs2 || !imm) {
+		logger(ERROR, error_internal,
+		       "stype argument string incorrectly parsed as x%d, x%d, %d",
+		       args.rd, args.rs1, args.imm);
+		logger(INFO, error_internal, "expected x%d, x%d, %d",
+		       expected.rs1, expected.rs2, expected.imm);
+		return 1;
+	}
+	return 0;
+}
+
+int test_utype(char *argstr, struct args_t expected)
+{
+	const struct args_t args = parse_itype(argstr);
+	const int rd = args.rd == expected.rd;
+	const int imm = args.imm == expected.imm;
+
+	if (!rd || !imm) {
+		logger(ERROR, error_internal,
+		       "utype argument string incorrectly parsed as x%d, %d",
+		       args.rd, args.imm);
+		logger(INFO, error_internal, "expected x%d, %d", expected.rd,
+		       expected.imm);
 		return 1;
 	}
 	return 0;
