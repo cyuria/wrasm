@@ -7,28 +7,28 @@ started.
 ## Read Our Contributing Docs
 
 Have a look through the following
-* <docs/contrib/readme.md>
+* [`docs/contrib/readme.md`](/docs/contrib/readme.md)
 
 ## Which Files Do I Need to Change?
 
 If you were implementing the RV32I base instruction set, you'd need to create
 the following two files:
-* <h/form/rv32i.h>
-* <src/form/rv32i.c>
+* [`h/form/rv32i.h`](/h/form/rv32i.h)
+* [`src/form/rv32i.c`](/src/form/rv32i.c)
 
 In your case, replace the filenames with the equivalent those for whichever
 extension you are implementing.
 
 You should also have a look through the definitions in these header files:
-* <h/form/generic.h>
-* <h/form/instruction.h>
-* <h/macro.h>
-* <h/debug.h>
+* [`h/form/generic.h`](/h/form/generic.h)
+* [`h/form/instruction.h`](/h/form/instruction.h)
+* [`h/macro.h`](/h/macro.h)
+* [`h/debug.h`](/h/debug.h)
 
 ## I Need More Help
 
 If you need more help, I strongly suggest reading through the code in
-<src/form/rv32i.c>.
+[`src/form/rv32i.c`](/src/form/rv32i.c.)
 
 If that is still not enough, just ask someone. You should have an open issue
 for adding the instruction set, ask someone there. If you don't then open an
