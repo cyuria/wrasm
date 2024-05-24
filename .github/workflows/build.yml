@@ -6,11 +6,13 @@ on:
     paths:
       - '*/**'
       - '**/meson.build'
+      - '!docs/**'
   pull_request:
     branches: [ "master" ]
     paths:
       - '*/**'
       - '**/meson.build'
+      - '!docs/**'
 
 jobs:
   compile:
