@@ -2,6 +2,7 @@ tests = [
     'find_symbol_or_immediate.c',
     'get_register_id.c',
     'parse_form.c',
+    'parse_args.c',
     'form_rv64i.c',
 ]
 

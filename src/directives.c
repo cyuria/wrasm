@@ -6,7 +6,7 @@
 
 #include "debug.h"
 #include "elf/output.h"
-#include "instructions.h"
+#include "bytecode.h"
 #include "macros.h"
 #include "stringutil.h"
 #include "symbols.h"

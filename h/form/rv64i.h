@@ -1,9 +1,11 @@
 #pragma once
-#include "form/generic.h"
+#include "form/instructions.h"
+
+extern const struct formation_t rv64i[];
 
 /* shortcut instructions bytecode generation */
 form_handler form_nop;
-form_handler form_load_short;
+form_handler form_load_pseudo;
 form_handler form_math;
 form_handler form_setif;
 form_handler form_branchifz;

@@ -22,15 +22,16 @@ headers = include_directories('h')
 
 sources = files(
     'src/args.c',
-    'src/asm.c',
+    'src/bytecode.c',
     'src/debug.c',
     'src/directives.c',
     'src/elf/def.c',
     'src/elf/output.c',
     'src/form/generic.c',
+    'src/form/instructions.c',
     'src/form/rv64i.c',
     'src/generation.c',
-    'src/instructions.c',
+    'src/parse.c',
     'src/registers.c',
     'src/stringutil.c',
     'src/symbols.c',
