@@ -380,8 +380,8 @@ struct args_t parse_fence(char *argstr)
 
 	if (!first)
 		return (struct args_t){
-			.rd = 0,
-			.rs1 = 0,
+			.rd = 0x0,
+			.rs1 = 0x0,
 			.imm = 0xFF,
 		};
 
@@ -395,16 +395,16 @@ struct args_t parse_fence(char *argstr)
 		return empty_args;
 	}
 
-	const int p = parse_fence_arg(first);
-	const int s = parse_fence_arg(second);
+	const int predecessor = parse_fence_arg(first);
+	const int successor = parse_fence_arg(second);
 
 	free(first);
 	free(second);
 
 	return (struct args_t){
-		.rd = 0,
-		.rs1 = 0,
-		.imm = (p << 4) | s,
+		.rd = 0x0,
+		.rs1 = 0x0,
+		.imm = (predecessor << 4) | successor,
 	};
 }
 
@@ -584,6 +584,28 @@ struct args_t parse_jr(char *argstr)
 	free(first);
 
 	logger(DEBUG, no_error, "Register parsed x%d", args.rs1);
+
+	return args;
+}
+
+struct args_t parse_ftso(char *argstr)
+{
+	logger(DEBUG, no_error,
+	       "Parsing arguments for no argument instruction");
+
+	const struct args_t args = {
+		.rd = 0x0,
+		.rs1 = 0x0,
+		.imm = 0x833,
+	};
+
+	if (!argstr)
+		return args;
+
+	for (char *c = argstr; *c; c++)
+		if (*c == ',')
+			logger(ERROR, error_instruction_other,
+			       "Expected zero arguments, but got at least one");
 
 	return args;
 }

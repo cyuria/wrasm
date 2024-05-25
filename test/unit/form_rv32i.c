@@ -50,6 +50,7 @@ struct case_t cases[] = {
 
 	{ .asm = "fence", .bytecode = 0x0ff0000f },
 	{ .asm = "fence ir, ow", .bytecode = 0x0a50000f },
+	{ .asm = "fence.tso", .bytecode = 0x8330000f },
 };
 
 int test_case(struct case_t c)
