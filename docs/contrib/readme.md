@@ -14,22 +14,23 @@ RISC-V can be found here.
 
 ## Code Style
 
-Wrasm follows the linux kernel style guidelines, so when in doubt, consult
+Wrasm follows the Linux kernel style guidelines, so when in doubt, consult
 them.
 
 There are also have a few general purpose headers
-*   [`h/xmalloc.h`](/h/xmalloc.h) adds an exit call if any of the malloc family
-    fails. Please use these instead of the regular stdlib calls, i.e.
-    `xmalloc(size)` instead of `malloc(size)`.
-*   [`h/stringutil.h`](/h/stringutil.h) provides a few utilities for parsing
-    strings.
-*   [`h/debug.h`](/h/debug.h) provides all logging functionality. Please don't
-    use `stdio.h` functions for logging purposes but instead the `logger()`
-    function defined here.
-*   [`h/macros.h`](/h/macros.h) provides generic macros, such as the
-    `ARRAY_LENGTH()` macro.
+*   [`h/xmalloc.h`](https://github.com/cyuria/wrasm/tree/master/h/xmalloc.h)
+    adds an exit call if any of the `malloc` family fails. Please use these
+    instead of the regular standard library calls, i.e. `xmalloc(size)` instead
+    of `malloc(size)`.
+*   [`h/stringutil.h`](https://github.com/cyuria/wrasm/tree/master/h/stringutil.h)
+    provides a few utilities for parsing strings.
+*   [`h/debug.h`](https://github.com/cyuria/wrasm/tree/master/h/debug.h)
+    provides all logging functionality. Please don't use `stdio.h` functions
+    for logging purposes but instead the `logger()` function defined here.
+*   [`h/macros.h`](https://github.com/cyuria/wrasm/tree/master/h/macros.h)
+    provides generic macros, such as the `ARRAY_LENGTH()` macro.
 
 ## For Specifics on Contributions
 
-* [Adding a New RISC-V Extension](adding_extensions.md)
+* [Adding a New RISC-V Extension](./adding_extensions.md)
 
