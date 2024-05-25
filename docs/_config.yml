@@ -1,0 +1,10 @@
+title: wrasm
+description: >-
+  A standalone RISC-V assembler inspired by nasm
+domain: cyuria.github.io
+baseurl: "/wrasm"
+url: "https://cyuria.github.io"
+
+remote_theme: pages-themes/cayman@v0.2.0
+plugins:
+  - jekyll-remote-theme
