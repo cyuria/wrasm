@@ -54,6 +54,73 @@ static struct symbol_t *expect_sym(char *arg)
 	return sym;
 }
 
+static int expect_one_arg(char *first)
+{
+	if (strtok(NULL, ",")) {
+		logger(ERROR, error_instruction_other,
+		       "Instruction has more than one argument");
+		return 0;
+	}
+
+	if (!first) {
+		logger(ERROR, error_instruction_other,
+		       "Expected one argument, not none");
+		return 1;
+	}
+	return 0;
+}
+
+static int expect_two_args(char *first, char *second)
+{
+	if (strtok(NULL, ",")) {
+		logger(ERROR, error_instruction_other,
+		       "Instruction has more than two arguments");
+		return 0;
+	}
+
+	if (!first) {
+		logger(ERROR, error_instruction_other,
+		       "Expected two arguments, not none");
+		return 1;
+	}
+	if (!second) {
+		logger(ERROR, error_instruction_other,
+		       "Expected two arguments, not one");
+		free(first);
+		return 1;
+	}
+	return 0;
+}
+
+static int expect_three_args(char *first, char *second, char *third)
+{
+	if (strtok(NULL, ",")) {
+		logger(ERROR, error_instruction_other,
+		       "Instruction has more than three arguments");
+		return 0;
+	}
+
+	if (!first) {
+		logger(ERROR, error_instruction_other,
+		       "Expected three arguments, not none");
+		return 1;
+	}
+	if (!second) {
+		logger(ERROR, error_instruction_other,
+		       "Expected three arguments, not one");
+		free(first);
+		return 1;
+	}
+	if (!third) {
+		logger(ERROR, error_instruction_other,
+		       "Expected three arguments, not two");
+		free(first);
+		free(second);
+		return 1;
+	}
+	return 0;
+}
+
 int parse_asm(const char *linestr, struct sectionpos_t position)
 {
 	logger(DEBUG, no_error, "Parsing assembly %s", linestr);
@@ -62,9 +129,10 @@ int parse_asm(const char *linestr, struct sectionpos_t position)
 	strcpy(line, linestr);
 
 	char *instruction = strtok(line, " \t");
+	char *argstr = strtok(NULL, "");
 
 	struct formation_t formation = parse_form(instruction);
-	struct args_t args = formation.arg_handler(strtok(NULL, ""));
+	struct args_t args = formation.arg_handler(argstr);
 
 	free(line);
 
@@ -80,94 +148,6 @@ int parse_asm(const char *linestr, struct sectionpos_t position)
 
 	return 0;
 }
-
-/*
-int parse_args(char *argstr, struct args_t *args)
-{
-	// TODO: reimplement
-	logger(DEBUG, no_error, "Parsing arguments for instruction (%s)",
-	       argstr);
-
-	args->a[0].type = arg_none;
-	args->a[1].type = arg_none;
-	args->a[2].type = arg_none;
-
-	char **arg_strs = NULL;
-	size_t arg_count = 0;
-
-	char *raw = NULL;
-	raw = strtok(argstr, ",");
-	while (raw) {
-		const size_t i = arg_count;
-		arg_count++;
-		if (arg_count > 3) {
-			logger(ERROR, error_instruction_other,
-			       "Instruction has too many arguments");
-			return 1;
-		}
-		arg_strs = xrealloc(arg_strs, arg_count * sizeof(*arg_strs));
-		arg_strs[i] = trim_whitespace(raw);
-		raw = strtok(NULL, ",");
-	}
-
-	for (size_t i = 0; i < arg_count; i++)
-		parse_arg(arg_strs[i], &args->a[i].type, &args->a[i].arg);
-
-	logger(DEBUG, no_error,
-	       "Arguments parsed, (%d, %d), (%d, %d), (%d, %d)",
-	       args->a[0].type, args->a[0].arg, args->a[1].type, args->a[1].arg,
-	       args->a[2].type, args->a[2].arg);
-
-	return 0;
-}
-
-static int parse_arg(const char *str, enum argtype_e *type, size_t *arg)
-{
-	size_t reg = get_register_id(str);
-	if (reg != (size_t)-1) {
-		*type = arg_register;
-		*arg = reg;
-		return 0;
-	}
-	struct symbol_t *sym = get_symbol(str);
-	if (sym) {
-		*type = arg_symbol;
-		*arg = (size_t)sym;
-		return 0;
-	}
-	const int status = get_immediate(str, arg);
-	if (!status) {
-		*type = arg_immediate;
-		return 0;
-	}
-	logger(ERROR, error_instruction_other,
-	       "Uknown argument (%s) encountered", str);
-	return 0;
-}
-*/
-
-/*
-	size_t reg = get_register_id(str);
-	if (reg != (size_t)-1) {
-		*type = arg_register;
-		*arg = reg;
-		return 0;
-	}
-	struct symbol_t *sym = get_symbol(str);
-	if (sym) {
-		*type = arg_symbol;
-		*arg = (size_t)sym;
-		return 0;
-	}
-	const int status = get_immediate(str, arg);
-	if (!status) {
-		*type = arg_immediate;
-		return 0;
-	}
-	logger(ERROR, error_instruction_other,
-	       "Uknown argument (%s) encountered", str);
-	return 0;
-*/
 
 struct args_t parse_none(char *argstr)
 {
@@ -196,31 +176,18 @@ struct args_t parse_rtype(char *argstr)
 
 	logger(DEBUG, no_error, "Parsed %s, %s, %s", first, second, third);
 
-	if (strtok(NULL, ","))
-		logger(ERROR, error_instruction_other,
-		       "Instruction has more than three arguments");
-
-	if (!first) {
-		logger(ERROR, error_instruction_other,
-		       "Expected three arguments, not none");
+	if (expect_three_args(first, second, third))
 		return empty_args;
-	}
-	if (!second) {
-		logger(ERROR, error_instruction_other,
-		       "Expected three arguments, not one");
-		return empty_args;
-	}
-	if (!third) {
-		logger(ERROR, error_instruction_other,
-		       "Expected three arguments, not two");
-		return empty_args;
-	}
 
 	struct args_t args = {
 		.rd = expect_reg(first),
 		.rs1 = expect_reg(second),
 		.rs2 = expect_reg(third),
 	};
+
+	free(first);
+	free(second);
+	free(third);
 
 	logger(DEBUG, no_error, "Registers parsed x%d, x%d, x%d", args.rd,
 	       args.rs1, args.rs2);
@@ -237,31 +204,18 @@ struct args_t parse_itype(char *argstr)
 	char *second = trim_arg(NULL);
 	char *third = trim_arg(NULL);
 
-	if (strtok(NULL, ","))
-		logger(ERROR, error_instruction_other,
-		       "Instruction has more than three arguments");
-
-	if (!first) {
-		logger(ERROR, error_instruction_other,
-		       "Expected three arguments, not none");
+	if (expect_three_args(first, second, third))
 		return empty_args;
-	}
-	if (!second) {
-		logger(ERROR, error_instruction_other,
-		       "Expected three arguments, not one");
-		return empty_args;
-	}
-	if (!third) {
-		logger(ERROR, error_instruction_other,
-		       "Expected three arguments, not two");
-		return empty_args;
-	}
 
 	struct args_t args = {
 		.rd = expect_reg(first),
 		.rs1 = expect_reg(second),
 		.imm = expect_imm(third),
 	};
+
+	free(first);
+	free(second);
+	free(third);
 
 	logger(DEBUG, no_error, "Registers parsed x%d, x%d, %d", args.rd,
 	       args.rs1, args.imm);
@@ -278,31 +232,18 @@ struct args_t parse_stype(char *argstr)
 	char *second = trim_arg(NULL);
 	char *third = trim_arg(NULL);
 
-	if (strtok(NULL, ","))
-		logger(ERROR, error_instruction_other,
-		       "Instruction has more than three arguments");
-
-	if (!first) {
-		logger(ERROR, error_instruction_other,
-		       "Expected three arguments, not none");
+	if (expect_three_args(first, second, third))
 		return empty_args;
-	}
-	if (!second) {
-		logger(ERROR, error_instruction_other,
-		       "Expected three arguments, not one");
-		return empty_args;
-	}
-	if (!third) {
-		logger(ERROR, error_instruction_other,
-		       "Expected three arguments, not two");
-		return empty_args;
-	}
 
 	struct args_t args = {
 		.rs1 = expect_reg(first),
 		.rs2 = expect_reg(second),
 		.imm = expect_imm(third),
 	};
+
+	free(first);
+	free(second);
+	free(third);
 
 	logger(DEBUG, no_error, "Registers parsed x%d, x%d, %d", args.rs1,
 	       args.rs2, args.imm);
@@ -318,25 +259,16 @@ struct args_t parse_utype(char *argstr)
 	char *first = trim_arg(argstr);
 	char *second = trim_arg(NULL);
 
-	if (strtok(NULL, ","))
-		logger(ERROR, error_instruction_other,
-		       "Instruction has more than three arguments");
-
-	if (!first) {
-		logger(ERROR, error_instruction_other,
-		       "Expected two arguments but got none");
+	if (expect_two_args(first, second))
 		return empty_args;
-	}
-	if (!second) {
-		logger(ERROR, error_instruction_other,
-		       "Expected two arguments but got one");
-		return empty_args;
-	}
 
 	struct args_t args = {
 		.rd = expect_reg(first),
 		.imm = expect_imm(second),
 	};
+
+	free(first);
+	free(second);
 
 	logger(DEBUG, no_error, "Registers parsed x%d, %d", args.rd, args.imm);
 
@@ -352,31 +284,18 @@ struct args_t parse_btype(char *argstr)
 	char *second = trim_arg(NULL);
 	char *third = trim_arg(NULL);
 
-	if (strtok(NULL, ","))
-		logger(ERROR, error_instruction_other,
-		       "Instruction has more than three arguments");
-
-	if (!first) {
-		logger(ERROR, error_instruction_other,
-		       "Expected three arguments, not none");
+	if (expect_three_args(first, second, third))
 		return empty_args;
-	}
-	if (!second) {
-		logger(ERROR, error_instruction_other,
-		       "Expected three arguments, not one");
-		return empty_args;
-	}
-	if (!third) {
-		logger(ERROR, error_instruction_other,
-		       "Expected three arguments, not two");
-		return empty_args;
-	}
 
 	struct args_t args = {
 		.rs1 = expect_reg(first),
 		.rs2 = expect_reg(second),
 		.sym = expect_sym(third),
 	};
+
+	free(first);
+	free(second);
+	free(third);
 
 	logger(DEBUG, no_error, "Registers parsed x%d, x%d, %s", args.rs1,
 	       args.rs2, args.sym->name);
@@ -392,25 +311,16 @@ struct args_t parse_bztype(char *argstr)
 	char *first = trim_arg(argstr);
 	char *second = trim_arg(NULL);
 
-	if (strtok(NULL, ","))
-		logger(ERROR, error_instruction_other,
-		       "Instruction has more than three arguments");
-
-	if (!first) {
-		logger(ERROR, error_instruction_other,
-		       "Expected two arguments but got none");
+	if (expect_two_args(first, second))
 		return empty_args;
-	}
-	if (!second) {
-		logger(ERROR, error_instruction_other,
-		       "Expected two arguments but got one");
-		return empty_args;
-	}
 
 	struct args_t args = {
 		.rs1 = expect_reg(first),
 		.sym = expect_sym(second),
 	};
+
+	free(first);
+	free(second);
 
 	logger(DEBUG, no_error, "Registers parsed x%d, %s", args.rs1,
 	       args.sym->name);
@@ -426,37 +336,76 @@ struct args_t parse_pseudo(char *argstr)
 	char *first = trim_arg(argstr);
 	char *second = trim_arg(NULL);
 
-	if (strtok(NULL, ","))
-		logger(ERROR, error_instruction_other,
-		       "Instruction has more than three arguments");
-
-	if (!first) {
-		logger(ERROR, error_instruction_other,
-		       "Expected two arguments but got none");
+	if (expect_two_args(first, second))
 		return empty_args;
-	}
-	if (!second) {
-		logger(ERROR, error_instruction_other,
-		       "Expected two arguments but got one");
-		return empty_args;
-	}
 
 	struct args_t args = {
 		.rd = expect_reg(first),
 		.rs1 = expect_reg(second),
 	};
 
+	free(first);
+	free(second);
+
 	logger(DEBUG, no_error, "Registers parsed x%d, x%d", args.rd, args.rs1);
 
 	return args;
 }
 
+static int parse_fence_arg(const char *arg)
+{
+	const char *key = "iorw";
+	int iorw = 0;
+	for (const char *c = key; *c; c++) {
+		iorw <<= 1;
+		if (*c != *arg)
+			continue;
+		iorw |= 1;
+		arg++;
+	}
+	if (*arg)
+		logger(ERROR, error_instruction_other,
+		       "expected combination of iorw but encountered '%c' character",
+		       *arg);
+	return iorw;
+}
+
 struct args_t parse_fence(char *argstr)
 {
-	(void)argstr;
-	logger(ERROR, error_not_implemented,
-	       "The FENCE instruction has not been implemented yet");
-	return empty_args;
+	logger(DEBUG, no_error, "Parsing arguments %s for fence instruction",
+	       argstr);
+
+	char *first = trim_arg(argstr);
+	char *second = trim_arg(NULL);
+
+	if (!first)
+		return (struct args_t){
+			.rd = 0,
+			.rs1 = 0,
+			.imm = 0xFF,
+		};
+
+	if (strtok(NULL, ","))
+		logger(ERROR, error_instruction_other,
+		       "Instruction has more than two arguments");
+
+	if (!second) {
+		logger(ERROR, error_instruction_other,
+		       "Expected two arguments but got one");
+		return empty_args;
+	}
+
+	const int p = parse_fence_arg(first);
+	const int s = parse_fence_arg(second);
+
+	free(first);
+	free(second);
+
+	return (struct args_t){
+		.rd = 0,
+		.rs1 = 0,
+		.imm = (p << 4) | s,
+	};
 }
 
 struct args_t parse_jal(char *argstr)
@@ -474,9 +423,11 @@ struct args_t parse_jal(char *argstr)
 		logger(ERROR, error_instruction_other,
 		       "Expected at most two arguments");
 
-	if (!first)
+	if (!first) {
 		logger(ERROR, error_invalid_instruction,
 		       "Expected at least one argument");
+		return empty_args;
+	}
 
 	if (second) {
 		args.rd = expect_reg(first);
@@ -505,13 +456,18 @@ struct args_t parse_jalr(char *argstr)
 	char *second = trim_arg(NULL);
 	char *third = trim_arg(NULL);
 
+	if (strtok(NULL, ","))
+		logger(ERROR, error_instruction_other,
+		       "Instruction has more than three arguments");
+
 	if (!first) {
 		logger(DEBUG, error_instruction_other,
 		       "Expected at least one argument");
 		return empty_args;
 	}
 
-	uint8_t rd = expect_reg(first);
+	const uint8_t rd = expect_reg(first);
+	free(first);
 
 	if (!second) {
 		logger(DEBUG, no_error, "jalr (pseudo) arguments parsed -> x%d",
@@ -526,15 +482,15 @@ struct args_t parse_jalr(char *argstr)
 	if (!third) {
 		logger(ERROR, error_instruction_other,
 		       "Expected one or three arguments but got two");
+		free(second);
 		return empty_args;
 	}
 
-	if (strtok(NULL, ","))
-		logger(ERROR, error_instruction_other,
-		       "Instruction has more than three arguments");
-
 	const uint8_t rs1 = expect_reg(second);
 	const uint32_t imm = expect_imm(third);
+
+	free(second);
+	free(third);
 
 	logger(DEBUG, no_error, "jalr arguments parsed -> x%d, x%d, %d", rd,
 	       rs1, imm);
@@ -550,25 +506,16 @@ struct args_t parse_la(char *argstr)
 	char *first = trim_arg(argstr);
 	char *second = trim_arg(NULL);
 
-	if (strtok(NULL, ","))
-		logger(ERROR, error_instruction_other,
-		       "Instruction has more than three arguments");
-
-	if (!first) {
-		logger(ERROR, error_instruction_other,
-		       "Expected two arguments but got none");
+	if (expect_two_args(first, second))
 		return empty_args;
-	}
-	if (!second) {
-		logger(ERROR, error_instruction_other,
-		       "Expected two arguments but got one");
-		return empty_args;
-	}
 
 	struct args_t args = {
 		.rd = expect_reg(first),
 		.sym = expect_sym(second),
 	};
+
+	free(first);
+	free(second);
 
 	logger(DEBUG, no_error, "Registers parsed x%d, x%d", args.rd, args.rs1);
 
@@ -583,27 +530,60 @@ struct args_t parse_li(char *argstr)
 	char *first = trim_arg(argstr);
 	char *second = trim_arg(NULL);
 
-	if (strtok(NULL, ","))
-		logger(ERROR, error_instruction_other,
-		       "Instruction has more than three arguments");
-
-	if (!first) {
-		logger(ERROR, error_instruction_other,
-		       "Expected two arguments but got none");
+	if (expect_two_args(first, second))
 		return empty_args;
-	}
-	if (!second) {
-		logger(ERROR, error_instruction_other,
-		       "Expected two arguments but got one");
-		return empty_args;
-	}
 
 	struct args_t args = {
 		.rd = expect_reg(first),
 		.imm = expect_imm(second),
 	};
 
+	free(first);
+	free(second);
+
 	logger(DEBUG, no_error, "Registers parsed x%d, x%d", args.rd, args.rs1);
+
+	return args;
+}
+
+struct args_t parse_j(char *argstr)
+{
+	logger(DEBUG, no_error, "Parsing arguments %s for li instruction",
+	       argstr);
+
+	char *first = trim_arg(argstr);
+
+	if (expect_one_arg(first))
+		return empty_args;
+
+	struct args_t args = {
+		.sym = expect_sym(first),
+	};
+
+	free(first);
+
+	logger(DEBUG, no_error, "Symbol parsed %s", args.sym->name);
+
+	return args;
+}
+
+struct args_t parse_jr(char *argstr)
+{
+	logger(DEBUG, no_error, "Parsing arguments %s for li instruction",
+	       argstr);
+
+	char *first = trim_arg(argstr);
+
+	if (expect_one_arg(first))
+		return empty_args;
+
+	struct args_t args = {
+		.rs1 = expect_reg(first),
+	};
+
+	free(first);
+
+	logger(DEBUG, no_error, "Register parsed x%d", args.rs1);
 
 	return args;
 }

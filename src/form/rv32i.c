@@ -54,8 +54,8 @@ const struct formation_t rv32i[] = {
 	{ "bgtu", &form_branchifr, &parse_btype, { 4, branchifr_gtu, 0, 0 } },
 	{ "bleu", &form_branchifr, &parse_btype, { 4, branchifr_leu, 0, 0 } },
 
-	{ "j", &form_jump, &parse_rtype, { 4, jump_j, 0, 0 } },
-	{ "jr", &form_jump, &parse_rtype, { 4, jump_jr, 0, 0 } },
+	{ "j", &form_jump, &parse_j, { 4, jump_j, 0, 0 } },
+	{ "jr", &form_jump, &parse_jr, { 4, jump_jr, 0, 0 } },
 	{ "ret", &form_jump, &parse_none, { 4, jump_ret, 0, 0 } },
 
 	{ "add", &form_rtype, &parse_rtype, { 4, OP_OP, 0x0, 0x00 } },
