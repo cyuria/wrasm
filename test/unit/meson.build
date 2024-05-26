@@ -6,23 +6,13 @@ tests = [
     'form_rv32i.c',
 ]
 
-compiler = meson.get_compiler('c')
-
-includeflag = '-include'
-
-if (compiler.get_id() == 'msvc')
-    includeflag = '/FI'
-endif
-
-root = include_directories('../../')
-
 foreach test : tests
     e = executable(
         'test_' + test,
         test,
         sources,
         build_by_default: false,
-        include_directories: [headers, root],
+        include_directories: [headers],
         dependencies: [argtable3_dep],
         c_args: [
             '-D_CRT_SECURE_NO_WARNINGS',

@@ -11,9 +11,6 @@ project(
 
 argtable3 = subproject(
     'argtable3',
-    default_options: [
-        'argtable3:werror=false',
-    ],
     required: true,
 )
 argtable3_dep = argtable3.get_variable('argtable3_dep')
@@ -29,7 +26,9 @@ sources = files(
     'src/elf/output.c',
     'src/form/generic.c',
     'src/form/instructions.c',
+    'src/form/rv32a.c',
     'src/form/rv32i.c',
+    'src/form/rv64a.c',
     'src/form/rv64i.c',
     'src/generation.c',
     'src/parse.c',
