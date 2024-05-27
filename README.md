@@ -7,6 +7,8 @@ Wrasm is a RISC-V assembler, primarily targeting riscv64.
 
 See the [documentation](https://cyuria.github.io/wrasm/) for more info.
 
+The documentation is also available under [`docs/`](docs/readme.md)
+
 ## Copyright
 
 Wrasm is Copyright (C) 2024 Cyuria.
