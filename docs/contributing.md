@@ -12,8 +12,8 @@ would appreciate it if you do NOT open a regular issue for this purpose.
 
 ## Docs
 
-If you want to contribute to the docs, please open a pull request. If you are
-unsure of anything, you can either ask by commenting on said PR, or by
+If you want to contribute to the docs, please open a pull request on GitHub. If
+you are unsure of anything, you can either ask by commenting on said PR, or by
 opening/commenting on a related issue.
 
 ## Code
