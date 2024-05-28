@@ -90,11 +90,11 @@ const struct formation_t rv32i[] = {
 	{ "ecall", &form_syscall, &parse_none, { 4, OP_SYSTEM, 0x0, 0x000 } },
 	{ "ebreak", &form_syscall, &parse_none, { 4, OP_SYSTEM, 0x0, 0x001 } },
 
-	{ "lb", &form_itype, &parse_itype, { 4, OP_LOAD, 0x0, 0 } },
-	{ "lh", &form_itype, &parse_itype, { 4, OP_LOAD, 0x1, 0 } },
-	{ "lw", &form_itype, &parse_itype, { 4, OP_LOAD, 0x2, 0 } },
-	{ "lbu", &form_itype, &parse_itype, { 4, OP_LOAD, 0x4, 0 } },
-	{ "lhu", &form_itype, &parse_itype, { 4, OP_LOAD, 0x5, 0 } },
+	{ "lb", &form_itype, &parse_ltype, { 4, OP_LOAD, 0x0, 0 } },
+	{ "lh", &form_itype, &parse_ltype, { 4, OP_LOAD, 0x1, 0 } },
+	{ "lw", &form_itype, &parse_ltype, { 4, OP_LOAD, 0x2, 0 } },
+	{ "lbu", &form_itype, &parse_ltype, { 4, OP_LOAD, 0x4, 0 } },
+	{ "lhu", &form_itype, &parse_ltype, { 4, OP_LOAD, 0x5, 0 } },
 
 	{ "sb", &form_stype, &parse_stype, { 4, OP_STORE, 0x0, 0 } },
 	{ "sh", &form_stype, &parse_stype, { 4, OP_STORE, 0x1, 0 } },
