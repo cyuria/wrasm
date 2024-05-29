@@ -47,6 +47,7 @@ static void expect_offreg(char *arg, int32_t *offset, uint8_t *reg)
 	if (*arg != '(')
 		logger(ERROR, error_instruction_other,
 		       "Expected '(' but got '%c'", *arg);
+	arg++;
 	char *closing = arg;
 	while (*closing != ')') {
 		if (!*closing) {
