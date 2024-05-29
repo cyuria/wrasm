@@ -3,7 +3,8 @@ tests = [
     'get_register_id.c',
     'parse_form.c',
     'parse_args.c',
-    'form_rv32i.c',
+    'form_base.c',
+    'form_atomic.c',
 ]
 
 foreach test : tests
