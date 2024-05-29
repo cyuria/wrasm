@@ -1,6 +1,7 @@
 
 #include "parse.h"
 
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -34,6 +35,42 @@ static uint8_t expect_reg(char *arg)
 		logger(ERROR, error_instruction_other,
 		       "Expected register but got %s", arg);
 	return (uint8_t)reg;
+}
+
+static void expect_offreg(char *arg, int32_t *offset, uint8_t *reg)
+{
+	*offset = (int32_t)strtol(arg, &arg, 0);
+
+	while (isspace(*arg))
+		arg++;
+
+	if (*arg != '(')
+		logger(ERROR, error_instruction_other,
+		       "Expected '(' but got '%c'", *arg);
+	arg++;
+	char *closing = arg;
+	while (*closing != ')') {
+		if (!*closing) {
+			logger(ERROR, error_instruction_other,
+			       "Expected closing parenthesis");
+			return;
+		}
+		closing++;
+	}
+	*closing = '\0';
+
+	size_t r = get_register_id(arg);
+
+	if (r == (size_t)-1)
+		logger(ERROR, error_instruction_other,
+		       "Expected register but got %s", arg);
+
+	*reg = (uint8_t)r;
+
+	closing++;
+	if (*closing)
+		logger(ERROR, error_instruction_other,
+		       "Received unexpected expression \"%s\"", closing);
 }
 
 static uint32_t expect_imm(char *arg)
@@ -223,30 +260,54 @@ struct args_t parse_itype(char *argstr)
 	return args;
 }
 
-struct args_t parse_stype(char *argstr)
+struct args_t parse_ltype(char *argstr)
 {
-	logger(DEBUG, no_error, "Parsing arguments for jtype instruction %s",
+	logger(DEBUG, no_error, "Parsing arguments for itype instruction %s",
 	       argstr);
 
 	char *first = trim_arg(argstr);
 	char *second = trim_arg(NULL);
-	char *third = trim_arg(NULL);
 
-	if (expect_three_args(first, second, third))
+	if (expect_two_args(first, second))
 		return empty_args;
 
 	struct args_t args = {
-		.rs1 = expect_reg(first),
-		.rs2 = expect_reg(second),
-		.imm = expect_imm(third),
+		.rd = expect_reg(first),
 	};
+
+	expect_offreg(second, &args.imm, &args.rs1);
 
 	free(first);
 	free(second);
-	free(third);
 
-	logger(DEBUG, no_error, "Registers parsed x%d, x%d, %d", args.rs1,
-	       args.rs2, args.imm);
+	logger(DEBUG, no_error, "Registers parsed x%d, %d(x%d)", args.rd,
+	       args.imm, args.rs1);
+
+	return args;
+}
+
+struct args_t parse_stype(char *argstr)
+{
+	logger(DEBUG, no_error, "Parsing arguments for itype instruction %s",
+	       argstr);
+
+	char *first = trim_arg(argstr);
+	char *second = trim_arg(NULL);
+
+	if (expect_two_args(first, second))
+		return empty_args;
+
+	struct args_t args = {
+		.rs2 = expect_reg(second),
+	};
+
+	expect_offreg(first, &args.imm, &args.rs1);
+
+	free(first);
+	free(second);
+
+	logger(DEBUG, no_error, "Registers parsed %d(x%d), x%d", args.imm,
+	       args.rs1, args.rs2);
 
 	return args;
 }
