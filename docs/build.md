@@ -1,7 +1,7 @@
 # Building Wrasm
 
 To compile wrasm, ensure you have [meson](https://mesonbuild.com) as well as
-[ninja](https://ninja-build.org) and a compatible C compiler installed on your
+[ninja](https://ninja-build.org) and a compatible C[^1] compiler installed on your
 system.
 
 To compile run the following commands in a terminal or command prompt:
@@ -21,6 +21,10 @@ To compile from another directory, just add the `-C` option to meson:
 ```sh
 meson compile -C path/to/build/directory
 ```
+
+[^1]: The C compiler should support the c17 standard (this may be updated to
+    c23 once proper compiler support is established). At the time of writing,
+    wrasm successfully builds with c99, however support is not guaranteed.
 
 ## Choosing a different compiler and linker
 
