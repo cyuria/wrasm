@@ -1,6 +1,7 @@
 
 #include "stringutil.h"
 
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -9,25 +10,20 @@
 
 int is_terminating(char c)
 {
-	return c == '\0' || c == ';' || c == '\n';
-}
-
-int is_whitespace(char c)
-{
-	return c == ' ' || c == '\t' || c == '\n';
+	return !c || c == ';' || c == '\n';
 }
 
 char *trim_whitespace(const char *str)
 {
 	const char *start = str;
-	while (is_whitespace(*start) && !is_terminating(*start))
+	while (isspace(*start) && !is_terminating(*start))
 		start++;
 
 	const char *end = start;
 	while (!is_terminating(*end))
 		end++;
 
-	while (is_whitespace(*end) && end > start)
+	while (isspace(*end) && end > start)
 		end--;
 
 	char *newstr = xmalloc((size_t)(end - start + 1));

@@ -1,5 +1,6 @@
 #include "directives.h"
 
+#include <ctype.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -42,7 +43,7 @@ static struct directive_t get_directive(const char *name)
 int parse_directive(char *line)
 {
 	char *directivename = line;
-	while (!is_whitespace(*line) && *line)
+	while (!isspace(*line))
 		line++;
 	if (*line)
 		*(line++) = '\0';
