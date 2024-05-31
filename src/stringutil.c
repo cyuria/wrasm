@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "debug.h"
 #include "xmalloc.h"
 
 int is_terminating(char c)
@@ -27,11 +26,6 @@ char *trim_whitespace(const char *str)
 		end--;
 
 	char *newstr = xmalloc((size_t)(end - start + 1));
-	if (newstr == NULL) {
-		logger(ERROR, error_internal,
-		       "Unable to allocate memory for stripped string");
-		return NULL;
-	}
 	memcpy(newstr, start, (size_t)(end - start));
 	newstr[end - start] = '\0';
 
