@@ -149,8 +149,7 @@ int fill_symtab(void)
 			struct elf64sym_t entry = (struct elf64sym_t){
 				.name = strtab_addr,
 				.info = sym->binding,
-				.other =
-					0, /* TODO: add other visibility attributes */
+				.other = 0, /* TODO: add other attributes */
 				.shndx = (uint16_t)sym->section,
 				.value = (uint64_t)sym->value,
 				.size = 0, /* TODO: support for symbol sizes? */
@@ -159,8 +158,7 @@ int fill_symtab(void)
 				&entry, sizeof(entry),
 				(struct sectionpos_t){
 					.section = section_symtab,
-					.offset = count *
-						  sizeof(struct elf64sym_t) });
+					.offset = count * sizeof(entry) });
 			strtab_addr += (uint32_t)sym->name_sz;
 			count++;
 		}

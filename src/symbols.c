@@ -24,9 +24,11 @@ static size_t hash_str(const char *str)
 struct symbol_t *get_symbol(const char *name)
 {
 	const size_t hash = hash_str(name);
-	for (size_t i = 0; i < symbols[hash].count; i++)
-		if (!strcmp(name, symbols[hash].data[i].name))
+	for (size_t i = 0; i < symbols[hash].count; i++) {
+		if (!strcmp(name, symbols[hash].data[i].name)) {
 			return &symbols[hash].data[i];
+		}
+	}
 	return NULL;
 }
 
