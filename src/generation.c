@@ -101,8 +101,8 @@ void parse_file(FILE *ifp, FILE *ofp)
 	free_instructions();
 }
 
-static int parse_line_trimmed(char *, struct sectionpos_t);
-int parse_line(char *line, struct sectionpos_t position)
+static int parse_line_trimmed(char *, struct sectionpos);
+int parse_line(char *line, struct sectionpos position)
 {
 	char *trimmed_line = trim_whitespace(line);
 	const int result = parse_line_trimmed(trimmed_line, position);
@@ -110,7 +110,7 @@ int parse_line(char *line, struct sectionpos_t position)
 	return result;
 }
 
-static int parse_line_trimmed(char *line, struct sectionpos_t position)
+static int parse_line_trimmed(char *line, struct sectionpos position)
 {
 	logger(DEBUG, no_error, " |-> \"%s\"", line);
 
@@ -136,10 +136,10 @@ int symbol_forward_declare(char *line)
 		return 0;
 	*colon = '\0';
 	char *name = trim_whitespace(line);
-	return !create_symbol(name, symbol_label);
+	return !create_symbol(name, SYMBOL_LABEL);
 }
 
-int parse_label(char *line, struct sectionpos_t position)
+int parse_label(char *line, struct sectionpos position)
 {
 	char *end = strchr(line, ':');
 	/* check for invalid label definition */
@@ -151,14 +151,14 @@ int parse_label(char *line, struct sectionpos_t position)
 	*(end++) = '\0';
 	char *name = trim_whitespace(line);
 
-	struct symbol_t *label = get_symbol(name);
+	struct symbol *label = get_symbol(name);
 	if (!label) {
 		logger(ERROR, error_internal, "Unknown label encountered (%s)",
 		       name);
 		free(name);
 		return 1;
 	}
-	if (label->type != symbol_label) {
+	if (label->type != SYMBOL_LABEL) {
 		logger(ERROR, error_internal,
 		       "%s is defined but is not a label", name);
 		free(name);
@@ -167,7 +167,7 @@ int parse_label(char *line, struct sectionpos_t position)
 
 	free(name);
 
-	const struct sectionpos_t fpos = get_outputpos();
+	const struct sectionpos fpos = get_outputpos();
 	if (fpos.offset == (size_t)-1) {
 		logger(CRITICAL, error_system,
 		       "Unable to determine section file position");

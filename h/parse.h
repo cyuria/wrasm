@@ -3,7 +3,7 @@
 #include "elf/output.h"
 #include "form/instructions.h"
 
-extern const struct args_t empty_args;
+extern const struct args empty_args;
 
 arg_parser parse_rtype;
 arg_parser parse_itype;
@@ -27,4 +27,4 @@ arg_parser parse_ftso;
 arg_parser parse_al;
 arg_parser parse_as;
 
-int parse_asm(const char *, struct sectionpos_t);
+int parse_asm(const char *, struct sectionpos);

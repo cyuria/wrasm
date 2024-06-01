@@ -27,17 +27,17 @@
 		}                  \
 	}
 
-struct bytecode_t {
+struct bytecode {
 	size_t size;
 	unsigned char *data;
 };
 
-extern const struct bytecode_t error_bytecode;
+extern const struct bytecode error_bytecode;
 
 /* helper functions */
-struct bytecode_t form_empty_bytecode(void);
+struct bytecode form_empty_bytecode(void);
 
-int32_t calc_symbol_offset(const struct symbol_t *, size_t);
+int32_t calc_symbol_offset(const struct symbol *, size_t);
 
 form_handler form_rtype;
 form_handler form_itype;

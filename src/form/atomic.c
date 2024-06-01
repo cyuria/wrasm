@@ -4,7 +4,7 @@
 #include "form/generic.h"
 #include "parse.h"
 
-const struct formation_t rv32a[] = {
+const struct formation rv32a[] = {
 	{ "lr.w", &form_rtype, &parse_al, { 4, OP_AMO, 0x2, 0x08 } },
 	{ "lr.w.rl", &form_rtype, &parse_al, { 4, OP_AMO, 0x2, 0x09 } },
 	{ "lr.w.aq", &form_rtype, &parse_al, { 4, OP_AMO, 0x2, 0x0A } },
@@ -63,7 +63,7 @@ const struct formation_t rv32a[] = {
 	END_FORMATION
 };
 
-const struct formation_t rv64a[] = {
+const struct formation rv64a[] = {
 	{ "lr.d", &form_rtype, &parse_al, { 4, OP_AMO, 0x3, 0x08 } },
 	{ "lr.d.rl", &form_rtype, &parse_al, { 4, OP_AMO, 0x3, 0x09 } },
 	{ "lr.d.aq", &form_rtype, &parse_al, { 4, OP_AMO, 0x3, 0x0A } },

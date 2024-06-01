@@ -6,7 +6,7 @@
 #include "form/instructions.h"
 #include "debug.h"
 
-int compare_formations(struct formation_t *a, struct formation_t *b)
+int compare_formations(struct formation *a, struct formation *b)
 {
 	if (a->arg_handler != b->arg_handler)
 		return 0;
@@ -26,9 +26,9 @@ int compare_formations(struct formation_t *a, struct formation_t *b)
 	return 1;
 }
 
-int test_parser(struct formation_t formation)
+int test_parser(struct formation formation)
 {
-	struct formation_t found = parse_form(formation.name);
+	struct formation found = parse_form(formation.name);
 	if (!found.name) {
 		logger(ERROR, error_internal,
 		       "Test Failed, parse_parser returned error code with instruction %s",

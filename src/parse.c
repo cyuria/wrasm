@@ -14,11 +14,11 @@
 #include "symbols.h"
 #include "xmalloc.h"
 
-const struct args_t empty_args = { .rd = 0,
-				   .rs1 = 0,
-				   .rs2 = 0,
-				   .imm = 0,
-				   .sym = NULL };
+const struct args empty_args = { .rd = 0,
+				 .rs1 = 0,
+				 .rs2 = 0,
+				 .imm = 0,
+				 .sym = NULL };
 
 static char *trim_arg(char *s)
 {
@@ -82,9 +82,9 @@ static uint32_t expect_imm(char *arg)
 	return (uint32_t)imm;
 }
 
-static struct symbol_t *expect_sym(char *arg)
+static struct symbol *expect_sym(char *arg)
 {
-	struct symbol_t *sym = get_symbol(arg);
+	struct symbol *sym = get_symbol(arg);
 	if (!sym)
 		logger(ERROR, error_instruction_other,
 		       "Expected symbol but got %s", arg);
@@ -158,7 +158,7 @@ static int expect_three_args(char *first, char *second, char *third)
 	return 0;
 }
 
-int parse_asm(const char *linestr, struct sectionpos_t position)
+int parse_asm(const char *linestr, struct sectionpos position)
 {
 	logger(DEBUG, no_error, "Parsing assembly %s", linestr);
 
@@ -168,12 +168,12 @@ int parse_asm(const char *linestr, struct sectionpos_t position)
 	char *instruction = strtok(line, " \t");
 	char *argstr = strtok(NULL, "");
 
-	struct formation_t formation = parse_form(instruction);
-	struct args_t args = formation.arg_handler(argstr);
+	struct formation formation = parse_form(instruction);
+	struct args args = formation.arg_handler(argstr);
 
 	free(line);
 
-	add_instruction((struct instruction_t){
+	add_instruction((struct instruction){
 		.formation = formation,
 		.args = args,
 		.line = linenumber,
@@ -186,7 +186,7 @@ int parse_asm(const char *linestr, struct sectionpos_t position)
 	return 0;
 }
 
-struct args_t parse_none(char *argstr)
+struct args parse_none(char *argstr)
 {
 	logger(DEBUG, no_error,
 	       "Parsing arguments for no argument instruction");
@@ -202,7 +202,7 @@ struct args_t parse_none(char *argstr)
 	return empty_args;
 }
 
-struct args_t parse_rtype(char *argstr)
+struct args parse_rtype(char *argstr)
 {
 	logger(DEBUG, no_error, "Parsing arguments for rtype instruction %s",
 	       argstr);
@@ -216,7 +216,7 @@ struct args_t parse_rtype(char *argstr)
 	if (expect_three_args(first, second, third))
 		return empty_args;
 
-	struct args_t args = {
+	struct args args = {
 		.rd = expect_reg(first),
 		.rs1 = expect_reg(second),
 		.rs2 = expect_reg(third),
@@ -232,7 +232,7 @@ struct args_t parse_rtype(char *argstr)
 	return args;
 }
 
-struct args_t parse_itype(char *argstr)
+struct args parse_itype(char *argstr)
 {
 	logger(DEBUG, no_error, "Parsing arguments for itype instruction %s",
 	       argstr);
@@ -244,7 +244,7 @@ struct args_t parse_itype(char *argstr)
 	if (expect_three_args(first, second, third))
 		return empty_args;
 
-	struct args_t args = {
+	struct args args = {
 		.rd = expect_reg(first),
 		.rs1 = expect_reg(second),
 		.imm = expect_imm(third),
@@ -260,7 +260,7 @@ struct args_t parse_itype(char *argstr)
 	return args;
 }
 
-struct args_t parse_ltype(char *argstr)
+struct args parse_ltype(char *argstr)
 {
 	logger(DEBUG, no_error, "Parsing arguments for itype instruction %s",
 	       argstr);
@@ -271,7 +271,7 @@ struct args_t parse_ltype(char *argstr)
 	if (expect_two_args(first, second))
 		return empty_args;
 
-	struct args_t args = {
+	struct args args = {
 		.rd = expect_reg(first),
 	};
 
@@ -286,7 +286,7 @@ struct args_t parse_ltype(char *argstr)
 	return args;
 }
 
-struct args_t parse_stype(char *argstr)
+struct args parse_stype(char *argstr)
 {
 	logger(DEBUG, no_error, "Parsing arguments for itype instruction %s",
 	       argstr);
@@ -297,7 +297,7 @@ struct args_t parse_stype(char *argstr)
 	if (expect_two_args(first, second))
 		return empty_args;
 
-	struct args_t args = {
+	struct args args = {
 		.rs2 = expect_reg(second),
 	};
 
@@ -324,7 +324,7 @@ struct args_t parse_stype(char *argstr)
 	return args;
 }
 
-struct args_t parse_utype(char *argstr)
+struct args parse_utype(char *argstr)
 {
 	logger(DEBUG, no_error, "Parsing arguments for utype instruction %s",
 	       argstr);
@@ -335,7 +335,7 @@ struct args_t parse_utype(char *argstr)
 	if (expect_two_args(first, second))
 		return empty_args;
 
-	struct args_t args = {
+	struct args args = {
 		.rd = expect_reg(first),
 		.imm = expect_imm(second),
 	};
@@ -348,7 +348,7 @@ struct args_t parse_utype(char *argstr)
 	return args;
 }
 
-struct args_t parse_btype(char *argstr)
+struct args parse_btype(char *argstr)
 {
 	logger(DEBUG, no_error, "Parsing arguments for jtype instruction %s",
 	       argstr);
@@ -360,7 +360,7 @@ struct args_t parse_btype(char *argstr)
 	if (expect_three_args(first, second, third))
 		return empty_args;
 
-	struct args_t args = {
+	struct args args = {
 		.rs1 = expect_reg(first),
 		.rs2 = expect_reg(second),
 		.sym = expect_sym(third),
@@ -376,7 +376,7 @@ struct args_t parse_btype(char *argstr)
 	return args;
 }
 
-struct args_t parse_bztype(char *argstr)
+struct args parse_bztype(char *argstr)
 {
 	logger(DEBUG, no_error, "Parsing arguments for bztype instruction %s",
 	       argstr);
@@ -387,7 +387,7 @@ struct args_t parse_bztype(char *argstr)
 	if (expect_two_args(first, second))
 		return empty_args;
 
-	struct args_t args = {
+	struct args args = {
 		.rs1 = expect_reg(first),
 		.sym = expect_sym(second),
 	};
@@ -401,7 +401,7 @@ struct args_t parse_bztype(char *argstr)
 	return args;
 }
 
-struct args_t parse_pseudo(char *argstr)
+struct args parse_pseudo(char *argstr)
 {
 	logger(DEBUG, no_error, "Parsing arguments %s for pseudo instruction",
 	       argstr);
@@ -412,7 +412,7 @@ struct args_t parse_pseudo(char *argstr)
 	if (expect_two_args(first, second))
 		return empty_args;
 
-	struct args_t args = {
+	struct args args = {
 		.rd = expect_reg(first),
 		.rs1 = expect_reg(second),
 	};
@@ -443,7 +443,7 @@ static int parse_fence_arg(const char *arg)
 	return iorw;
 }
 
-struct args_t parse_fence(char *argstr)
+struct args parse_fence(char *argstr)
 {
 	logger(DEBUG, no_error, "Parsing arguments %s for fence instruction",
 	       argstr);
@@ -452,7 +452,7 @@ struct args_t parse_fence(char *argstr)
 	char *second = trim_arg(NULL);
 
 	if (!first)
-		return (struct args_t){
+		return (struct args){
 			.rd = 0x0,
 			.rs1 = 0x0,
 			.imm = 0xFF,
@@ -474,19 +474,19 @@ struct args_t parse_fence(char *argstr)
 	free(first);
 	free(second);
 
-	return (struct args_t){
+	return (struct args){
 		.rd = 0x0,
 		.rs1 = 0x0,
 		.imm = (predecessor << 4) | successor,
 	};
 }
 
-struct args_t parse_jal(char *argstr)
+struct args parse_jal(char *argstr)
 {
 	logger(DEBUG, no_error, "Parsing arguments for jal instruction %s",
 	       argstr);
 
-	struct args_t args = { .rd = 1 };
+	struct args args = { .rd = 1 };
 
 	char *first = trim_arg(argstr);
 	char *second = trim_arg(NULL);
@@ -520,7 +520,7 @@ struct args_t parse_jal(char *argstr)
 	return args;
 }
 
-struct args_t parse_jalr(char *argstr)
+struct args parse_jalr(char *argstr)
 {
 	logger(DEBUG, no_error, "Parsing arguments for jalr instruction %s",
 	       argstr);
@@ -545,7 +545,7 @@ struct args_t parse_jalr(char *argstr)
 	if (!second) {
 		logger(DEBUG, no_error, "jalr (pseudo) arguments parsed -> x%d",
 		       rd);
-		return (struct args_t){
+		return (struct args){
 			.rd = 0x1,
 			.rs1 = rd,
 			.imm = 0,
@@ -565,13 +565,13 @@ struct args_t parse_jalr(char *argstr)
 	free(second);
 	free(third);
 
-	logger(DEBUG, no_error, "jalr arguments parsed -> x%d, x%d, %d", rd,
-	       rs1, imm);
+	logger(DEBUG, no_error, "jalr arguments parsed x%d x%d %d", rd, rs1,
+	       imm);
 
-	return (struct args_t){ .rd = rd, .rs1 = rs1, .imm = imm };
+	return (struct args){ .rd = rd, .rs1 = rs1, .imm = imm };
 }
 
-struct args_t parse_la(char *argstr)
+struct args parse_la(char *argstr)
 {
 	logger(DEBUG, no_error, "Parsing arguments %s for la instruction",
 	       argstr);
@@ -582,7 +582,7 @@ struct args_t parse_la(char *argstr)
 	if (expect_two_args(first, second))
 		return empty_args;
 
-	struct args_t args = {
+	struct args args = {
 		.rd = expect_reg(first),
 		.sym = expect_sym(second),
 	};
@@ -590,12 +590,12 @@ struct args_t parse_la(char *argstr)
 	free(first);
 	free(second);
 
-	logger(DEBUG, no_error, "Registers parsed x%d, x%d", args.rd, args.rs1);
+	logger(DEBUG, no_error, "Registers parsed x%d x%d", args.rd, args.rs1);
 
 	return args;
 }
 
-struct args_t parse_li(char *argstr)
+struct args parse_li(char *argstr)
 {
 	logger(DEBUG, no_error, "Parsing arguments %s for li instruction",
 	       argstr);
@@ -606,7 +606,7 @@ struct args_t parse_li(char *argstr)
 	if (expect_two_args(first, second))
 		return empty_args;
 
-	struct args_t args = {
+	struct args args = {
 		.rd = expect_reg(first),
 		.imm = expect_imm(second),
 	};
@@ -614,12 +614,12 @@ struct args_t parse_li(char *argstr)
 	free(first);
 	free(second);
 
-	logger(DEBUG, no_error, "Registers parsed x%d, x%d", args.rd, args.rs1);
+	logger(DEBUG, no_error, "Registers parsed x%d x%d", args.rd, args.rs1);
 
 	return args;
 }
 
-struct args_t parse_j(char *argstr)
+struct args parse_j(char *argstr)
 {
 	logger(DEBUG, no_error, "Parsing arguments %s for li instruction",
 	       argstr);
@@ -629,7 +629,7 @@ struct args_t parse_j(char *argstr)
 	if (expect_one_arg(first))
 		return empty_args;
 
-	struct args_t args = {
+	struct args args = {
 		.sym = expect_sym(first),
 	};
 
@@ -640,7 +640,7 @@ struct args_t parse_j(char *argstr)
 	return args;
 }
 
-struct args_t parse_jr(char *argstr)
+struct args parse_jr(char *argstr)
 {
 	logger(DEBUG, no_error, "Parsing arguments %s for li instruction",
 	       argstr);
@@ -650,7 +650,7 @@ struct args_t parse_jr(char *argstr)
 	if (expect_one_arg(first))
 		return empty_args;
 
-	struct args_t args = {
+	struct args args = {
 		.rs1 = expect_reg(first),
 	};
 
@@ -661,12 +661,12 @@ struct args_t parse_jr(char *argstr)
 	return args;
 }
 
-struct args_t parse_ftso(char *argstr)
+struct args parse_ftso(char *argstr)
 {
 	logger(DEBUG, no_error,
 	       "Parsing arguments for no argument instruction");
 
-	const struct args_t args = {
+	const struct args args = {
 		.rd = 0x0,
 		.rs1 = 0x0,
 		.imm = 0x833,
@@ -678,12 +678,12 @@ struct args_t parse_ftso(char *argstr)
 	for (char *c = argstr; *c; c++)
 		if (*c == ',')
 			logger(ERROR, error_instruction_other,
-			       "Expected zero arguments, but got at least one");
+			       "Expected zero arguments");
 
 	return args;
 }
 
-struct args_t parse_al(char *argstr)
+struct args parse_al(char *argstr)
 {
 	logger(DEBUG, no_error, "Parsing arguments for itype instruction %s",
 	       argstr);
@@ -694,7 +694,7 @@ struct args_t parse_al(char *argstr)
 	if (expect_two_args(first, second))
 		return empty_args;
 
-	struct args_t args = {
+	struct args args = {
 		.rd = expect_reg(first),
 		.rs2 = 0,
 	};
@@ -714,7 +714,7 @@ struct args_t parse_al(char *argstr)
 	return args;
 }
 
-struct args_t parse_as(char *argstr)
+struct args parse_as(char *argstr)
 {
 	logger(DEBUG, no_error, "Parsing arguments for itype instruction %s",
 	       argstr);
@@ -726,7 +726,7 @@ struct args_t parse_as(char *argstr)
 	if (expect_three_args(first, second, third))
 		return empty_args;
 
-	struct args_t args = {
+	struct args args = {
 		.rd = expect_reg(first),
 		.rs2 = expect_reg(second),
 	};

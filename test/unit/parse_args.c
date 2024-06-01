@@ -7,11 +7,11 @@
 #include "macros.h"
 #include "xmalloc.h"
 
-typedef int test_parse(char *, struct args_t);
+typedef int test_parse(char *, struct args);
 
 struct case_t {
 	const char *argstr;
-	struct args_t expected;
+	struct args expected;
 };
 
 struct case_t cases_rtype[] = {
@@ -31,9 +31,9 @@ struct case_t cases_utype[] = {
 	{ "s0, 16", { .rd = 8, .imm = 16 } },
 };
 
-int test_rtype(char *argstr, struct args_t expected)
+int test_rtype(char *argstr, struct args expected)
 {
-	const struct args_t args = parse_rtype(argstr);
+	const struct args args = parse_rtype(argstr);
 	const int rd = args.rd == expected.rd;
 	const int rs1 = args.rs1 == expected.rs1;
 	const int rs2 = args.rs2 == expected.rs2;
@@ -47,9 +47,9 @@ int test_rtype(char *argstr, struct args_t expected)
 	return 0;
 }
 
-int test_itype(char *argstr, struct args_t expected)
+int test_itype(char *argstr, struct args expected)
 {
-	const struct args_t args = parse_itype(argstr);
+	const struct args args = parse_itype(argstr);
 	const int rd = args.rd == expected.rd;
 	const int rs1 = args.rs1 == expected.rs1;
 	const int imm = args.imm == expected.imm;
@@ -65,9 +65,9 @@ int test_itype(char *argstr, struct args_t expected)
 	return 0;
 }
 
-int test_stype(char *argstr, struct args_t expected)
+int test_stype(char *argstr, struct args expected)
 {
-	const struct args_t args = parse_itype(argstr);
+	const struct args args = parse_itype(argstr);
 	const int rs1 = args.rs1 == expected.rs1;
 	const int rs2 = args.rs2 == expected.rs2;
 	const int imm = args.imm == expected.imm;
@@ -83,9 +83,9 @@ int test_stype(char *argstr, struct args_t expected)
 	return 0;
 }
 
-int test_utype(char *argstr, struct args_t expected)
+int test_utype(char *argstr, struct args expected)
 {
-	const struct args_t args = parse_itype(argstr);
+	const struct args args = parse_itype(argstr);
 	const int rd = args.rd == expected.rd;
 	const int imm = args.imm == expected.imm;
 

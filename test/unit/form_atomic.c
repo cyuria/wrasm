@@ -44,7 +44,7 @@ int test_case(struct case_t c)
 	char *instruction = strtok(line, " \t");
 	char *argstr = strtok(NULL, "");
 
-	const struct formation_t formation = parse_form(instruction);
+	const struct formation formation = parse_form(instruction);
 	if (!formation.name) {
 		logger(ERROR, error_internal,
 		       "Unable to find formation for instruction %s in %s",
@@ -52,9 +52,9 @@ int test_case(struct case_t c)
 		return 1;
 	}
 
-	struct args_t args = formation.arg_handler(argstr);
+	struct args args = formation.arg_handler(argstr);
 
-	struct bytecode_t result = formation.form_handler(
+	struct bytecode result = formation.form_handler(
 		formation.name, formation.idata, args, c.p);
 
 	if (result.size != sizeof(c.bytecode)) {
@@ -77,8 +77,8 @@ int main(void)
 	set_exit_loglevel(NODEBUG);
 	set_min_loglevel(DEBUG);
 
-	struct symbol_t *start = create_symbol("_start", symbol_label);
-	start->section = section_null;
+	struct symbol *start = create_symbol("_start", SYMBOL_LABEL);
+	start->section = SECTION_NULL;
 	start->value = 0;
 
 	int errors = 0;

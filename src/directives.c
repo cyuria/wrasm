@@ -13,31 +13,31 @@
 #include "symbols.h"
 #include "xmalloc.h"
 
-struct directive_t {
+struct directive {
 	const char *name;
 	int (*parser)(const char *);
 };
-struct directive_t directive_map[] = {
+struct directive directive_map[] = {
 	{ ".string", parse_asciz }, { ".asciz", parse_asciz },
 	{ ".ascii", parse_ascii },  { ".section", parse_section },
 	{ ".globl", parse_global },
 };
 struct {
 	const char *name;
-	enum sections_e section;
+	enum sections section;
 } section_map[] = {
-	{ ".text", section_text },
-	{ ".data", section_data },
+	{ ".text", SECTION_TEXT },
+	{ ".data", SECTION_DATA },
 };
 
-static struct directive_t get_directive(const char *name)
+static struct directive get_directive(const char *name)
 {
 	for (unsigned long i = 0; i < ARRAY_LENGTH(directive_map); i++)
 		if (!strcmp(name, directive_map[i].name))
 			return directive_map[i];
 	logger(ERROR, error_invalid_instruction,
 	       "Unknown directive found with name: %s", name);
-	return (struct directive_t){ NULL, NULL };
+	return (struct directive){ NULL, NULL };
 }
 
 int parse_directive(char *line)
@@ -48,7 +48,7 @@ int parse_directive(char *line)
 	if (*line)
 		*(line++) = '\0';
 
-	struct directive_t directive = get_directive(directivename);
+	struct directive directive = get_directive(directivename);
 
 	if (directive.parser == NULL)
 		return 1;
@@ -134,11 +134,11 @@ static int parse_ascii_generic(const char *str, bool nullterm)
 	char *data = xmalloc(size);
 	memcpy(data, parsed, size);
 	free(parsed);
-	const struct sectionpos_t position = get_outputpos();
-	const int res = add_data((struct rawdata_t){ .data = data,
-						     .size = size,
-						     .position = position,
-						     .line = linenumber });
+	const struct sectionpos position = get_outputpos();
+	const int res = add_data((struct rawdata){ .data = data,
+						   .size = size,
+						   .position = position,
+						   .line = linenumber });
 	inc_outputsize(position.section, size);
 	return res;
 }
@@ -164,7 +164,7 @@ int parse_section(const char *str)
 }
 int parse_global(const char *str)
 {
-	struct symbol_t *sym = get_symbol(str);
+	struct symbol *sym = get_symbol(str);
 	if (!sym) {
 		logger(ERROR, error_unknown, "Uknown symbol (%s) encountered",
 		       sym->name);

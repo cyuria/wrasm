@@ -8,25 +8,25 @@
 #include "symbols.h"
 #include "xmalloc.h"
 
-const struct bytecode_t error_bytecode = { .size = (size_t)-1, .data = NULL };
+const struct bytecode error_bytecode = { .size = (size_t)-1, .data = NULL };
 
-int32_t calc_symbol_offset(const struct symbol_t *sym, size_t position)
+int32_t calc_symbol_offset(const struct symbol *sym, size_t position)
 {
-	const size_t sympos = calc_fileoffset((struct sectionpos_t){
+	const size_t sympos = calc_fileoffset((struct sectionpos){
 		.section = sym->section,
 		.offset = sym->value,
 	});
 	return (int32_t)(sympos - position);
 }
 
-struct bytecode_t form_empty_bytecode(void)
+struct bytecode form_empty_bytecode(void)
 {
 	logger(DEBUG, no_error, "Generating empty bytecode");
-	return (struct bytecode_t){ .size = 0, .data = NULL };
+	return (struct bytecode){ .size = 0, .data = NULL };
 }
 
-struct bytecode_t form_rtype(const char *name, struct idata_t instruction,
-			     struct args_t args, size_t position)
+struct bytecode form_rtype(const char *name, struct idata instruction,
+			   struct args args, size_t position)
 {
 	(void)position;
 	logger(DEBUG, no_error, "Generating R type instruction %s", name);
@@ -40,7 +40,7 @@ struct bytecode_t form_rtype(const char *name, struct idata_t instruction,
 
 	assert(instruction.sz == 4);
 
-	struct bytecode_t res = {
+	struct bytecode res = {
 		.size = 4,
 		.data = xmalloc(4),
 	};
@@ -49,8 +49,8 @@ struct bytecode_t form_rtype(const char *name, struct idata_t instruction,
 	return res;
 }
 
-struct bytecode_t form_itype(const char *name, struct idata_t instruction,
-			     struct args_t args, size_t position)
+struct bytecode form_itype(const char *name, struct idata instruction,
+			   struct args args, size_t position)
 {
 	(void)position;
 	logger(DEBUG, no_error, "Generating I type instruction %s", name);
@@ -63,7 +63,7 @@ struct bytecode_t form_itype(const char *name, struct idata_t instruction,
 
 	assert(instruction.sz == 4);
 
-	struct bytecode_t res = {
+	struct bytecode res = {
 		.size = 4,
 		.data = xmalloc(4),
 	};
@@ -72,17 +72,17 @@ struct bytecode_t form_itype(const char *name, struct idata_t instruction,
 	return res;
 }
 
-struct bytecode_t form_itype2(const char *name, struct idata_t instruction,
-			      struct args_t args, size_t position)
+struct bytecode form_itype2(const char *name, struct idata instruction,
+			    struct args args, size_t position)
 {
 	logger(DEBUG, no_error, "Generating I type 2 instruction %s", name);
-	struct bytecode_t res = form_itype(name, instruction, args, position);
+	struct bytecode res = form_itype(name, instruction, args, position);
 	*(uint32_t *)res.data |= 0x40000000; /* set type 2 bit */
 	return res;
 }
 
-struct bytecode_t form_stype(const char *name, struct idata_t instruction,
-			     struct args_t args, size_t position)
+struct bytecode form_stype(const char *name, struct idata instruction,
+			   struct args args, size_t position)
 {
 	(void)position;
 	logger(DEBUG, no_error, "Generating S type instruction %s", name);
@@ -96,7 +96,7 @@ struct bytecode_t form_stype(const char *name, struct idata_t instruction,
 
 	assert(instruction.sz == 4);
 
-	struct bytecode_t res = {
+	struct bytecode res = {
 		.size = 4,
 		.data = xmalloc(4),
 	};
@@ -105,13 +105,13 @@ struct bytecode_t form_stype(const char *name, struct idata_t instruction,
 	return res;
 }
 
-struct bytecode_t form_btype(const char *name, struct idata_t instruction,
-			     struct args_t args, size_t position)
+struct bytecode form_btype(const char *name, struct idata instruction,
+			   struct args args, size_t position)
 {
 	(void)position;
 	logger(DEBUG, no_error, "Generating B type instruction %s", name);
 
-	if (args.sym->type != symbol_label)
+	if (args.sym->type != SYMBOL_LABEL)
 		logger(ERROR, error_invalid_syntax,
 		       "Incorrect argument types for instruction %s."
 		       " Expected label, but got a different symbol",
@@ -133,7 +133,7 @@ struct bytecode_t form_btype(const char *name, struct idata_t instruction,
 
 	assert(instruction.sz == 4);
 
-	struct bytecode_t res = {
+	struct bytecode res = {
 		.size = 4,
 		.data = xmalloc(4),
 	};
@@ -143,8 +143,8 @@ struct bytecode_t form_btype(const char *name, struct idata_t instruction,
 	return res;
 }
 
-struct bytecode_t form_utype(const char *name, struct idata_t instruction,
-			     struct args_t args, size_t position)
+struct bytecode form_utype(const char *name, struct idata instruction,
+			   struct args args, size_t position)
 {
 	(void)position;
 	logger(DEBUG, no_error, "Generating U type instruction %s", name);
@@ -155,7 +155,7 @@ struct bytecode_t form_utype(const char *name, struct idata_t instruction,
 
 	assert(instruction.sz == 4);
 
-	struct bytecode_t res = {
+	struct bytecode res = {
 		.size = 4,
 		.data = xmalloc(4),
 	};
@@ -163,8 +163,8 @@ struct bytecode_t form_utype(const char *name, struct idata_t instruction,
 	return res;
 }
 
-struct bytecode_t form_jtype(const char *name, struct idata_t instruction,
-			     struct args_t args, size_t position)
+struct bytecode form_jtype(const char *name, struct idata instruction,
+			   struct args args, size_t position)
 {
 	(void)position;
 	logger(DEBUG, no_error, "Generating J type instruction %s", name);
@@ -181,7 +181,7 @@ struct bytecode_t form_jtype(const char *name, struct idata_t instruction,
 
 	assert(instruction.sz == 4);
 
-	struct bytecode_t res = {
+	struct bytecode res = {
 		.size = 4,
 		.data = xmalloc(4),
 	};

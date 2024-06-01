@@ -10,12 +10,12 @@
 #include "form/base.h"
 #include "macros.h"
 
-struct formation_t parse_form(const char *instruction)
+struct formation parse_form(const char *instruction)
 {
 	logger(DEBUG, no_error, "Getting formation for instruction %s",
 	       instruction);
 
-	const struct formation_t *sets[] = {
+	const struct formation *sets[] = {
 		rv32i,
 		rv64i,
 		rv32a,
@@ -31,5 +31,5 @@ struct formation_t parse_form(const char *instruction)
 
 	logger(ERROR, error_invalid_instruction,
 	       "Unknown assembly instruction - %s\n", instruction);
-	return (struct formation_t)END_FORMATION;
+	return (struct formation)END_FORMATION;
 }
