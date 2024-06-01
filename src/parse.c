@@ -248,6 +248,12 @@ struct args_t parse_stype(char *argstr)
 	logger(DEBUG, no_error, "Registers parsed x%d, x%d, %d", args.rs1,
 	       args.rs2, args.imm);
 
+	free(first);
+	free(second);
+
+	logger(DEBUG, no_error, "Registers parsed x%d, x%d, %d", args.rs1,
+	       args.rs2, args.imm);
+
 	return args;
 }
 
