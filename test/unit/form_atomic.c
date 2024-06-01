@@ -17,22 +17,22 @@ struct case_t {
 };
 
 struct case_t cases[] = {
-	{ .asm = "lr.w t0, a0", .bytecode = 0x8330000f },
-	{ .asm = "sc.w t0, a2, a0", .bytecode = 0x8330000f },
-	{ .asm = "lr.w.aq t0, a0", .bytecode = 0x8330000f },
-	{ .asm = "sc.w.aq t0, a2, a0", .bytecode = 0x8330000f },
-	{ .asm = "lr.w.rl t0, a0", .bytecode = 0x8330000f },
-	{ .asm = "sc.w.rl t0, a2, a0", .bytecode = 0x8330000f },
-	{ .asm = "lr.w.aqrl t0, a0", .bytecode = 0x8330000f },
-	{ .asm = "sc.w.aqrl t0, a2, a0", .bytecode = 0x8330000f },
-	{ .asm = "lr.d t0, a0", .bytecode = 0x8330000f },
-	{ .asm = "sc.d t0, a2, a0", .bytecode = 0x8330000f },
-	{ .asm = "lr.d.aq t0, a0", .bytecode = 0x8330000f },
-	{ .asm = "sc.d.aq t0, a2, a0", .bytecode = 0x8330000f },
-	{ .asm = "lr.d.rl t0, a0", .bytecode = 0x8330000f },
-	{ .asm = "sc.d.rl t0, a2, a0", .bytecode = 0x8330000f },
-	{ .asm = "lr.d.aqrl t0, a0", .bytecode = 0x8330000f },
-	{ .asm = "sc.d.aqrl t0, a2, a0", .bytecode = 0x8330000f },
+	{ .asm = "lr.w t0, (a0)", .bytecode = 0x100522af },
+	{ .asm = "sc.w t0, a2, (a0)", .bytecode = 0x18c522af },
+	{ .asm = "lr.w.aq t0, (a0)", .bytecode = 0x140522af },
+	{ .asm = "sc.w.aq t0, a2, (a0)", .bytecode = 0x1cc522af },
+	{ .asm = "lr.w.rl t0, (a0)", .bytecode = 0x120522af },
+	{ .asm = "sc.w.rl t0, a2, (a0)", .bytecode = 0x1ac522af },
+	{ .asm = "lr.w.aqrl t0, (a0)", .bytecode = 0x160522af },
+	{ .asm = "sc.w.aqrl t0, a2, (a0)", .bytecode = 0x1ec522af },
+	{ .asm = "lr.d t0, (a0)", .bytecode = 0x100532af },
+	{ .asm = "sc.d t0, a2, (a0)", .bytecode = 0x18c532af },
+	{ .asm = "lr.d.aq t0, (a0)", .bytecode = 0x140532af },
+	{ .asm = "sc.d.aq t0, a2, (a0)", .bytecode = 0x1cc532af },
+	{ .asm = "lr.d.rl t0, (a0)", .bytecode = 0x120532af },
+	{ .asm = "sc.d.rl t0, a2, (a0)", .bytecode = 0x1ac532af },
+	{ .asm = "lr.d.aqrl t0, (a0)", .bytecode = 0x160532af },
+	{ .asm = "sc.d.aqrl t0, a2, (a0)", .bytecode = 0x1ec532af },
 };
 
 int test_case(struct case_t c)

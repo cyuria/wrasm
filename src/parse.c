@@ -682,3 +682,67 @@ struct args_t parse_ftso(char *argstr)
 
 	return args;
 }
+
+struct args_t parse_al(char *argstr)
+{
+	logger(DEBUG, no_error, "Parsing arguments for itype instruction %s",
+	       argstr);
+
+	char *first = trim_arg(argstr);
+	char *second = trim_arg(NULL);
+
+	if (expect_two_args(first, second))
+		return empty_args;
+
+	struct args_t args = {
+		.rd = expect_reg(first),
+		.rs2 = 0,
+	};
+
+	expect_offreg(second, &args.imm, &args.rs1);
+
+	if (args.imm)
+		logger(ERROR, error_invalid_instruction,
+		       "Optional integer offset must be zero");
+
+	free(first);
+	free(second);
+
+	logger(DEBUG, no_error, "Registers parsed x%d %d(x%d)", args.rd,
+	       args.imm, args.rs1);
+
+	return args;
+}
+
+struct args_t parse_as(char *argstr)
+{
+	logger(DEBUG, no_error, "Parsing arguments for itype instruction %s",
+	       argstr);
+
+	char *first = trim_arg(argstr);
+	char *second = trim_arg(NULL);
+	char *third = trim_arg(NULL);
+
+	if (expect_three_args(first, second, third))
+		return empty_args;
+
+	struct args_t args = {
+		.rd = expect_reg(first),
+		.rs2 = expect_reg(second),
+	};
+
+	expect_offreg(third, &args.imm, &args.rs1);
+
+	if (args.imm)
+		logger(ERROR, error_invalid_instruction,
+		       "Optional integer offset must be zero");
+
+	free(first);
+	free(second);
+	free(third);
+
+	logger(DEBUG, no_error, "Registers parsed x%d x%d %d(x%d)", args.rd,
+	       args.rs2, args.imm, args.rs1);
+
+	return args;
+}
