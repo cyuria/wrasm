@@ -1,8 +1,9 @@
 
 #include <string.h>
 
+#include "form/atomic.h"
+#include "form/base.h"
 #include "form/instructions.h"
-#include "form/rv64i.h"
 #include "debug.h"
 
 int compare_formations(struct formation_t *a, struct formation_t *b)
@@ -48,7 +49,13 @@ int main(void)
 	set_exit_loglevel(NODEBUG);
 	set_min_loglevel(DEBUG);
 	int errors = 0;
+	for (size_t i = 0; rv32i[i].name; i++)
+		errors += test_parser(rv32i[i]);
 	for (size_t i = 0; rv64i[i].name; i++)
-		errors += test_parser(rv64i[i]);
+		errors += test_parser(rv32i[i]);
+	for (size_t i = 0; rv32a[i].name; i++)
+		errors += test_parser(rv32i[i]);
+	for (size_t i = 0; rv64a[i].name; i++)
+		errors += test_parser(rv32i[i]);
 	return errors != 0 || get_clean_exit(ERROR);
 }

@@ -2,6 +2,7 @@
 #include "form/instructions.h"
 
 extern const struct formation_t rv32i[];
+extern const struct formation_t rv64i[];
 
 enum load_pseudo {
 	load_imm,

@@ -6,10 +6,8 @@
 
 #include "debug.h"
 #include "form/generic.h"
-#include "form/rv32a.h"
-#include "form/rv32i.h"
-#include "form/rv64a.h"
-#include "form/rv64i.h"
+#include "form/atomic.h"
+#include "form/base.h"
 #include "macros.h"
 
 struct formation_t parse_form(const char *instruction)

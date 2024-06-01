@@ -23,16 +23,16 @@ struct case_t cases[] = {
 	{ .asm = "sc.w.aq t0, a2, a0", .bytecode = 0x8330000f },
 	{ .asm = "lr.w.rl t0, a0", .bytecode = 0x8330000f },
 	{ .asm = "sc.w.rl t0, a2, a0", .bytecode = 0x8330000f },
-	{ .asm = "lr.w.aq.rl t0, a0", .bytecode = 0x8330000f },
-	{ .asm = "sc.w.aq.rl t0, a2, a0", .bytecode = 0x8330000f },
+	{ .asm = "lr.w.aqrl t0, a0", .bytecode = 0x8330000f },
+	{ .asm = "sc.w.aqrl t0, a2, a0", .bytecode = 0x8330000f },
 	{ .asm = "lr.d t0, a0", .bytecode = 0x8330000f },
 	{ .asm = "sc.d t0, a2, a0", .bytecode = 0x8330000f },
 	{ .asm = "lr.d.aq t0, a0", .bytecode = 0x8330000f },
 	{ .asm = "sc.d.aq t0, a2, a0", .bytecode = 0x8330000f },
 	{ .asm = "lr.d.rl t0, a0", .bytecode = 0x8330000f },
 	{ .asm = "sc.d.rl t0, a2, a0", .bytecode = 0x8330000f },
-	{ .asm = "lr.d.aq.rl t0, a0", .bytecode = 0x8330000f },
-	{ .asm = "sc.d.aq.rl t0, a2, a0", .bytecode = 0x8330000f },
+	{ .asm = "lr.d.aqrl t0, a0", .bytecode = 0x8330000f },
+	{ .asm = "sc.d.aqrl t0, a2, a0", .bytecode = 0x8330000f },
 };
 
 int test_case(struct case_t c)
