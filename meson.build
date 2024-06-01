@@ -5,6 +5,7 @@ project(
         'c_std=c17',
         'warning_level=3',
         'b_lto=true',
+        'b_pie=true',
     ],
     version: '0.0.1-alpha',
 )

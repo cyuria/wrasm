@@ -11,6 +11,7 @@ arg_parser parse_stype;
 arg_parser parse_utype;
 arg_parser parse_btype;
 arg_parser parse_bztype;
+arg_parser parse_ltype;
 arg_parser parse_pseudo;
 arg_parser parse_fence;
 arg_parser parse_none;
