@@ -7,7 +7,7 @@
 #include "debug.h"
 #include "xmalloc.h"
 
-struct symbolmap_t symbols[] = { { .count = 0, .data = NULL } };
+struct symbolmap symbols[] = { { .count = 0, .data = NULL } };
 
 static size_t hash_str(const char *str)
 {
@@ -21,7 +21,7 @@ static size_t hash_str(const char *str)
 	return hash % SYMBOLMAP_ENTRIES;
 }
 
-struct symbol_t *get_symbol(const char *name)
+struct symbol *get_symbol(const char *name)
 {
 	const size_t hash = hash_str(name);
 	for (size_t i = 0; i < symbols[hash].count; i++) {
@@ -32,7 +32,7 @@ struct symbol_t *get_symbol(const char *name)
 	return NULL;
 }
 
-struct symbol_t *create_symbol(const char *name, enum symbol_types_e type)
+struct symbol *create_symbol(const char *name, enum symbol_types type)
 {
 	const size_t hash = hash_str(name);
 	const size_t index = symbols[hash].count;

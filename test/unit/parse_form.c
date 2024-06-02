@@ -1,11 +1,12 @@
 
 #include <string.h>
 
+#include "form/atomic.h"
+#include "form/base.h"
 #include "form/instructions.h"
-#include "form/rv64i.h"
 #include "debug.h"
 
-int compare_formations(struct formation_t *a, struct formation_t *b)
+int compare_formations(struct formation *a, struct formation *b)
 {
 	if (a->arg_handler != b->arg_handler)
 		return 0;
@@ -25,9 +26,9 @@ int compare_formations(struct formation_t *a, struct formation_t *b)
 	return 1;
 }
 
-int test_parser(struct formation_t formation)
+int test_parser(struct formation formation)
 {
-	struct formation_t found = parse_form(formation.name);
+	struct formation found = parse_form(formation.name);
 	if (!found.name) {
 		logger(ERROR, error_internal,
 		       "Test Failed, parse_parser returned error code with instruction %s",
@@ -48,7 +49,13 @@ int main(void)
 	set_exit_loglevel(NODEBUG);
 	set_min_loglevel(DEBUG);
 	int errors = 0;
+	for (size_t i = 0; rv32i[i].name; i++)
+		errors += test_parser(rv32i[i]);
 	for (size_t i = 0; rv64i[i].name; i++)
-		errors += test_parser(rv64i[i]);
+		errors += test_parser(rv32i[i]);
+	for (size_t i = 0; rv32a[i].name; i++)
+		errors += test_parser(rv32i[i]);
+	for (size_t i = 0; rv64a[i].name; i++)
+		errors += test_parser(rv32i[i]);
 	return errors != 0 || get_clean_exit(ERROR);
 }

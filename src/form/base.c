@@ -1,5 +1,5 @@
 
-#include "form/rv32i.h"
+#include "form/base.h"
 
 #include <assert.h>
 #include <string.h>
@@ -28,35 +28,35 @@
 #endif
 
 /* TODO: Add HINT instruction support */
-const struct formation_t rv32i[] = {
+const struct formation rv32i[] = {
 	{ "nop", &form_nop, &parse_none, { 4, OP_OPI, 0, 0 } },
 
-	{ "li", &form_load_pseudo, &parse_li, { 8, load_imm, 0, 0 } },
-	{ "la", &form_load_pseudo, &parse_la, { 8, load_addr, 0, 0 } },
+	{ "li", &form_load_pseudo, &parse_li, { 8, LOAD_IMM, 0, 0 } },
+	{ "la", &form_load_pseudo, &parse_la, { 8, LOAD_ADDR, 0, 0 } },
 
-	{ "mv", &form_math, &parse_pseudo, { 4, math_mv, 0, 0 } },
-	{ "not", &form_math, &parse_pseudo, { 4, math_not, 0, 0 } },
-	{ "neg", &form_math, &parse_pseudo, { 4, math_neg, 0, 0 } },
+	{ "mv", &form_math, &parse_pseudo, { 4, MATH_MV, 0, 0 } },
+	{ "not", &form_math, &parse_pseudo, { 4, MATH_NOT, 0, 0 } },
+	{ "neg", &form_math, &parse_pseudo, { 4, MATH_NEG, 0, 0 } },
 
-	{ "seqz", &form_setif, &parse_pseudo, { 4, setif_eqz, 0, 0 } },
-	{ "snez", &form_setif, &parse_pseudo, { 4, setif_nez, 0, 0 } },
-	{ "sltz", &form_setif, &parse_pseudo, { 4, setif_ltz, 0, 0 } },
-	{ "sgtz", &form_setif, &parse_pseudo, { 4, setif_gtz, 0, 0 } },
+	{ "seqz", &form_setif, &parse_pseudo, { 4, SETIF_EQZ, 0, 0 } },
+	{ "snez", &form_setif, &parse_pseudo, { 4, SETIF_NEZ, 0, 0 } },
+	{ "sltz", &form_setif, &parse_pseudo, { 4, SETIF_LTZ, 0, 0 } },
+	{ "sgtz", &form_setif, &parse_pseudo, { 4, SETIF_GTZ, 0, 0 } },
 
-	{ "beqz", &form_branchifz, &parse_bztype, { 4, branchifz_eqz, 0, 0 } },
-	{ "bnez", &form_branchifz, &parse_bztype, { 4, branchifz_nez, 0, 0 } },
-	{ "blez", &form_branchifz, &parse_bztype, { 4, branchifz_lez, 0, 0 } },
-	{ "bgez", &form_branchifz, &parse_bztype, { 4, branchifz_gez, 0, 0 } },
-	{ "bltz", &form_branchifz, &parse_bztype, { 4, branchifz_ltz, 0, 0 } },
-	{ "bgtz", &form_branchifz, &parse_bztype, { 4, branchifz_gtz, 0, 0 } },
-	{ "bgt", &form_branchifr, &parse_btype, { 4, branchifr_gt, 0, 0 } },
-	{ "ble", &form_branchifr, &parse_btype, { 4, branchifr_le, 0, 0 } },
-	{ "bgtu", &form_branchifr, &parse_btype, { 4, branchifr_gtu, 0, 0 } },
-	{ "bleu", &form_branchifr, &parse_btype, { 4, branchifr_leu, 0, 0 } },
+	{ "beqz", &form_branchifz, &parse_bztype, { 4, BRANCHIFZ_EQZ, 0, 0 } },
+	{ "bnez", &form_branchifz, &parse_bztype, { 4, BRANCHIFZ_NEZ, 0, 0 } },
+	{ "blez", &form_branchifz, &parse_bztype, { 4, BRANCHIFZ_LEZ, 0, 0 } },
+	{ "bgez", &form_branchifz, &parse_bztype, { 4, BRANCHIFZ_GEZ, 0, 0 } },
+	{ "bltz", &form_branchifz, &parse_bztype, { 4, BRANCHIFZ_LTZ, 0, 0 } },
+	{ "bgtz", &form_branchifz, &parse_bztype, { 4, BRANCHIFZ_GTZ, 0, 0 } },
+	{ "bgt", &form_branchifr, &parse_btype, { 4, BRANCHIFR_GT, 0, 0 } },
+	{ "ble", &form_branchifr, &parse_btype, { 4, BRANCHIFR_LE, 0, 0 } },
+	{ "bgtu", &form_branchifr, &parse_btype, { 4, BRANCHIFR_GTU, 0, 0 } },
+	{ "bleu", &form_branchifr, &parse_btype, { 4, BRANCHIFR_LEU, 0, 0 } },
 
-	{ "j", &form_jump, &parse_j, { 4, jump_j, 0, 0 } },
-	{ "jr", &form_jump, &parse_jr, { 4, jump_jr, 0, 0 } },
-	{ "ret", &form_jump, &parse_none, { 4, jump_ret, 0, 0 } },
+	{ "j", &form_jump, &parse_j, { 4, JUMP_J, 0, 0 } },
+	{ "jr", &form_jump, &parse_jr, { 4, JUMP_JR, 0, 0 } },
+	{ "ret", &form_jump, &parse_none, { 4, JUMP_RET, 0, 0 } },
 
 	{ "fence.tso", &form_itype, &parse_ftso, { 4, OP_MISC_MEM, 0x0, 0 } },
 
@@ -108,8 +108,33 @@ const struct formation_t rv32i[] = {
 	END_FORMATION
 };
 
-struct bytecode_t form_syscall(const char *name, struct idata_t instruction,
-			       struct args_t args, size_t position)
+const struct formation rv64i[] = {
+	{ "negw", &form_math, &parse_pseudo, { 4, MATH_NEGW, 0, 0 } },
+	{ "sext.w", &form_math, &parse_pseudo, { 4, MATH_SEXTW, 0, 0 } },
+
+	{ "addw", &form_rtype, &parse_rtype, { 4, OP_OP32, 0x0, 0x00 } },
+	{ "addiw", &form_itype, &parse_itype, { 4, OP_OPI32, 0x0, 0 } },
+	{ "subw", &form_rtype, &parse_rtype, { 4, OP_OP32, 0x0, 0x20 } },
+
+	{ "slli", &form_itype, &parse_itype, { 4, OP_OPI, 0x1, 0x00 } },
+	{ "sllw", &form_rtype, &parse_rtype, { 4, OP_OP32, 0x1, 0x00 } },
+	{ "slliw", &form_itype, &parse_itype, { 4, OP_OPI32, 0x0, 0x00 } },
+	{ "srli", &form_itype, &parse_itype, { 4, OP_OPI, 0x5, 0x00 } },
+	{ "srlw", &form_rtype, &parse_rtype, { 4, OP_OP32, 0x5, 0x00 } },
+	{ "srliw", &form_itype, &parse_itype, { 4, OP_OPI32, 0x5, 0 } },
+	{ "srai", &form_itype2, &parse_itype, { 4, OP_OPI, 0x5, 0 } },
+	{ "sraw", &form_rtype, &parse_rtype, { 4, OP_OP32, 0x5, 0x20 } },
+	{ "sraiw", &form_itype2, &parse_itype, { 4, OP_OPI32, 0x5, 0 } },
+
+	{ "lwu", &form_itype, &parse_itype, { 4, OP_LOAD, 0x6, 0 } },
+	{ "ld", &form_itype, &parse_itype, { 4, OP_LOAD, 0x3, 0 } },
+	{ "sd", &form_stype, &parse_stype, { 4, OP_STORE, 0x3, 0 } },
+
+	END_FORMATION
+};
+
+struct bytecode form_syscall(const char *name, struct idata instruction,
+			     struct args args, size_t position)
 {
 	(void)args;
 	(void)position;
@@ -121,7 +146,7 @@ struct bytecode_t form_syscall(const char *name, struct idata_t instruction,
 
 	assert(instruction.sz == 4);
 
-	struct bytecode_t res = {
+	struct bytecode res = {
 		.size = 4,
 		.data = xmalloc(4),
 	};
@@ -129,20 +154,20 @@ struct bytecode_t form_syscall(const char *name, struct idata_t instruction,
 	return res;
 }
 
-struct bytecode_t form_nop(const char *name, struct idata_t instruction,
-			   struct args_t args, size_t position)
+struct bytecode form_nop(const char *name, struct idata instruction,
+			 struct args args, size_t position)
 {
 	(void)args;
 	(void)position;
 	logger(DEBUG, no_error, "Generating nop instruction %s", name);
 
 	return form_itype(name, instruction,
-			  (struct args_t){ .rd = 0, .rs1 = 0, .imm = 0 },
+			  (struct args){ .rd = 0, .rs1 = 0, .imm = 0 },
 			  position);
 }
 
-struct bytecode_t form_load_pseudo(const char *name, struct idata_t instruction,
-				   struct args_t args, size_t position)
+struct bytecode form_load_pseudo(const char *name, struct idata instruction,
+				 struct args args, size_t position)
 {
 	logger(DEBUG, no_error, "Generating load instruction %s", name);
 
@@ -152,11 +177,11 @@ struct bytecode_t form_load_pseudo(const char *name, struct idata_t instruction,
 	uint8_t opcode;
 	uint32_t value;
 	switch (type) {
-	case load_imm:
+	case LOAD_IMM:
 		opcode = OP_LUI;
 		value = args.imm;
 		break;
-	case load_addr:
+	case LOAD_ADDR:
 		opcode = OP_AUIPC;
 		value = (uint32_t)calc_symbol_offset(args.sym, position);
 		break;
@@ -176,151 +201,151 @@ struct bytecode_t form_load_pseudo(const char *name, struct idata_t instruction,
 	const char *uppernames[] = { "lui (li)", "auipc (la)" };
 	const char *lowernames[] = { "addi (li)", "addi (la)" };
 
-	struct bytecode_t upper = form_utype(
-		uppernames[type], (struct idata_t){ 4, opcode, 0, 0 },
-		(struct args_t){
-			.rd = rd,
-			.imm = value & 0xFFFFF000,
-		},
-		position);
-	struct bytecode_t lower = form_itype(
-		lowernames[type], (struct idata_t){ 4, OP_OPI, 0x0, 0 },
-		(struct args_t){
-			.rd = rd,
-			.rs1 = rd,
-			.imm = value & 0xFFF,
-		},
-		position + 4);
+	struct bytecode upper = form_utype(uppernames[type],
+					   (struct idata){ 4, opcode, 0, 0 },
+					   (struct args){
+						   .rd = rd,
+						   .imm = value & 0xFFFFF000,
+					   },
+					   position);
+	struct bytecode lower = form_itype(lowernames[type],
+					   (struct idata){ 4, OP_OPI, 0x0, 0 },
+					   (struct args){
+						   .rd = rd,
+						   .rs1 = rd,
+						   .imm = value & 0xFFF,
+					   },
+					   position + 4);
 
 	unsigned char *data = malloc(upper.size + lower.size);
 	memcpy(data, upper.data, upper.size);
 	memcpy(data + upper.size, lower.data, lower.size);
 
-	return (struct bytecode_t){
+	return (struct bytecode){
 		.size = upper.size + lower.size,
 		.data = data,
 	};
 }
 
-struct bytecode_t form_math(const char *name, struct idata_t instruction,
-			    struct args_t args, size_t position)
+struct bytecode form_math(const char *name, struct idata instruction,
+			  struct args args, size_t position)
 {
 	logger(DEBUG, no_error, "Generating math instruction %s", name);
 
 	const enum math_pseudo type = instruction.opcode;
 	// op rd, rs1
 	switch (type) {
-	case math_mv: // addi rd, rs, 0
+	case MATH_MV: // addi rd, rs, 0
 		args.imm = 0;
 		return form_itype("mv (addi)",
-				  (struct idata_t){ 4, OP_OPI, 0x0, 0 }, args,
+				  (struct idata){ 4, OP_OPI, 0x0, 0 }, args,
 				  position);
-	case math_not: // xori rd, rs, -1
+	case MATH_NOT: // xori rd, rs, -1
 		args.imm = (uint32_t)-1;
 		return form_itype("not (xori)",
-				  (struct idata_t){ 4, OP_OPI, 0x4, 0 }, args,
+				  (struct idata){ 4, OP_OPI, 0x4, 0 }, args,
 				  position);
-	case math_neg: // sub rd, x0, rs
+	case MATH_NEG: // sub rd, x0, rs
 		args.rs2 = args.rs1;
 		args.rs1 = 0;
 		return form_rtype("neg (sub)",
-				  (struct idata_t){ 4, OP_OP, 0x0, 0x20 }, args,
+				  (struct idata){ 4, OP_OP, 0x0, 0x20 }, args,
 				  position);
-	case math_negw: // subw rd, x0, rs
+	case MATH_NEGW: // subw rd, x0, rs
 		args.rs2 = args.rs1;
 		args.rs1 = 0;
 		return form_rtype("neg (sub)",
-				  (struct idata_t){ 4, OP_OP32, 0x0, 0x20 },
-				  args, position);
-	case math_sextw: // addiw rd, rs, 0
+				  (struct idata){ 4, OP_OP32, 0x0, 0x20 }, args,
+				  position);
+	case MATH_SEXTW: // addiw rd, rs, 0
 		args.imm = 0;
 		return form_itype("sextw (addiw)",
-				  (struct idata_t){ 4, OP_OPI32, 0x0, 0 }, args,
+				  (struct idata){ 4, OP_OPI32, 0x0, 0 }, args,
 				  position);
 	}
 	FULLY_DEFINED_SWITCH();
 }
 
-struct bytecode_t form_setif(const char *name, struct idata_t instruction,
-			     struct args_t args, size_t position)
+struct bytecode form_setif(const char *name, struct idata instruction,
+			   struct args args, size_t position)
 {
 	logger(DEBUG, no_error, "Generating conditional set intruction %s",
 	       name);
 	const enum setif_pseudo type = instruction.opcode;
 	// op rd, rs1
 	switch (type) {
-	case setif_eqz: // sltiu rd, rs, 1
+	case SETIF_EQZ: // sltiu rd, rs, 1
 		args.imm = 1;
 		return form_itype("sltiu (snez)",
-				  (struct idata_t){ 4, OP_OPI, 0x3, 0x00 },
-				  args, position);
-	case setif_nez: // sltu rd, x0, rs
+				  (struct idata){ 4, OP_OPI, 0x3, 0x00 }, args,
+				  position);
+	case SETIF_NEZ: // sltu rd, x0, rs
 		args.rs2 = args.rs1;
 		args.rs1 = 0;
 		return form_rtype("sltu (snez)",
-				  (struct idata_t){ 4, OP_OP, 0x3, 0x00 }, args,
+				  (struct idata){ 4, OP_OP, 0x3, 0x00 }, args,
 				  position);
-	case setif_ltz: // slt rd, rs, x0
+	case SETIF_LTZ: // slt rd, rs, x0
 		args.rs2 = 0;
 		return form_rtype("slt (sltz)",
-				  (struct idata_t){ 4, OP_OP, 0x2, 0x00 }, args,
+				  (struct idata){ 4, OP_OP, 0x2, 0x00 }, args,
 				  position);
-	case setif_gtz: // slt rd, x0, rs
+	case SETIF_GTZ: // slt rd, x0, rs
 		args.rs2 = args.rs1;
 		args.rs1 = 0;
 		return form_rtype("slt (sgtz)",
-				  (struct idata_t){ 4, OP_OP, 0x2, 0x00 }, args,
+				  (struct idata){ 4, OP_OP, 0x2, 0x00 }, args,
 				  position);
 	}
 	FULLY_DEFINED_SWITCH();
 }
 
-struct bytecode_t form_branchifz(const char *name, struct idata_t instruction,
-				 struct args_t args, size_t position)
+struct bytecode form_branchifz(const char *name, struct idata instruction,
+			       struct args args, size_t position)
 {
 	logger(DEBUG, no_error, "Generating conditional branch intruction %s",
 	       name);
 	const enum branchifz_pseudo type = instruction.opcode;
 	// op rs1, offset
 	switch (type) {
-	case branchifz_eqz: // beq rs, x0, offset
+	case BRANCHIFZ_EQZ: // beq rs, x0, offset
 		args.rs2 = 0;
 		return form_btype("beq (beqz)",
-				  (struct idata_t){ 4, OP_BRANCH, 0x0, 0 },
-				  args, position);
-	case branchifz_nez: // bne rs, x0, offset
+				  (struct idata){ 4, OP_BRANCH, 0x0, 0 }, args,
+				  position);
+	case BRANCHIFZ_NEZ: // bne rs, x0, offset
 		args.rs2 = 0;
 		return form_btype("bne (bnez)",
-				  (struct idata_t){ 4, OP_BRANCH, 0x1, 0 },
-				  args, position);
-	case branchifz_lez: // bge x0, rs, offset
+				  (struct idata){ 4, OP_BRANCH, 0x1, 0 }, args,
+				  position);
+	case BRANCHIFZ_LEZ: // bge x0, rs, offset
 		args.rs2 = args.rs1;
 		args.rs1 = 0;
 		return form_btype("bge (blez)",
-				  (struct idata_t){ 4, OP_BRANCH, 0x5, 0 },
-				  args, position);
-	case branchifz_gez: // bge rs, x0, offset
+				  (struct idata){ 4, OP_BRANCH, 0x5, 0 }, args,
+				  position);
+	case BRANCHIFZ_GEZ: // bge rs, x0, offset
 		args.rs2 = 0;
 		return form_btype("bge (blez)",
-				  (struct idata_t){ 4, OP_BRANCH, 0x5, 0 },
-				  args, position);
-	case branchifz_ltz: // blt rs, x0, offset
+				  (struct idata){ 4, OP_BRANCH, 0x5, 0 }, args,
+				  position);
+	case BRANCHIFZ_LTZ: // blt rs, x0, offset
 		args.rs2 = 0;
 		return form_btype("bge (blez)",
-				  (struct idata_t){ 4, OP_BRANCH, 0x4, 0 },
-				  args, position);
-	case branchifz_gtz: // blt x0, rs, offset
+				  (struct idata){ 4, OP_BRANCH, 0x4, 0 }, args,
+				  position);
+	case BRANCHIFZ_GTZ: // blt x0, rs, offset
 		args.rs2 = args.rs1;
 		args.rs1 = 0;
 		return form_btype("bge (blez)",
-				  (struct idata_t){ 4, OP_BRANCH, 0x4, 0 },
-				  args, position);
+				  (struct idata){ 4, OP_BRANCH, 0x4, 0 }, args,
+				  position);
 	}
 	FULLY_DEFINED_SWITCH();
 }
 
-struct bytecode_t form_branchifr(const char *name, struct idata_t instruction,
-				 struct args_t args, size_t position)
+struct bytecode form_branchifr(const char *name, struct idata instruction,
+			       struct args args, size_t position)
 {
 	logger(DEBUG, no_error, "Generating conditional branch intruction %s",
 	       name);
@@ -330,39 +355,33 @@ struct bytecode_t form_branchifr(const char *name, struct idata_t instruction,
 	args.rs1 = args.rs2;
 	args.rs2 = rs1;
 
-	/* Types happen to align correctly with the correct funct3 field for this trick to work */
-	/* { "blt",  &form_btype, &parse_rtype, { 4, OP_BRANCH, 0x4, 0 } }, */
-	/* { "bge",  &form_btype, &parse_rtype, { 4, OP_BRANCH, 0x5, 0 } }, */
-	/* { "bltu", &form_btype, &parse_rtype, { 4, OP_BRANCH, 0x6, 0 } }, */
-	/* { "bgeu", &form_btype, &parse_rtype, { 4, OP_BRANCH, 0x7, 0 } }, */
-	const uint8_t funct3 = (uint8_t)(type + 0x4);
+	const uint8_t funct3 = (uint8_t)(type);
 	const char *names[] = { "blt (bgt)", "bge (ble)", "bltu (bgtu)",
 				"bgeu (bleu)" };
-	return form_btype(names[type],
-			  (struct idata_t){ 4, OP_BRANCH, funct3, 0 }, args,
+	return form_btype(names[type - BRANCHIFR_GT],
+			  (struct idata){ 4, OP_BRANCH, funct3, 0 }, args,
 			  position);
 }
 
-struct bytecode_t form_jump(const char *name, struct idata_t instruction,
-			    struct args_t args, size_t position)
+struct bytecode form_jump(const char *name, struct idata instruction,
+			  struct args args, size_t position)
 {
 	logger(DEBUG, no_error, "Generating unconditional jump intruction %s",
 	       name);
 	const enum jump_pseudo type = instruction.opcode;
 	switch (type) {
-	case jump_j:
+	case JUMP_J:
 		args.rd = 0;
-		return form_jtype("jal (j)",
-				  (struct idata_t){ 4, OP_JAL, 0, 0 }, args,
-				  position);
-	case jump_ret:
+		return form_jtype("jal (j)", (struct idata){ 4, OP_JAL, 0, 0 },
+				  args, position);
+	case JUMP_RET:
 		args.rs1 = 1;
 		// fall through
-	case jump_jr:
+	case JUMP_JR:
 		args.rd = 0;
 		args.imm = 0;
 		return form_itype("jalr (jr)",
-				  (struct idata_t){ 4, OP_JALR, 0x0, 0 }, args,
+				  (struct idata){ 4, OP_JALR, 0x0, 0 }, args,
 				  position);
 	}
 	FULLY_DEFINED_SWITCH();

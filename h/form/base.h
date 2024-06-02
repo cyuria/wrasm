@@ -1,43 +1,44 @@
 #pragma once
 #include "form/instructions.h"
 
-extern const struct formation_t rv32i[];
+extern const struct formation rv32i[];
+extern const struct formation rv64i[];
 
 enum load_pseudo {
-	load_imm,
-	load_addr,
+	LOAD_IMM,
+	LOAD_ADDR,
 };
 enum math_pseudo {
-	math_mv,
-	math_not,
-	math_neg,
-	math_negw,
-	math_sextw,
+	MATH_MV,
+	MATH_NOT,
+	MATH_NEG,
+	MATH_NEGW,
+	MATH_SEXTW,
 };
 enum setif_pseudo {
-	setif_eqz,
-	setif_nez,
-	setif_ltz,
-	setif_gtz,
+	SETIF_EQZ,
+	SETIF_NEZ,
+	SETIF_LTZ,
+	SETIF_GTZ,
 };
 enum branchifz_pseudo {
-	branchifz_eqz,
-	branchifz_nez,
-	branchifz_lez,
-	branchifz_gez,
-	branchifz_ltz,
-	branchifz_gtz,
+	BRANCHIFZ_EQZ,
+	BRANCHIFZ_NEZ,
+	BRANCHIFZ_LEZ,
+	BRANCHIFZ_GEZ,
+	BRANCHIFZ_LTZ,
+	BRANCHIFZ_GTZ,
 };
 enum branchifr_pseudo {
-	branchifr_gt,
-	branchifr_le,
-	branchifr_gtu,
-	branchifr_leu,
+	BRANCHIFR_GT = 0x4,
+	BRANCHIFR_LE = 0x5,
+	BRANCHIFR_GTU = 0x6,
+	BRANCHIFR_LEU = 0x7,
 };
 enum jump_pseudo {
-	jump_j,
-	jump_jr,
-	jump_ret,
+	JUMP_J,
+	JUMP_JR,
+	JUMP_RET,
 };
 
 /* shortcut instructions bytecode generation */
@@ -52,13 +53,6 @@ form_handler form_jr;
 form_handler form_ret;
 
 /* basic integer instruction type bytecode generation */
-form_handler form_rtype;
-form_handler form_itype;
-form_handler form_itype2;
-form_handler form_stype;
-form_handler form_btype;
-form_handler form_utype;
-form_handler form_jtype;
 form_handler form_syscall;
 
 /* individual instruction bytecode generation */

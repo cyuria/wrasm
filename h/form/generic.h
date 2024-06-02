@@ -17,6 +17,7 @@
 #define OP_SYSTEM 0x73
 #define OP_LUI 0x37
 #define OP_AUIPC 0x17
+#define OP_AMO 0x2F
 
 #define END_FORMATION              \
 	{                          \
@@ -26,14 +27,22 @@
 		}                  \
 	}
 
-struct bytecode_t {
+struct bytecode {
 	size_t size;
 	unsigned char *data;
 };
 
-extern const struct bytecode_t error_bytecode;
+extern const struct bytecode error_bytecode;
 
 /* helper functions */
-struct bytecode_t form_empty_bytecode(void);
+struct bytecode form_empty_bytecode(void);
 
-int32_t calc_symbol_offset(const struct symbol_t *, size_t);
+int32_t calc_symbol_offset(const struct symbol *, size_t);
+
+form_handler form_rtype;
+form_handler form_itype;
+form_handler form_itype2;
+form_handler form_stype;
+form_handler form_btype;
+form_handler form_utype;
+form_handler form_jtype;

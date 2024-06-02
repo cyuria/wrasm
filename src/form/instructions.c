@@ -6,18 +6,20 @@
 
 #include "debug.h"
 #include "form/generic.h"
-#include "form/rv32i.h"
-#include "form/rv64i.h"
+#include "form/atomic.h"
+#include "form/base.h"
 #include "macros.h"
 
-struct formation_t parse_form(const char *instruction)
+struct formation parse_form(const char *instruction)
 {
 	logger(DEBUG, no_error, "Getting formation for instruction %s",
 	       instruction);
 
-	const struct formation_t *sets[] = {
+	const struct formation *sets[] = {
 		rv32i,
 		rv64i,
+		rv32a,
+		rv64a,
 	};
 	for (size_t i = 0; i < ARRAY_LENGTH(sets); i++) {
 		while (sets[i]->name) {
@@ -29,5 +31,5 @@ struct formation_t parse_form(const char *instruction)
 
 	logger(ERROR, error_invalid_instruction,
 	       "Unknown assembly instruction - %s\n", instruction);
-	return (struct formation_t)END_FORMATION;
+	return (struct formation)END_FORMATION;
 }

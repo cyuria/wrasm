@@ -3,36 +3,36 @@
 #include <stdint.h>
 #include <stdio.h>
 
-enum sections_e {
-  section_null,
-  section_strtab,
-  section_text,
-  section_data,
-  section_symtab,
-  SECTION_COUNT
+enum sections {
+	SECTION_NULL,
+	SECTION_STRTAB,
+	SECTION_TEXT,
+	SECTION_DATA,
+	SECTION_SYMTAB,
+	SECTION_COUNT
 };
 
-struct sectionpos_t {
-  enum sections_e section;
-  size_t offset;
+struct sectionpos {
+	enum sections section;
+	size_t offset;
 };
 
-struct section_t {
-  size_t offset;
-  size_t size;
-  char *contents;
-  uint32_t nameoffset;
+struct section {
+	size_t offset;
+	size_t size;
+	char *contents;
+	uint32_t nameoffset;
 };
 
-extern enum sections_e outputsection;
+extern enum sections outputsection;
 
-void change_output(enum sections_e);
+void change_output(enum sections);
 
-struct sectionpos_t get_outputpos(void);
-void inc_outputsize(enum sections_e, size_t);
-void set_section(enum sections_e);
+struct sectionpos get_outputpos(void);
+void inc_outputsize(enum sections, size_t);
+void set_section(enum sections);
 
-size_t calc_fileoffset(struct sectionpos_t);
+size_t calc_fileoffset(struct sectionpos);
 
 void calc_strtab(void);
 int fill_strtab(void);
@@ -42,6 +42,6 @@ int fill_symtab(void);
 
 int alloc_output(void);
 
-size_t write_sectiondata(const void *, size_t, struct sectionpos_t);
+size_t write_sectiondata(const void *, size_t, struct sectionpos);
 
 int flush_output(FILE *);

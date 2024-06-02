@@ -9,12 +9,12 @@
 #include "form/generic.h"
 #include "xmalloc.h"
 
-static struct instruction_t *instructions = NULL;
+static struct instruction *instructions = NULL;
 static size_t instructions_size = 0;
-static struct rawdata_t *dataitems = NULL;
+static struct rawdata *dataitems = NULL;
 static size_t dataitems_size = 0;
 
-int add_instruction(struct instruction_t instruction)
+int add_instruction(struct instruction instruction)
 {
 	const size_t sz = instructions_size + 1;
 	instructions = xrealloc(instructions, sz * sizeof(*instructions));
@@ -24,10 +24,10 @@ int add_instruction(struct instruction_t instruction)
 	return 0;
 }
 
-int add_data(struct rawdata_t dataitem)
+int add_data(struct rawdata dataitem)
 {
 	const size_t sz = dataitems_size + 1;
-	struct rawdata_t *newdataarr =
+	struct rawdata *newdataarr =
 		xrealloc(dataitems, sz * sizeof(*dataitems));
 
 	if (newdataarr == NULL) {
@@ -62,14 +62,14 @@ int write_all_instructions(void)
 	return 0;
 }
 
-int write_instruction(struct instruction_t i)
+int write_instruction(struct instruction i)
 {
 	linenumber = i.line;
 	logger(DEBUG, no_error,
 	       "Generating bytecode for %s instruction (offset: %zu)",
 	       i.formation.name, i.position.offset);
 	set_section(i.position.section);
-	struct bytecode_t bytecode =
+	struct bytecode bytecode =
 		i.formation.form_handler(i.formation.name, i.formation.idata,
 					 i.args, calc_fileoffset(i.position));
 	logger(DEBUG, no_error, "Bytecode finished generating");
@@ -103,7 +103,7 @@ int write_all_data(void)
 	return 0;
 }
 
-int write_data(struct rawdata_t data)
+int write_data(struct rawdata data)
 {
 	linenumber = data.line;
 	logger(DEBUG, no_error, "Writing data (offset: %zu)",

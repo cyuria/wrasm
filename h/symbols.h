@@ -3,31 +3,31 @@
 #include "elf/def.h"
 #include "elf/output.h"
 
-struct symbol_t {
+struct symbol {
 	size_t name_sz;
 	char *name;
-	enum sections_e section;
+	enum sections section;
 	long value;
 	unsigned char binding;
-	enum symbol_types_e {
-		symbol_unknown,
-		symbol_label,
-		symbol_value,
-		symbol_other,
+	enum symbol_types {
+		SYMBOL_UNKNOWN,
+		SYMBOL_LABEL,
+		SYMBOL_VALUE,
+		SYMBOL_OTHER,
 	} type;
 };
 
 #define SYMBOLMAP_ENTRIES 256
-struct symbolmap_t {
+struct symbolmap {
 	size_t count;
-	struct symbol_t *data;
+	struct symbol *data;
 };
-extern struct symbolmap_t symbols[SYMBOLMAP_ENTRIES];
+extern struct symbolmap symbols[SYMBOLMAP_ENTRIES];
 
-struct symbol_t *get_symbol(const char *);
-struct symbol_t *create_symbol(const char *, enum symbol_types_e);
+struct symbol *get_symbol(const char *);
+struct symbol *create_symbol(const char *, enum symbol_types);
 
-struct elf64sym_t create_symtab_entry(const char *);
+struct elf64sym create_symtab_entry(const char *);
 
 size_t calc_symtab_str_buf_size(void);
 char *create_symtab_str_buf(size_t);

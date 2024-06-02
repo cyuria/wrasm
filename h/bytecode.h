@@ -3,31 +3,31 @@
 #include <stdbool.h>
 
 #include "elf/output.h"
-#include "form/generic.h"
+#include "form/instructions.h"
 
-struct instruction_t {
-	struct formation_t formation;
-	struct args_t args;
-	struct sectionpos_t position;
+struct instruction {
+	struct formation formation;
+	struct args args;
+	struct sectionpos position;
 	size_t line;
 };
 
-struct rawdata_t {
+struct rawdata {
 	void *data;
 	size_t size;
-	struct sectionpos_t position;
+	struct sectionpos position;
 	size_t line;
 };
 
-int add_instruction(struct instruction_t);
-int add_data(struct rawdata_t);
+int add_instruction(struct instruction);
+int add_data(struct rawdata);
 
 int write_all(void);
 
 int write_all_instructions(void);
-int write_instruction(struct instruction_t);
+int write_instruction(struct instruction);
 
 int write_all_data(void);
-int write_data(struct rawdata_t);
+int write_data(struct rawdata);
 
 void free_instructions(void);
