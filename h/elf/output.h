@@ -45,3 +45,4 @@ int alloc_output(void);
 size_t write_sectiondata(const void *, size_t, struct sectionpos);
 
 int flush_output(FILE *);
+void free_output(void);
