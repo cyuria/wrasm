@@ -71,19 +71,15 @@ void open_files(void)
 void copy_files(FILE *dest, FILE *src)
 {
 	const long pos = ftell(src);
-	fseek(src, 0L, SEEK_END);
-	size_t sz = (size_t)ftell(outputtempfile);
 	rewind(outputtempfile);
 
 	char *buffer = xmalloc(BUFSIZ);
-	while (sz > BUFSIZ) {
-		fread(buffer, 1, BUFSIZ, src);
-		fwrite(buffer, 1, BUFSIZ, dest);
-		sz -= BUFSIZ;
+	for (;;) {
+		const size_t bytes = fread(buffer, 1, BUFSIZ, src);
+		fwrite(buffer, 1, bytes, dest);
+		if (bytes != BUFSIZ)
+			break;
 	}
-	buffer = xrealloc(buffer, sz);
-	fread(buffer, 1, sz, src);
-	fwrite(buffer, 1, sz, dest);
 	free(buffer);
 
 	fseek(src, pos, SEEK_SET);
