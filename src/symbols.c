@@ -81,7 +81,7 @@ char *create_symtab_str_buf(size_t sz)
 	return buf;
 }
 
-void free_labels(void)
+void free_symbols(void)
 {
 	for (size_t hash = 0; hash < SYMBOLMAP_ENTRIES; hash++) {
 		for (size_t index = 0; index < symbols[hash].count; index++)

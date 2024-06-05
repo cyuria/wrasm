@@ -123,4 +123,12 @@ void free_instructions(void)
 {
 	free(instructions);
 	instructions = NULL;
+	instructions_size = 0;
+}
+
+void free_data(void)
+{
+	free(dataitems);
+	dataitems = NULL;
+	dataitems_size = 0;
 }

@@ -32,4 +32,4 @@ struct elf64sym create_symtab_entry(const char *);
 size_t calc_symtab_str_buf_size(void);
 char *create_symtab_str_buf(size_t);
 
-void free_labels(void);
+void free_symbols(void);

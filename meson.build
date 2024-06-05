@@ -6,6 +6,7 @@ project(
         'warning_level=3',
         'b_lto=true',
         'b_pie=true',
+        'optimization=3',
     ],
     version: '0.0.1-alpha',
 )

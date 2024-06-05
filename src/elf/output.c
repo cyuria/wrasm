@@ -255,3 +255,9 @@ int flush_output(FILE *elf)
 
 	return 0;
 }
+
+void free_output(void)
+{
+	for (int i = 0; i < SECTION_COUNT; i++)
+		free(outputsections[i].contents);
+}

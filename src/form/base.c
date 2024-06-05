@@ -221,6 +221,9 @@ struct bytecode form_load_pseudo(const char *name, struct idata instruction,
 	memcpy(data, upper.data, upper.size);
 	memcpy(data + upper.size, lower.data, lower.size);
 
+	free(upper.data);
+	free(lower.data);
+
 	return (struct bytecode){
 		.size = upper.size + lower.size,
 		.data = data,

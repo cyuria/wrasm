@@ -98,7 +98,10 @@ void parse_file(FILE *ifp, FILE *ofp)
 
 	flush_output(ofp);
 
+	free_output();
 	free_instructions();
+	free_data();
+	free_symbols();
 }
 
 static int parse_line_trimmed(char *, struct sectionpos);
@@ -136,7 +139,9 @@ int symbol_forward_declare(char *line)
 		return 0;
 	*colon = '\0';
 	char *name = trim_whitespace(line);
-	return !create_symbol(name, SYMBOL_LABEL);
+	struct symbol *sym = create_symbol(name, SYMBOL_LABEL);
+	free(name);
+	return !sym;
 }
 
 int parse_label(char *line, struct sectionpos position)

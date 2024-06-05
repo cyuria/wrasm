@@ -31,3 +31,4 @@ int write_all_data(void);
 int write_data(struct rawdata);
 
 void free_instructions(void);
+void free_data(void);
