@@ -26,6 +26,7 @@ extern struct symbolmap symbols[SYMBOLMAP_ENTRIES];
 
 struct symbol *get_symbol(const char *);
 struct symbol *create_symbol(const char *, enum symbol_types);
+struct symbol *get_or_create_symbol(const char *, enum symbol_types);
 
 struct elf64sym create_symtab_entry(const char *);
 

@@ -52,7 +52,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - run: sudo apt install qemu-user lld
+    - run: sudo apt update && sudo apt install qemu-user lld
 
     - uses: ./.github/setup_cc_env
       with: 

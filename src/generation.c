@@ -69,8 +69,6 @@ void parse_file(FILE *ifp, FILE *ofp)
 
 	linenumber = 0;
 
-	while ((nread = getl(&line, &linesize, ifp)) != (size_t)-1)
-		symbol_forward_declare(line);
 	fseek(ifp, 0L, SEEK_SET);
 
 	while ((nread = getl(&line, &linesize, ifp)) != (size_t)-1) {
@@ -104,7 +102,7 @@ void parse_file(FILE *ifp, FILE *ofp)
 	free_symbols();
 }
 
-static int parse_line_trimmed(char *, struct sectionpos);
+static inline int parse_line_trimmed(char *, struct sectionpos);
 int parse_line(char *line, struct sectionpos position)
 {
 	char *trimmed_line = trim_whitespace(line);
@@ -113,35 +111,26 @@ int parse_line(char *line, struct sectionpos position)
 	return result;
 }
 
-static int parse_line_trimmed(char *line, struct sectionpos position)
+static inline int parse_line_trimmed(char *line, struct sectionpos position)
 {
 	logger(DEBUG, no_error, " |-> \"%s\"", line);
 
-	if (*line == '\0')
+	switch (*line) {
+	case '\0':
+	case ';':
 		return 0;
-
-	if (*line == '.' || *line == '[')
+	case '.':
+	case '[':
 		return parse_directive(line);
-	if (*line == ';')
-		return 0;
-	if (*line == '/' && *(line + 1) == '/')
-		return 0;
+	case '/':
+		if (line[1] == '/')
+			return 0;
+	}
+
 	if (strchr(line, ':'))
 		return parse_label(line, position);
 
 	return parse_asm(line, position);
-}
-
-int symbol_forward_declare(char *line)
-{
-	char *colon = strchr(line, ':');
-	if (colon == NULL)
-		return 0;
-	*colon = '\0';
-	char *name = trim_whitespace(line);
-	struct symbol *sym = create_symbol(name, SYMBOL_LABEL);
-	free(name);
-	return !sym;
 }
 
 int parse_label(char *line, struct sectionpos position)
@@ -151,25 +140,11 @@ int parse_label(char *line, struct sectionpos position)
 	if (end == NULL)
 		return 0;
 
-	logger(DEBUG, no_error, "Setting position of label (%s)", line);
+	logger(DEBUG, no_error, "Creating label (%s)", line);
 
 	*(end++) = '\0';
 	char *name = trim_whitespace(line);
-
-	struct symbol *label = get_symbol(name);
-	if (!label) {
-		logger(ERROR, error_internal, "Unknown label encountered (%s)",
-		       name);
-		free(name);
-		return 1;
-	}
-	if (label->type != SYMBOL_LABEL) {
-		logger(ERROR, error_internal,
-		       "%s is defined but is not a label", name);
-		free(name);
-		return 1;
-	}
-
+	struct symbol *label = get_or_create_symbol(name, SYMBOL_LABEL);
 	free(name);
 
 	const struct sectionpos fpos = get_outputpos();

@@ -14,11 +14,7 @@
 #include "symbols.h"
 #include "xmalloc.h"
 
-const struct args empty_args = { .rd = 0,
-				 .rs1 = 0,
-				 .rs2 = 0,
-				 .imm = 0,
-				 .sym = NULL };
+const struct args empty_args = { .sym = NULL };
 
 static char *trim_arg(char *s)
 {
@@ -80,15 +76,6 @@ static uint32_t expect_imm(char *arg)
 		logger(ERROR, error_instruction_other,
 		       "Expected immediate but got %s", arg);
 	return (uint32_t)imm;
-}
-
-static struct symbol *expect_sym(char *arg)
-{
-	struct symbol *sym = get_symbol(arg);
-	if (!sym)
-		logger(ERROR, error_instruction_other,
-		       "Expected symbol but got %s", arg);
-	return sym;
 }
 
 static int expect_one_arg(char *first)
@@ -220,6 +207,7 @@ struct args parse_rtype(char *argstr)
 		.rd = expect_reg(first),
 		.rs1 = expect_reg(second),
 		.rs2 = expect_reg(third),
+		.sym = NULL,
 	};
 
 	free(first);
@@ -248,6 +236,7 @@ struct args parse_itype(char *argstr)
 		.rd = expect_reg(first),
 		.rs1 = expect_reg(second),
 		.imm = expect_imm(third),
+		.sym = NULL,
 	};
 
 	free(first);
@@ -273,6 +262,7 @@ struct args parse_ltype(char *argstr)
 
 	struct args args = {
 		.rd = expect_reg(first),
+		.sym = NULL,
 	};
 
 	expect_offreg(second, &args.imm, &args.rs1);
@@ -299,6 +289,7 @@ struct args parse_stype(char *argstr)
 
 	struct args args = {
 		.rs2 = expect_reg(second),
+		.sym = NULL,
 	};
 
 	expect_offreg(first, &args.imm, &args.rs1);
@@ -326,6 +317,7 @@ struct args parse_utype(char *argstr)
 	struct args args = {
 		.rd = expect_reg(first),
 		.imm = expect_imm(second),
+		.sym = NULL,
 	};
 
 	free(first);
@@ -351,7 +343,7 @@ struct args parse_btype(char *argstr)
 	struct args args = {
 		.rs1 = expect_reg(first),
 		.rs2 = expect_reg(second),
-		.sym = expect_sym(third),
+		.sym = get_or_create_symbol(third, SYMBOL_LABEL),
 	};
 
 	free(first);
@@ -377,7 +369,7 @@ struct args parse_bztype(char *argstr)
 
 	struct args args = {
 		.rs1 = expect_reg(first),
-		.sym = expect_sym(second),
+		.sym = get_or_create_symbol(second, SYMBOL_LABEL),
 	};
 
 	free(first);
@@ -403,6 +395,7 @@ struct args parse_pseudo(char *argstr)
 	struct args args = {
 		.rd = expect_reg(first),
 		.rs1 = expect_reg(second),
+		.sym = NULL,
 	};
 
 	free(first);
@@ -444,6 +437,7 @@ struct args parse_fence(char *argstr)
 			.rd = 0x0,
 			.rs1 = 0x0,
 			.imm = 0xFF,
+			.sym = NULL,
 		};
 
 	if (strtok(NULL, ","))
@@ -466,6 +460,7 @@ struct args parse_fence(char *argstr)
 		.rd = 0x0,
 		.rs1 = 0x0,
 		.imm = (predecessor << 4) | successor,
+		.sym = NULL,
 	};
 }
 
@@ -499,7 +494,7 @@ struct args parse_jal(char *argstr)
 			       "Expected a second argument");
 	}
 
-	args.sym = expect_sym(sym);
+	args.sym = get_or_create_symbol(sym, SYMBOL_LABEL);
 	free(sym);
 
 	logger(DEBUG, no_error, "Registers parsed, x%d, %s", args.rd,
@@ -572,7 +567,7 @@ struct args parse_la(char *argstr)
 
 	struct args args = {
 		.rd = expect_reg(first),
-		.sym = expect_sym(second),
+		.sym = get_or_create_symbol(second, SYMBOL_LABEL),
 	};
 
 	free(first);
@@ -618,10 +613,8 @@ struct args parse_j(char *argstr)
 		return empty_args;
 
 	struct args args = {
-		.sym = expect_sym(first),
+		.sym = get_or_create_symbol(first, SYMBOL_LABEL),
 	};
-
-	free(first);
 
 	logger(DEBUG, no_error, "Symbol parsed %s", args.sym->name);
 
