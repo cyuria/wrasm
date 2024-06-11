@@ -7,6 +7,7 @@
 #include "debug.h"
 #include "elf/output.h"
 #include "form/generic.h"
+#include "symbols.h"
 #include "xmalloc.h"
 
 static struct instruction *instructions = NULL;
@@ -69,6 +70,12 @@ int write_instruction(struct instruction i)
 	       "Generating bytecode for %s instruction (offset: %zu)",
 	       i.formation.name, i.position.offset);
 	set_section(i.position.section);
+
+	if (i.args.sym)
+		if (i.args.sym->section == SECTION_NULL)
+			logger(ERROR, error_unknown, "Symbol %s not found",
+			       i.args.sym->name);
+
 	struct bytecode bytecode =
 		i.formation.form_handler(i.formation.name, i.formation.idata,
 					 i.args, calc_fileoffset(i.position));

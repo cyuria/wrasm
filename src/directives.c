@@ -164,10 +164,10 @@ int parse_section(const char *str)
 }
 int parse_global(const char *str)
 {
-	struct symbol *sym = get_symbol(str);
+	struct symbol *sym = get_or_create_symbol(str, SYMBOL_LABEL);
 	if (!sym) {
-		logger(ERROR, error_unknown, "Uknown symbol (%s) encountered",
-		       sym->name);
+		logger(ERROR, error_internal, "Uknown symbol %s encountered",
+		       str);
 		return 1;
 	}
 	sym->binding = 0x10;

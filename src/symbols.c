@@ -32,10 +32,27 @@ struct symbol *get_symbol(const char *name)
 	return NULL;
 }
 
+struct symbol *get_or_create_symbol(const char *name, enum symbol_types type)
+{
+	struct symbol *sym = get_symbol(name);
+	if (sym)
+		return sym;
+	return create_symbol(name, type);
+}
+
 struct symbol *create_symbol(const char *name, enum symbol_types type)
 {
 	const size_t hash = hash_str(name);
+
 	const size_t index = symbols[hash].count;
+
+	for (size_t i = 0; i < symbols[hash].count; i++) {
+		if (!strcmp(name, symbols[hash].data[i].name)) {
+			logger(ERROR, error_invalid_syntax,
+			       "Duplicate symbol %s encountered");
+			return NULL;
+		}
+	}
 
 	symbols[hash].count++;
 	symbols[hash].data =
