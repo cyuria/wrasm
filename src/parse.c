@@ -730,10 +730,12 @@ struct args parse_as(char *argstr)
 
 struct args parse_csr(char *argstr)
 {
-
+	(void)argstr;
+	return empty_args;
 }
 
 struct args parse_csri(char *argstr)
 {
-
+	(void)argstr;
+	return empty_args;
 }
