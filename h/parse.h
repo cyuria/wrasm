@@ -26,5 +26,7 @@ arg_parser parse_jr;
 arg_parser parse_ftso;
 arg_parser parse_al;
 arg_parser parse_as;
+arg_parser parse_csr;
+arg_parser parse_csri;
 
 int parse_asm(const char *, struct sectionpos);

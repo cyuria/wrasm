@@ -727,3 +727,13 @@ struct args parse_as(char *argstr)
 
 	return args;
 }
+
+struct args parse_csr(char *argstr)
+{
+
+}
+
+struct args parse_csri(char *argstr)
+{
+
+}
