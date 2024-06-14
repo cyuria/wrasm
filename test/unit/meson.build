@@ -5,6 +5,7 @@ tests = [
     'parse_args.c',
     'form_base.c',
     'form_atomic.c',
+    'form_csr.c',
 ]
 
 foreach test : tests
