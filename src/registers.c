@@ -437,7 +437,30 @@ size_t get_float_register_id(const char *reg)
 
 int get_immediate(const char *imm, size_t *res)
 {
-	*res = (size_t)strtoll(imm, NULL, 0);
+	int base = 0;
+
+	if (!*imm)
+		return 1;
+
+	/* Attempt to detect base */
+	if (imm[0] == '0') {
+		switch (imm[1]) {
+		case 'b':
+			base = 2;
+			imm += 2;
+			break;
+		case 'o':
+			base = 8;
+			imm += 2;
+			break;
+		case 'x':
+			base = 16;
+			imm += 2;
+			break;
+		}
+	}
+
+	*res = (size_t)strtoll(imm, NULL, base);
 
 	/* We know strtoll didn't fail */
 	if (*res)
