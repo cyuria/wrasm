@@ -26,15 +26,19 @@ int main(void)
 	int errors = 0;
 	for (size_t i = 0; i < ARRAY_LENGTH(tests); i++) {
 		size_t imm = 0;
-		get_immediate(tests[i].symbol, &imm);
+		if (get_immediate(tests[i].symbol, &imm)) {
+			logger(ERROR, error_internal,
+				"Test Failed, get_immediate() failed with input %s",
+				tests[i].symbol);
+		}
 		if (imm != tests[i].value) {
-			logger(CRITICAL, error_internal,
-			       "Test Failed, expected \"%s\" to equal %d but was given %d",
+			logger(ERROR, error_internal,
+			       "Test Failed, expected %s to equal %d but was given %d",
 			       tests[i].symbol, tests[i].value, imm);
 			errors++;
 		}
 	}
 	if (errors)
-		logger(CRITICAL, error_internal, "%d tests failed", errors);
+		logger(ERROR, error_internal, "%d tests failed", errors);
 	return errors != 0 || get_clean_exit(ERROR);
 }

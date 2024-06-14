@@ -28,6 +28,7 @@ sources = files(
     'src/elf/output.c',
     'src/form/atomic.c',
     'src/form/base.c',
+    'src/form/csr.c',
     'src/form/generic.c',
     'src/form/instructions.c',
     'src/generation.c',
