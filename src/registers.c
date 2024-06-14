@@ -460,17 +460,10 @@ int get_immediate(const char *imm, size_t *res)
 		}
 	}
 
-	*res = (size_t)strtoll(imm, NULL, base);
+	char *endptr;
+	*res = (size_t)strtoll(imm, &endptr, base);
 
-	/* We know strtoll didn't fail */
-	if (*res)
-		return 0;
-
-	/* check for anything that could've caused a failure */
-	if ((*imm < '0' || *imm > '9') && *imm != '-')
-		return 1;
-
-	return 0;
+	return endptr == imm;
 }
 
 uint16_t get_csr(const char *csr)
