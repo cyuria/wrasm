@@ -790,7 +790,7 @@ struct args parse_csri(char *argstr)
 
 	struct args args = {
 		.rd = expect_reg(first),
-		.rs1 = expect_imm(second),
+		.rs1 = (uint8_t)(expect_imm(second) & 0x1F),
 		.imm = expect_csr(third),
 	};
 
