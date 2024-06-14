@@ -14,6 +14,8 @@ RISC-V can be found here.
 
 ## Code Style
 
+See also the [codebase philosophy](./philosophy.md).
+
 Wrasm follows the Linux kernel style guidelines, so when in doubt, consult
 them.
 
@@ -29,6 +31,10 @@ There are also have a few general purpose headers
     for logging purposes but instead the `logger()` function defined here.
 *   [`h/macros.h`](https://github.com/cyuria/wrasm/tree/master/h/macros.h)
     provides generic macros, such as the `ARRAY_LENGTH()` macro.
+
+## Codebase Philosophy
+
+see [PHILOSOPHY](./philosophy.md)
 
 ## For Specifics on Contributions
 
