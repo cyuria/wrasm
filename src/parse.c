@@ -2,6 +2,7 @@
 #include "parse.h"
 
 #include <ctype.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -76,6 +77,15 @@ static uint32_t expect_imm(char *arg)
 		logger(ERROR, error_instruction_other,
 		       "Expected immediate but got %s", arg);
 	return (uint32_t)imm;
+}
+
+static uint16_t expect_csr(char *arg)
+{
+	const uint16_t csr = get_csr(arg);
+	if (csr == 0xFFFF)
+		logger(ERROR, error_instruction_other,
+		       "Expected valid control/status register but got %s", arg);
+	return csr;
 }
 
 static int expect_one_arg(char *first)
@@ -155,8 +165,8 @@ int parse_asm(const char *linestr, struct sectionpos position)
 	char *instruction = strtok(line, " \t");
 	char *argstr = strtok(NULL, "");
 
-	struct formation formation = parse_form(instruction);
-	struct args args = formation.arg_handler(argstr);
+	const struct formation formation = parse_form(instruction);
+	const struct args args = formation.arg_handler(argstr);
 
 	free(line);
 
@@ -203,7 +213,7 @@ struct args parse_rtype(char *argstr)
 	if (expect_three_args(first, second, third))
 		return empty_args;
 
-	struct args args = {
+	const struct args args = {
 		.rd = expect_reg(first),
 		.rs1 = expect_reg(second),
 		.rs2 = expect_reg(third),
@@ -232,7 +242,7 @@ struct args parse_itype(char *argstr)
 	if (expect_three_args(first, second, third))
 		return empty_args;
 
-	struct args args = {
+	const struct args args = {
 		.rd = expect_reg(first),
 		.rs1 = expect_reg(second),
 		.imm = expect_imm(third),
@@ -314,7 +324,7 @@ struct args parse_utype(char *argstr)
 	if (expect_two_args(first, second))
 		return empty_args;
 
-	struct args args = {
+	const struct args args = {
 		.rd = expect_reg(first),
 		.imm = expect_imm(second),
 		.sym = NULL,
@@ -340,7 +350,7 @@ struct args parse_btype(char *argstr)
 	if (expect_three_args(first, second, third))
 		return empty_args;
 
-	struct args args = {
+	const struct args args = {
 		.rs1 = expect_reg(first),
 		.rs2 = expect_reg(second),
 		.sym = get_or_create_symbol(third, SYMBOL_LABEL),
@@ -367,7 +377,7 @@ struct args parse_bztype(char *argstr)
 	if (expect_two_args(first, second))
 		return empty_args;
 
-	struct args args = {
+	const struct args args = {
 		.rs1 = expect_reg(first),
 		.sym = get_or_create_symbol(second, SYMBOL_LABEL),
 	};
@@ -392,7 +402,7 @@ struct args parse_pseudo(char *argstr)
 	if (expect_two_args(first, second))
 		return empty_args;
 
-	struct args args = {
+	const struct args args = {
 		.rd = expect_reg(first),
 		.rs1 = expect_reg(second),
 		.sym = NULL,
@@ -532,6 +542,7 @@ struct args parse_jalr(char *argstr)
 			.rd = 0x1,
 			.rs1 = rd,
 			.imm = 0,
+			.sym = NULL,
 		};
 	}
 
@@ -551,7 +562,12 @@ struct args parse_jalr(char *argstr)
 	logger(DEBUG, no_error, "jalr arguments parsed x%d x%d %d", rd, rs1,
 	       imm);
 
-	return (struct args){ .rd = rd, .rs1 = rs1, .imm = imm };
+	return (struct args){
+		.rd = rd,
+		.rs1 = rs1,
+		.imm = imm,
+		.sym = NULL,
+	};
 }
 
 struct args parse_la(char *argstr)
@@ -565,7 +581,7 @@ struct args parse_la(char *argstr)
 	if (expect_two_args(first, second))
 		return empty_args;
 
-	struct args args = {
+	const struct args args = {
 		.rd = expect_reg(first),
 		.sym = get_or_create_symbol(second, SYMBOL_LABEL),
 	};
@@ -589,9 +605,10 @@ struct args parse_li(char *argstr)
 	if (expect_two_args(first, second))
 		return empty_args;
 
-	struct args args = {
+	const struct args args = {
 		.rd = expect_reg(first),
 		.imm = expect_imm(second),
+		.sym = NULL,
 	};
 
 	free(first);
@@ -612,7 +629,7 @@ struct args parse_j(char *argstr)
 	if (expect_one_arg(first))
 		return empty_args;
 
-	struct args args = {
+	const struct args args = {
 		.sym = get_or_create_symbol(first, SYMBOL_LABEL),
 	};
 
@@ -631,8 +648,9 @@ struct args parse_jr(char *argstr)
 	if (expect_one_arg(first))
 		return empty_args;
 
-	struct args args = {
+	const struct args args = {
 		.rs1 = expect_reg(first),
+		.sym = NULL,
 	};
 
 	free(first);
@@ -651,6 +669,7 @@ struct args parse_ftso(char *argstr)
 		.rd = 0x0,
 		.rs1 = 0x0,
 		.imm = 0x833,
+		.sym = NULL,
 	};
 
 	if (!argstr)
@@ -678,6 +697,7 @@ struct args parse_al(char *argstr)
 	struct args args = {
 		.rd = expect_reg(first),
 		.rs2 = 0,
+		.sym = NULL,
 	};
 
 	expect_offreg(second, &args.imm, &args.rs1);
@@ -730,12 +750,56 @@ struct args parse_as(char *argstr)
 
 struct args parse_csr(char *argstr)
 {
-	(void)argstr;
-	return empty_args;
+	logger(DEBUG, no_error, "Parsing arguments for csr instruction %s",
+	       argstr);
+
+	char *first = trim_arg(argstr);
+	char *second = trim_arg(NULL);
+	char *third = trim_arg(NULL);
+
+	if (expect_three_args(first, second, third))
+		return empty_args;
+
+	struct args args = {
+		.rd = expect_reg(first),
+		.rs1 = expect_reg(second),
+		.imm = expect_csr(third),
+	};
+
+	free(first);
+	free(second);
+	free(third);
+
+	logger(DEBUG, no_error, "Registers parsed x%d, x%d, 0x%.03X", args.rd,
+	       args.rs1, args.imm);
+
+	return args;
 }
 
 struct args parse_csri(char *argstr)
 {
-	(void)argstr;
-	return empty_args;
+	logger(DEBUG, no_error, "Parsing arguments for csri instruction %s",
+	       argstr);
+
+	char *first = trim_arg(argstr);
+	char *second = trim_arg(NULL);
+	char *third = trim_arg(NULL);
+
+	if (expect_three_args(first, second, third))
+		return empty_args;
+
+	struct args args = {
+		.rd = expect_reg(first),
+		.rs1 = expect_imm(second),
+		.imm = expect_csr(third),
+	};
+
+	free(first);
+	free(second);
+	free(third);
+
+	logger(DEBUG, no_error, "Registers parsed x%d, 0x%X, 0x%.03X", args.rd,
+	       args.rs1, args.imm);
+
+	return args;
 }
