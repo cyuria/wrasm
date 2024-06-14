@@ -477,7 +477,7 @@ uint16_t get_csr(const char *csr)
 {
 	if ((*csr >= '0' && *csr <= '9') || *csr == '-') {
 		char *endptr;
-		long long encoding = strtoll(csr, &endptr, 0);
+		const uint16_t encoding = (uint16_t)strtoll(csr, &endptr, 0);
 		if (*endptr)
 			return 0xFFFF;
 		return encoding;
