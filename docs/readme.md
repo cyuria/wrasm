@@ -26,8 +26,7 @@ See [testing wrasm](test.md).
 
 Interested in improving wrasm?
 
-Have a look at [contributing](contributing.md) and
-[`docs/contrib/`](contrib/readme.md)
+Have a look at and [contrib/](contrib/readme.md)
 
 Also check out our [issues](https://github.com/cyuria/wrasm/issues) or our
 [good first issues](https://github.com/cyuria/wrasm/contribute)
