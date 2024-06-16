@@ -8,6 +8,7 @@
 #include "form/atomic.h"
 #include "form/base.h"
 #include "form/csr.h"
+#include "form/fencei.h"
 #include "form/generic.h"
 #include "macros.h"
 
@@ -17,11 +18,7 @@ struct formation parse_form(const char *instruction)
 	       instruction);
 
 	const struct formation *sets[] = {
-		rv32i,
-		rv64i,
-		rv32a,
-		rv64a,
-		zicsr,
+		rv32i, rv64i, rv32a, rv64a, zicsr, zifencei,
 	};
 	for (size_t i = 0; i < ARRAY_LENGTH(sets); i++) {
 		while (sets[i]->name) {

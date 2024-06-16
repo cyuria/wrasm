@@ -29,6 +29,7 @@ sources = files(
     'src/form/atomic.c',
     'src/form/base.c',
     'src/form/csr.c',
+    'src/form/fencei.c',
     'src/form/generic.c',
     'src/form/instructions.c',
     'src/generation.c',
