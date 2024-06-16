@@ -23,6 +23,8 @@ struct case_t cases[] = {
 	{ .asm = "csrrwi s1, misa, 0x5", .bytecode = 0x3012d4f3 },
 	{ .asm = "csrrsi a0, pmpaddr63, 0x2", .bytecode = 0x3ef16573 },
 	{ .asm = "csrrci a1, tselect, 0x12", .bytecode = 0x7a0975f3 },
+
+	{ .asm = "fence.i", .bytecode = 0x0000100f }
 };
 
 int test_case(struct case_t c)

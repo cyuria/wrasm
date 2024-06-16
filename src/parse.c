@@ -15,7 +15,13 @@
 #include "symbols.h"
 #include "xmalloc.h"
 
-const struct args empty_args = { .sym = NULL };
+const struct args empty_args = {
+	.rd = 0,
+	.rs1 = 0,
+	.rs2 = 0,
+	.imm = 0,
+	.sym = NULL,
+};
 
 static char *trim_arg(char *s)
 {
@@ -84,7 +90,8 @@ static uint16_t expect_csr(char *arg)
 	const uint16_t csr = get_csr(arg);
 	if (csr == 0xFFFF)
 		logger(ERROR, error_instruction_other,
-		       "Expected valid control/status register but got %s", arg);
+		       "Expected valid control/status register but got %s",
+		       arg);
 	return csr;
 }
 
