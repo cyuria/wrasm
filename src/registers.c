@@ -386,24 +386,23 @@ const struct {
 	{ "dscratch1", 0x7B3 },
 };
 
-/* TODO: implement w/ float extension */
-const char *float_reg_abi_map[] = { 0 };
-
 size_t get_register_id(const char *reg)
 {
-	logger(DEBUG, no_error, "Searching for register (%s)", reg);
-
-	/* limit the number of possible characters in the register */
-	int l = 0;
-	while (reg[l] && reg[l] != ' ')
-		l++;
-	if (l > 4)
-		return (size_t)-1;
+	logger(DEBUG, no_error, "Searching for register %s", reg);
 
 	if (*reg == 'x') {
-		size_t r = (size_t)atol(reg + 1);
-		if (r >= 32)
+		char *endptr;
+		size_t r = strtol(reg + 1, &endptr, 10);
+		if (*endptr) {
+			logger(ERROR, error_instruction_other,
+			       "Expected end of register but got %s", endptr);
 			return (size_t)-1;
+		}
+		if (r >= 32) {
+			logger(ERROR, error_instruction_other,
+			       "Maximum register is x31 but got %s", reg);
+			return (size_t)-1;
+		}
 		return r;
 	}
 
@@ -415,24 +414,31 @@ size_t get_register_id(const char *reg)
 	if (!strcmp(reg, "fp"))
 		return 8;
 
-	logger(INFO, no_error, "unknown register (%s)", reg);
+	logger(ERROR, no_error, "unknown register %s", reg);
 
 	return (size_t)-1;
 }
 
 size_t get_float_register_id(const char *reg)
 {
-	if (*reg != 'f')
+	if (*reg != 'f') {
+		logger(ERROR, error_instruction_other,
+		       "Expected floating point register but got %s", reg);
 		return (size_t)-1;
-
-	if (reg[1] >= '0' && reg[1] <= '9')
-		return (size_t)atoi(reg + 1);
-
-	for (size_t i = 0; i < ARRAY_LENGTH(float_reg_abi_map); i++)
-		if (!strcmp(reg, float_reg_abi_map[i]))
-			return i;
-
-	return (size_t)-1;
+	}
+	char *endptr;
+	size_t r = strtol(reg + 1, &endptr, 10);
+	if (*endptr) {
+		logger(ERROR, error_instruction_other,
+		       "Expected end of register but got %s", endptr);
+		return (size_t)-1;
+	}
+	if (r >= 32) {
+		logger(ERROR, error_instruction_other,
+		       "Maximum register is f31 but got %s", reg);
+		return (size_t)-1;
+	}
+	return r;
 }
 
 int get_immediate(const char *imm, size_t *res)
