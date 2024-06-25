@@ -18,6 +18,8 @@
 #define OP_LUI 0x37
 #define OP_AUIPC 0x17
 #define OP_AMO 0x2F
+#define OP_LOADF 0x13
+#define OP_STOREF 0x33
 
 #define END_FORMATION              \
 	{                          \

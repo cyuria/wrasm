@@ -108,7 +108,6 @@ struct bytecode form_stype(const char *name, struct idata instruction,
 struct bytecode form_btype(const char *name, struct idata instruction,
 			   struct args args, size_t position)
 {
-	(void)position;
 	logger(DEBUG, no_error, "Generating B type instruction %s", name);
 
 	if (args.sym->type != SYMBOL_LABEL)
@@ -166,7 +165,6 @@ struct bytecode form_utype(const char *name, struct idata instruction,
 struct bytecode form_jtype(const char *name, struct idata instruction,
 			   struct args args, size_t position)
 {
-	(void)position;
 	logger(DEBUG, no_error, "Generating J type instruction %s", name);
 
 	int32_t offset = calc_symbol_offset(args.sym, position);

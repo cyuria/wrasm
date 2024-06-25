@@ -61,7 +61,7 @@ size_t getl(char **lineptr, size_t *n, FILE *stream)
 	return (size_t)(p - bufptr - 1);
 }
 
-void parse_file(FILE *ifp, FILE *ofp)
+void parse_file(FILE *input, FILE *output)
 {
 	char *line = NULL;
 	size_t linesize = 0;
@@ -69,9 +69,9 @@ void parse_file(FILE *ifp, FILE *ofp)
 
 	linenumber = 0;
 
-	fseek(ifp, 0L, SEEK_SET);
+	fseek(input, 0L, SEEK_SET);
 
-	while ((nread = getl(&line, &linesize, ifp)) != (size_t)-1) {
+	while ((nread = getl(&line, &linesize, input)) != (size_t)-1) {
 		linenumber++;
 		logger(DEBUG, no_error, "Parsing line \"%s\"", line);
 		if (parse_line(line, get_outputpos()))
@@ -94,7 +94,7 @@ void parse_file(FILE *ifp, FILE *ofp)
 	fill_strtab();
 	fill_symtab();
 
-	flush_output(ofp);
+	flush_output(output);
 
 	free_output();
 	free_instructions();
